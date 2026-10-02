@@ -15,8 +15,8 @@
   "navbar": {
     "primary": {
       "type": "button",
-      "label": "Get API Access",
-      "href": "https://photon.health"
+      "label": "Get Sandbox",
+      "href": "https://photonhealth/onboard#developer"
     }
   },
   "navigation": {
@@ -79,7 +79,9 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/photonhealth"
+      "x": "https://x.com/photonhealth",
+      "linkedin": "https://www.linkedin.com/company/photon-health",
+      "github": "https://github.com/photon-health"
     }
   },
   "background": {
