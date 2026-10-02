@@ -1,46 +1,89 @@
 ---
-title: "Authenticate: API Keys and Metadata"
-description: "Learn how to obtain an access token, pass the x-photon-auth-token header, and use RequestMetadata to identify your application on every mutation."
+title: "Authentication"
+icon:
+  name: "lock"
+  style: "regular"
+  library: "fontawesome"
 ---
 
-Every request to the Photon Rx API must carry two pieces of identification: an `x-photon-auth-token` header that proves you are a valid caller, and a `metadata` argument on each mutation that tells the API which system is making the call. This guide covers both requirements, shows you how to handle authentication errors, and explains best practices for keeping your credentials safe.
+Every request to the Photon Network requires an `Authentication `header with a valid OAuth token. Tokens are scoped to a single account and the permissions of the authenticated user, with the exceptions of M2M tokens which have limited permissions.
 
-## Obtain an API key
+## Credentials
 
-API keys are managed in the [Photon dashboard](https://app.photon.health). To generate one:
+**Application** and **Backend** credentials can be used to generate **User** and **Machine** scoped tokens, respectively. 
 
-1. Log in to [app.photon.health](https://app.photon.health).
-2. Navigate to **Settings → Developers**
+The following credentials can be accessed in your [dashboard](https://app.neutron.health/settings/developers):
+
+- **Application** credentials consist only of a public `client_id` and a URL whitelist that must be set to the domain of your application.
+- **Backend** credentials consist of a `client_id `and `client_secret `which should be kept secret.
+
+Credentials are available in all Sandbox accounts, but are a paid feature production. If you cant access these credentials on a paid account, please contact your organization admin.
+
+## User Token
+
+If you're calling Network APIs from your frontend, you will need to authenticate a user via a redirect to [auth.neutron.health](http://auth.neutron.health/). The a token must be passed in the header with each request. 
+
+User Tokens are generated with specific permissions according to the role of a logged in user. 
+
+## Machine Token
+
+Backend requests can be made to sync patients, draft prescriptions, and programmatically create orders.
+
+<Info>
+  Machine tokens cannot be assigned the `write:prescription` permission.
+</Info>
+
+A machine token is only valid for about 24 hours, and  your `client_id` and `client_secret`can be created by authenticating with. 
+
+```shellscript
+curl \
+  https://auth.neutron.health/oauth/token \
+  --request POST \
+  --header "content-type: application/json" \
+  --data @- << EOF
+{
+  "client_id":"YOUR_CLIENT_ID",
+  "client_secret":"YOUR_CLIENT_SECRET",
+  "audience":"https://api.neutron.health",
+  "grant_type":"client_credentials"
+}
+EOF
+```
 
 {/* TODO: add the remaining steps for creating credentials and requesting an access token. */}
 
-## Pass the access token header
-
-Send your access token in the `x-photon-auth-token` HTTP header on every request. The `Authorization` header is not read.
-
-```text
-x-photon-auth-token: <your-access-token>
-x-photon-auth-token-type: auth0-m2m
+```json
+{
+	"access_token":"YOUR_ACCESS_TOKEN",
+	"scope":"write:patient read:prescription write:order",
+	"expires_in":86400,
+	"token_type":"Bearer"
+}
 ```
+
+## Authenticate Request
 
 All requests go to the single GraphQL endpoint:
 
 ```text
-https://network-api.photon.health/graphql
+https://network.neutron.health/graphql
 ```
 
-<CodeGroup>
-  ```bash curl
-  curl --request POST \
-    --url https://network-api.photon.health/graphql \
-    --header 'x-photon-auth-token: <your-access-token>' \
-    --header 'x-photon-auth-token-type: auth0-m2m' \
-    --header 'Content-Type: application/json' \
-    --data '{ "query": "{ ping }" }'
-  ```
-</CodeGroup>
+```text
+Authentication: Bearer YOUR_ACCESS_TOKEN
+```
 
-The `ping` query is a lightweight health check that returns `"pong 💊"`. Use it to verify your credentials are working before sending any mutation traffic.
+Both User and Machine tokens can be passed via the `Authentication` header
+
+```shellscript
+curl --request POST \
+  --url https://network.neutron.health/graphql \
+  --header 'Authentication: Bearer YOUR_ACCESS_TOKEN' \
+  --header 'Content-Type: application/json' \
+  --data '{ "query": "{ ping }" }'
+```
+
+The `ping` query is a lightweight health check. You can use it to verify your credentials.
 
 ---
 
@@ -89,25 +132,9 @@ enum RequestSource {
 
 ### Example metadata block
 
-```graphql
-mutation IntakePatient($patient: PatientInput, $metadata: RequestMetadata!) {
-  patient(patient: $patient, metadata: $metadata) {
-    ... on PatientPayload {
-      patient {
-        ... on Patient { id }
-      }
-    }
-    ... on UnauthorizedError {
-      code
-      message
-    }
-  }
-}
-```
-
 ```json
 {
-  "patient": { "demographic": { "name": { "first": "Jane", "last": "Doe" } } },
+  ...
   "metadata": {
     "source": "DIRECT_API",
     "sourceVersion": "1.0.0",
@@ -117,9 +144,7 @@ mutation IntakePatient($patient: PatientInput, $metadata: RequestMetadata!) {
 }
 ```
 
----
-
-## Handling authentication errors
+## Authentication errors
 
 A missing or invalid token fails the whole request and returns a top-level `errors` array, not an `UnauthorizedError`:
 

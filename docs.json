@@ -28,7 +28,6 @@
             "group": "Get Started",
             "pages": [
               "introduction",
-              "mutation-structure",
               "authentication"
             ]
           },

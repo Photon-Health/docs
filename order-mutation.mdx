@@ -1,6 +1,10 @@
 ---
-title: "Order Mutation"
+title: "Order"
 description: "Assemble a draft order, attach signed prescriptions, select a pharmacy, and submit it for fulfillment."
+icon:
+  name: "box-isometric"
+  style: "regular"
+  library: "fontawesome"
 ---
 
 The `order` mutation groups one or more prescriptions into a single order and routes them to a pharmacy (or the patient). You assemble the order in `DRAFT`, then transition it to `SUBMITTED` to send it. It's the final step in the Rx workflow.

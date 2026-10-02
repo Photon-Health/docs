@@ -1,6 +1,10 @@
 ---
-title: "Prescription Mutation"
+title: "Prescription"
 description: "Draft a prescription, iterate on it, review screening alerts, and sign it with content-hash attestation."
+icon:
+  name: "prescription-bottle-pill"
+  style: "regular"
+  library: "fontawesome"
 ---
 
 The `prescription` mutation manages a prescription's full draft lifecycle: create a draft, update it, review clinical screening, and sign. It's the same mutation throughout — call it repeatedly with the same `id` to iterate until the draft is signed.
