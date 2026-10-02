@@ -74,36 +74,6 @@ mutation Patient($patient: PatientInput!, $metadata: RequestMetadata!) {
 ```
 
 ```json Variables
-{
-  "patient": {
-    "demographic": {
-      "name": { "first": "Jordan", "last": "Sample" },
-      "dateOfBirth": "1985-04-12",
-      "sex": "FEMALE",
-      "email": "jordan.sample@example.com",
-      "phone": "+12025550142",
-      "address": {
-        "street1": "100 Example Ave",
-        "street2": "Apt 4B",
-        "city": "Brooklyn",
-        "state": "NY",
-        "postalCode": "11201",
-        "country": "US"
-      },
-      "benefits": {
-        "add": [
-          { "bin": "012345", "pcn": "EXAMPLE", "groupId": "GRP1001", "memberId": "MBR000123456" }
-        ]
-      }
-    },
-    "clinical": {
-      "allergies": { "add": [{ "rxNormId": "7980" }] },
-      "medications": { "add": [{ "rxNormId": "314076", "status": "ACTIVE" }] },
-      "diagnoses": { "add": [{ "icd10Code": "I10" }] }
-    }
-  },
-  "metadata": { "source": "DIRECT_API", "client": "docs-example", "requestId": "req_0001" }
-}
 ```
 
 </CodeGroup>
@@ -151,10 +121,6 @@ mutation Patient($patient: PatientInput!, $metadata: RequestMetadata!) {
 ```
 
 ```json Variables
-{
-  "patient": { "id": "pat_01EXAMPLEPATIENT000000000" },
-  "metadata": { "source": "DIRECT_API", "client": "docs-example", "requestId": "req_0002" }
-}
 ```
 
 </CodeGroup>

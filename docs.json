@@ -1,16 +1,16 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "luma",
-  "name": "Photon Rx API",
+  "theme": "linden",
+  "name": "Photon Docs",
   "colors": {
     "primary": "#1570EF",
     "light": "#53B1FD",
     "dark": "#175CD3"
   },
-  "favicon": "/favicon.svg",
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "https://photonhealth.com/content-assets/05aac0ebb7813e0e07696ae13bd48bea.svg",
+    "dark": "https://photonhealth.com/content-assets/05aac0ebb7813e0e07696ae13bd48bea.svg",
+    "href": "https://photonhealth.com/"
   },
   "navbar": {
     "primary": {
@@ -91,5 +91,16 @@
   "fonts": {
     "family": "Work Sans",
     "weight": 400
+  },
+  "contextual": {
+    "options": [
+      "claude",
+      "chatgpt",
+      "view"
+    ],
+    "display": "header"
+  },
+  "styling": {
+    "codeblocks": "dark"
   }
 }
