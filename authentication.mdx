@@ -6,22 +6,22 @@ icon:
   library: "fontawesome"
 ---
 
-Every request to the Photon Network requires an `Authentication `header with a valid OAuth token. Tokens are scoped to a single account and the permissions of the authenticated user, with the exceptions of M2M tokens which have limited permissions.
+Every request to the Photon Network requires an `Authorization` header with a valid OAuth token. Tokens are scoped to a single account and to the permissions of the authenticated user, with the exception of machine (M2M) tokens, which have limited permissions.
 
 ## Credentials
 
-**Application** and **Backend** credentials can be used to generate **User** and **Machine** scoped tokens, respectively. 
+**Application** and **Backend** credentials are used to generate **User** and **Machine** tokens, respectively.
 
-The following credentials can be accessed in your [dashboard](https://app.neutron.health/settings/developers):
+You can find both in your [dashboard](https://app.neutron.health/settings/developers):
 
-- **Application** credentials consist only of a public `client_id` and a URL whitelist that must be set to the domain of your application.
-- **Backend** credentials consist of a `client_id `and `client_secret `which should be kept secret.
+- **Application** credentials consist of a public `client_id` and an allowlist of URLs, which must include your application's domain.
+- **Backend** credentials consist of a `client_id` and a `client_secret`. Keep the secret out of client-side code and version control.
 
-Credentials are available in all Sandbox accounts, but are a paid feature production. If you cant access these credentials on a paid account, please contact your organization admin.
+Credentials are available in all Sandbox accounts and are a paid feature in production. If you can't access them on a paid account, contact your organization admin.
 
 ## User Token
 
-If you're calling Network APIs from your frontend, you will need to authenticate a user via a redirect to [auth.neutron.health](http://auth.neutron.health/). The a token must be passed in the header with each request. 
+If you're calling Network APIs from your frontend, authenticate the user via a redirect to [auth.neutron.health](https://auth.neutron.health/). Pass the resulting token in the header with each request.
 
 User Tokens are generated with specific permissions according to the role of a logged in user. 
 
@@ -33,7 +33,7 @@ Backend requests can be made to sync patients, draft prescriptions, and programm
   Machine tokens cannot be assigned the `write:prescription` permission.
 </Info>
 
-A machine token is only valid for about 24 hours, and  your `client_id` and `client_secret`can be created by authenticating with. 
+A machine token is valid for 24 hours (`expires_in: 86400`). Request one by exchanging your `client_id` and `client_secret`:
 
 ```shellscript
 curl \
@@ -70,15 +70,15 @@ https://network.neutron.health/graphql
 ```
 
 ```text
-Authentication: Bearer YOUR_ACCESS_TOKEN
+Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
-Both User and Machine tokens can be passed via the `Authentication` header
+Both User and Machine tokens are passed via the `Authorization` header:
 
 ```shellscript
 curl --request POST \
   --url https://network.neutron.health/graphql \
-  --header 'Authentication: Bearer YOUR_ACCESS_TOKEN' \
+  --header 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
   --header 'Content-Type: application/json' \
   --data '{ "query": "{ ping }" }'
 ```
