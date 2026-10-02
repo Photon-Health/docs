@@ -16,7 +16,7 @@
     "primary": {
       "type": "button",
       "label": "Get Sandbox",
-      "href": "https://photonhealth/onboard#developer"
+      "href": "/onboard#developer"
     }
   },
   "navigation": {
@@ -98,12 +98,14 @@
   "contextual": {
     "options": [
       "claude",
-      "chatgpt",
-      "view"
+      "chatgpt"
     ],
     "display": "header"
   },
   "styling": {
     "codeblocks": "dark"
+  },
+  "appearance": {
+    "strict": false
   }
 }
