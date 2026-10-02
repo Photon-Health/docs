@@ -1,0 +1,157 @@
+---
+title: "Clinical Screening "
+description: "Understand how Photon automatically screens prescriptions for drug interactions, allergy conflicts, and contraindicated conditions."
+sidebarTitle: "Clinical Screening"
+---
+
+Clinical screening runs automatically as soon as the `prescription` mutation resolves a treatment to a catalog entry. The API evaluates the resolved drug against the patient's recorded allergies, active medications, and diagnoses, then reports concerns on the draft as `screeningAlerts` and sets its `status`. Inspect the alerts before signing — it's your checkpoint between the clinical decision and fulfillment.
+
+## How screening works
+
+Screening is triggered by treatment resolution: once `treatment` resolves to a catalog entity, the API evaluates it against the patient's clinical history and writes the result to the draft's `status` and `screeningAlerts`.
+
+Screening only checks against data already on the record. Populate allergies, medications, and diagnoses via the `patient` mutation **before** drafting.
+
+<Note>
+  Screening evaluates the _resolved_ treatment. If the treatment input is `AMBIGUOUS`, screening doesn't run until you retry with a resolved `id`. Resolve treatment ambiguity first, then read `screeningAlerts`.
+</Note>
+
+## Alert types
+
+```graphql
+enum ScreeningAlertType {
+  DRUG      # Interaction with an existing medication
+  ALLERGEN  # Conflicts with a recorded allergy
+  CONDITION # Contraindicated for a recorded diagnosis
+}
+```
+
+| Type | Checks against |
+| --- | --- |
+| `DRUG` | The patient's active medications, for known interaction pairs. |
+| `ALLERGEN` | The patient's recorded allergens, by ingredient and drug class. |
+| `CONDITION` | The patient's active diagnoses, for contraindications. |
+
+## Severity levels
+
+```graphql
+enum ScreeningSeverity {
+  MINOR     # Never blocks the draft
+  MODERATE  # Blocks the draft
+  MAJOR     # Blocks the draft
+}
+```
+
+`MINOR` is informational. `MODERATE` and `MAJOR` both block: the draft's `status` becomes `BLOCKED` and it cannot be ordered.
+
+<Warning>
+  A `BLOCKED` draft cannot be acknowledged, overridden, or sent through this API. To proceed, revise the prescription — change the treatment, remove the conflicting allergy or medication, or pick an alternative — and create a new draft.
+</Warning>
+
+## Draft status
+
+```graphql
+enum DraftStatus {
+  READY    # No blocking or warning-level alerts
+  WARNING  # Non-blocking alerts present; can still proceed
+  BLOCKED  # A MODERATE or MAJOR alert; cannot be sent
+}
+```
+
+`status` reflects the aggregate severity of all alerts:
+
+| Status | Meaning | Action |
+| --- | --- | --- |
+| `READY` | No alerts. | Safe to sign. |
+| `WARNING` | Only `MINOR` alerts. | Review, then sign and order. |
+| `BLOCKED` | At least one `MODERATE`/`MAJOR` alert. | Do not order; revise and redraft. |
+
+## The ScreeningAlert structure
+
+```graphql
+type ScreeningAlert {
+  severity: ScreeningSeverity!
+  type: ScreeningAlertType!
+  description: String!
+  involvedEntities: [InvolvedEntity!]!
+  category: ChangeCategory!
+  options: [ChangeOption!]
+}
+
+type InvolvedEntity {
+  id: ID!
+  name: String!
+}
+```
+
+- `description` — plain-language explanation, ready to show a prescriber.
+- `involvedEntities` — the entities that triggered the alert (e.g. the drug and the conflicting allergen).
+- `category` — always populated; usually `SAFETY`.
+- `options` — a suggested alternative that avoids the conflict, when one exists.
+
+## Example: MODERATE allergen alert
+
+A prescribed antibiotic conflicts with a recorded allergy. The draft is `BLOCKED`; the alert names the involved entities and suggests an alternative.
+
+<Note>
+  This example is illustrative. IDs and wording are placeholders, not captured API output.
+</Note>
+
+```json
+{
+  "data": {
+    "prescription": {
+      "prescription": {
+        "id": "rx-draft-001",
+        "status": "BLOCKED",
+        "screeningAlerts": [
+          {
+            "severity": "MODERATE",
+            "type": "ALLERGEN",
+            "description": "Amoxicillin 500 mg is a penicillin-class antibiotic. The patient has a recorded allergy to Penicillin G. Cross-reactivity may cause a hypersensitivity reaction.",
+            "category": "SAFETY",
+            "involvedEntities": [
+              { "id": "drug-amoxicillin-500mg", "name": "Amoxicillin 500 mg Oral Capsule" },
+              { "id": "allergen-penicillin-g", "name": "Penicillin G" }
+            ],
+            "options": [
+              {
+                "displayName": "Azithromycin 500 mg Oral Tablet",
+                "reason": "Non-penicillin alternative with no recorded allergy conflict",
+                "operation": "Prescription",
+                "argument": "treatment.id",
+                "value": "drug-azithromycin-500mg",
+                "match": null
+              }
+            ]
+          }
+        ]
+      },
+      "appliedChanges": [
+        {
+          "key": "treatment.resolution",
+          "label": "Treatment resolved: Amoxicillin 500 mg Oral Capsule",
+          "status": "APPLIED"
+        }
+      ],
+      "unappliedChanges": []
+    }
+  }
+}
+```
+
+The treatment resolved (`appliedChanges` is non-empty), but screening flagged the conflict. Present the alert and its suggested option to the prescriber, who accepts the alternative or picks another drug, then submit a new draft.
+
+## Preparing the patient record
+
+Screening quality tracks record completeness. Before drafting, call the `patient` mutation with:
+
+- **`allergies`** — all known drug and substance allergies, resolved to catalog IDs where possible.
+- **`medications`** — active medications, including OTC drugs and supplements when relevant.
+- **`diagnoses`** — active diagnoses that could contraindicate a prescription.
+
+An empty record produces **no alerts** — not because the drug is safe, but because there's nothing to screen against.
+
+<Tip>
+  The `patient` mutation supports incremental updates: add, modify, or remove individual allergies and medications without resubmitting the full history each visit.
+</Tip>

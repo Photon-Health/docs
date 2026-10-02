@@ -1,0 +1,270 @@
+---
+title: "Patient Mutation Breakdown"
+description: "Create or update a patient record with demographic and clinical data. Returns the saved record or a list of ambiguous candidates to resolve."
+---
+
+The `patient` mutation is the single entry point for creating and updating patient records in the Photon Rx platform. You can supply a full demographic profile, clinical history, and insurance benefits in one call. When you provide an `id`, the mutation updates the existing record; when you omit it, Photon attempts to match against existing patients by name and date of birth before creating a new one. If the match is ambiguous, the mutation returns candidate records for you to resolve before retrying.
+
+## Mutation Signature
+
+```graphql
+mutation Patient($patient: PatientInput, $metadata: RequestMetadata!) {
+  patient(patient: $patient, metadata: $metadata) {
+    ... on PatientPayload {
+      patient {
+        ... on Patient {
+          id
+          demographic {
+            name { first last }
+            dateOfBirth
+            email
+          }
+        }
+      }
+      appliedChanges { key status severity reason }
+      unappliedChanges { key status severity reason }
+    }
+    ... on AmbiguousPatientMatch {
+      candidates { id firstName lastName dateOfBirth }
+      reason
+    }
+    ... on UnauthorizedError {
+      code
+      message
+      requiredPermission
+    }
+    ... on UpstreamServiceError {
+      code
+      message
+      service
+      retryable
+    }
+  }
+}
+```
+
+## Arguments
+
+<ParamField body="patient" type="PatientInput">
+  The patient data to create or update. Omitting it is rejected with `MISSING_INPUT` ("A patient id or demographic information is required.").
+</ParamField>
+
+<ParamField body="metadata" type="RequestMetadata!" required>
+  Request-level metadata used for audit logging and tracing. Required on every call.
+
+  <Expandable title="RequestMetadata fields">
+    <ParamField body="source" type="RequestSource!" required>
+      The originating surface of this request. One of `WEB_APP`, `EMBEDDABLE_COMPONENT`, `DIRECT_API`, `MCP_CONNECTOR`, or `LLM_AGENT`.
+    </ParamField>
+
+    <ParamField body="sourceVersion" type="String">
+      The version identifier of the originating client (e.g., `"2.4.1"`). Used for debugging and analytics.
+    </ParamField>
+
+    <ParamField body="client" type="String">
+      A human-readable name for the calling application or integration (e.g., `"AcmePractice EHR"`).
+    </ParamField>
+
+    <ParamField body="requestId" type="String">
+      A caller-supplied ID for tracing this request in your logs. It is not an idempotency key: retrying with the same `requestId` applies the changes again.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## PatientInput Fields
+
+<ParamField body="id" type="ID">
+  The Photon ID of an existing patient. When present, the mutation updates that record; `email` and `phone` sent alongside it are checked against the record, not updated, and a mismatch is `REJECTED` with category `SAFETY`. When omitted, Photon matches on the supplied demographics before creating a new patient.
+</ParamField>
+
+<ParamField body="demographic" type="PatientDemographicInput">
+  Demographic information for the patient.
+
+  <Expandable title="PatientDemographicInput fields">
+    <ParamField body="name" type="HumanNameInput">
+      The patient's legal name.
+
+      <Expandable title="HumanNameInput fields">
+        <ParamField body="first" type="String">
+          Given (first) name.
+        </ParamField>
+        <ParamField body="last" type="String">
+          Family (last) name.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+
+    <ParamField body="dateOfBirth" type="Date">
+      Date of birth in `YYYY-MM-DD` format. Used for patient matching when no `id` is supplied.
+    </ParamField>
+
+    <ParamField body="sex" type="Sex">
+      Biological sex assigned at birth. One of `MALE`, `FEMALE`, or `UNKNOWN`. Used for clinical decision support and benefit eligibility checks.
+    </ParamField>
+
+    <ParamField body="gender" type="String">
+      Free-text gender identity. Stored for display purposes and not used for clinical screening.
+    </ParamField>
+
+    <ParamField body="email" type="String">
+      Patient's email address. Used for pharmacy notifications and benefit coordination.
+    </ParamField>
+
+    <ParamField body="phone" type="String">
+      Patient's phone number, e.g. `"+15005550006"` or `"5005550006"`. Stored in E.164 format.
+    </ParamField>
+
+    <ParamField body="address" type="AddressInput">
+      Patient's home address.
+
+      <Expandable title="AddressInput fields">
+        <ParamField body="street1" type="String">Primary street address.</ParamField>
+        <ParamField body="street2" type="String">Apartment, suite, or unit number.</ParamField>
+        <ParamField body="city" type="String">City name.</ParamField>
+        <ParamField body="state" type="String">Two-letter US state code (e.g., `"CA"`).</ParamField>
+        <ParamField body="postalCode" type="String">ZIP or postal code.</ParamField>
+        <ParamField body="country" type="String">Country code, e.g. `"US"`. Required whenever `address` is sent.</ParamField>
+      </Expandable>
+    </ParamField>
+
+    <ParamField body="benefits" type="BenefitsPatch">
+      Insurance benefit records to add, update, or remove. Use the `none` flag to assert that the patient has no benefits on file.
+
+      <Expandable title="BenefitsPatch fields">
+        <ParamField body="add" type="[BenefitReferenceInput!]">
+          New benefit records to attach to this patient. Each entry may include `bin`, `pcn`, `groupId`, and `memberId`.
+        </ParamField>
+        <ParamField body="update" type="[BenefitReferenceInput!]">
+          Existing benefit records to update. Provide the `id` of the benefit along with any fields you want to change.
+        </ParamField>
+        <ParamField body="remove" type="[BenefitReferenceInput!]">
+          Benefit records to detach. Provide the `id` of each benefit to remove.
+        </ParamField>
+        <ParamField body="none" type="Boolean">
+          When `true`, clears all benefits for this patient and marks the record as explicitly benefits-free.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+
+    <ParamField body="preferredPharmacy" type="PharmacyReferenceInput">
+      The patient's preferred pharmacy. You can reference an existing Photon pharmacy by `id`, look one up by `name`, or search by location using `near`.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="clinical" type="PatientClinicalInput">
+  Clinical history for the patient. All patch fields use add/remove semantics — you only send the delta, not the full list.
+
+  <Expandable title="PatientClinicalInput fields">
+    <ParamField body="allergies" type="AllergiesPatch">
+      Allergy records to add or remove.
+
+      <Expandable title="AllergiesPatch fields">
+        <ParamField body="add" type="[AllergyReferenceInput!]">
+          Allergies to record. Each entry accepts `id`, `name`, and/or `rxNormId`.
+        </ParamField>
+        <ParamField body="remove" type="[AllergyReferenceInput!]">
+          Allergies to remove. Provide the Photon `id` of each allergy.
+        </ParamField>
+        <ParamField body="none" type="Boolean">
+          When `true`, marks the patient as NKDA (No Known Drug Allergies). Cannot be combined with `add` or `remove`. It does not remove allergies already on file.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+
+    <ParamField body="medications" type="MedicationsPatch">
+      Medication history records to add, update, or remove.
+
+      <Expandable title="MedicationsPatch fields">
+        <ParamField body="add" type="[MedicationReferenceInput!]">
+          Medications to add. Each entry requires a `status` of `ACTIVE`, `HISTORICAL`, or `UNKNOWN`, plus at least one of `id`, `name`, or `rxNormId`.
+        </ParamField>
+        <ParamField body="update" type="[MedicationReferenceInput!]">
+          Medication entries to update. Provide the Photon `id` and the fields you want to change.
+        </ParamField>
+        <ParamField body="remove" type="[MedicationReferenceInput!]">
+          Medication entries to remove by Photon `id`.
+        </ParamField>
+        <ParamField body="none" type="Boolean">
+          When `true`, clears all medication history and marks the record as explicitly empty.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+
+    <ParamField body="diagnoses" type="DiagnosesPatch">
+      Active diagnoses to add or remove.
+
+      <Expandable title="DiagnosesPatch fields">
+        <ParamField body="add" type="[DiagnosisReferenceInput!]">
+          Diagnoses to attach. Each entry accepts `id`, `name`, and/or `icd10Code`.
+        </ParamField>
+        <ParamField body="remove" type="[DiagnosisReferenceInput!]">
+          Diagnoses to remove by Photon `id`.
+        </ParamField>
+        <ParamField body="none" type="Boolean">
+          When `true`, clears all recorded diagnoses for this patient.
+        </ParamField>
+      </Expandable>
+    </ParamField>
+
+    <ParamField body="notes" type="String">
+      Free-text clinical notes visible to prescribers and pharmacists. Replaces any existing notes on update.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Returns
+
+The mutation returns a `PatientResult` union. You should handle all four variants in your client.
+
+<ResponseField name="PatientPayload" type="union variant">
+  Returned when the operation succeeds.
+
+  <Expandable title="PatientPayload fields">
+    <ResponseField name="patient" type="PatientRecordResult">
+      A union of `Patient | UpstreamServiceError`. On success, resolves to the full `Patient` record after all changes have been applied. When the underlying record service fails independently of the mutation itself, resolves to `UpstreamServiceError` — inspect `retryable` to decide whether to retry.
+    </ResponseField>
+    <ResponseField name="appliedChanges" type="[Change!]!">
+      A list of field-level changes that were successfully persisted. Each `Change` includes `key`, `status`, `severity`, `reason`, and a `detail` with the before/after values.
+    </ResponseField>
+    <ResponseField name="unappliedChanges" type="[Change!]!">
+      Changes that were requested but not applied — for example, because a field was read-only or a value was already current. Inspect this list to detect silent no-ops.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="AmbiguousPatientMatch" type="union variant">
+  Returned when Photon finds a possible existing match it can't confirm — for example, only name and date of birth match. It can contain a single candidate. No record is created or updated.
+
+  <Expandable title="AmbiguousPatientMatch fields">
+    <ResponseField name="candidates" type="[PatientCandidate!]!">
+      The list of matching patients. Each `PatientCandidate` exposes `id`, `firstName`, `lastName`, and `dateOfBirth`.
+    </ResponseField>
+    <ResponseField name="reason" type="String!">
+      A human-readable explanation of why the match was ambiguous. Display this to the end user if you are building a disambiguation UI.
+    </ResponseField>
+  </Expandable>
+
+  To resolve an ambiguous match, retry the mutation with the `patient.id` set to the `id` of the intended candidate.
+</ResponseField>
+
+<ResponseField name="UnauthorizedError" type="union variant">
+  Returned when the caller's API token lacks the permission required to perform the requested operation.
+
+  <Expandable title="UnauthorizedError fields">
+    <ResponseField name="code" type="String!">Machine-readable error code.</ResponseField>
+    <ResponseField name="message" type="String!">Human-readable description of the authorization failure.</ResponseField>
+    <ResponseField name="requiredPermission" type="String">The specific permission scope needed to complete this call.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="UpstreamServiceError" type="union variant">
+  Returned when a downstream dependency (e.g., a benefit verification service) fails.
+
+  <Expandable title="UpstreamServiceError fields">
+    <ResponseField name="code" type="String!">Machine-readable error code.</ResponseField>
+    <ResponseField name="message" type="String!">Human-readable description of the failure.</ResponseField>
+    <ResponseField name="service" type="String!">The name of the upstream service that failed.</ResponseField>
+    <ResponseField name="retryable" type="Boolean!">When `true`, you can safely retry the same request after a short delay.</ResponseField>
+  </Expandable>
+</ResponseField>

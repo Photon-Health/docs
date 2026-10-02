@@ -1,0 +1,86 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "luma",
+  "name": "Photon Rx API",
+  "colors": {
+    "primary": "#ef7025",
+    "light": "#eec9bc",
+    "dark": "#4fa1ab"
+  },
+  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "Get API Access",
+      "href": "https://photon.health"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "mutation-structure",
+              "authentication"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "patient-mutation",
+              "prescription-mutation",
+              "order-mutation"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Mutations",
+            "pages": [
+              "api/patient",
+              "api/prescription",
+              "api/order"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "concepts/entity-resolution",
+              "untitled-page",
+              "concepts/clinical-screening",
+              "reference/errors",
+              "reference/enums",
+              "reference/pharmacy-search"
+            ]
+          },
+          {
+            "group": "Types",
+            "pages": [
+              "api/types/patient-types",
+              "api/types/prescription-types",
+              "api/types/order-types",
+              "api/types/change-types",
+              "api/types/pharmacy-types"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/photonhealth"
+    }
+  }
+}

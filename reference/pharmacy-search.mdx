@@ -1,0 +1,140 @@
+---
+title: "Pharmacy search"
+description: "Find a pharmacy by ID, name, location, or fulfillment type, and resolve multiple matches."
+---
+
+`PharmacyReferenceInput` finds a pharmacy. It is accepted in two places:
+
+- `order(input: { pharmacy })`: the pharmacy the order is sent to.
+- `patient(patient: { demographic: { preferredPharmacy } })`: the patient's saved pharmacy.
+
+## Results
+
+| Matches | Result |
+| --- | --- |
+| 1 | Applied. No confirmation is asked. |
+| 2 or more | `AMBIGUOUS` change with up to 20 candidates in `options`. Nothing is saved. |
+| 0 | `REJECTED` change, category `INVALID_INPUT`: "No pharmacy matches the references provided." |
+
+<Warning>
+  A single match is applied without confirmation. For example, `name: "CVS"` with `fulfillmentType: MAIL_ORDER` resolves straight to CVS Caremark. Use `id` when you need a specific pharmacy.
+</Warning>
+
+## Fields
+
+Send at least one field. An empty object is rejected with `MISSING_INPUT`.
+
+| Field | Type | Behavior |
+| --- | --- | --- |
+| `id` | `ID` | Exact match. An unknown ID is rejected: "No on-file pharmacy matches id …". |
+| `name` | `String` | Case-insensitive, partial match. `"walgreens"` and `"Care Plus"` match. Typos do not: `"Walgren"` matches nothing. |
+| `near` | `LocationInput` | Location. See below. |
+| `fulfillmentType` | `FulfillmentType` | `PICK_UP` or `MAIL_ORDER`. Filters results. |
+| `openAt` | `Date` | Date only (`YYYY-MM-DD`). A date-time value fails the whole request. Results for future dates were inconsistent in testing; do not rely on this filter. |
+
+Fields combine to narrow results.
+
+## `near`
+
+Set exactly one field. Setting more than one is rejected: "Only one of near.address, near.latLong, or near.text is supported."
+
+| Field | Status |
+| --- | --- |
+| `latLong` with `radiusMiles` | Filters to pharmacies within the radius. Use this. |
+| `latLong` without `radiusMiles` | Sorts by distance. Does not filter. |
+| `address` | Sorts by distance. Does not filter. |
+| `text` | Not supported. Rejected: "Matching on near.text is not yet supported." |
+
+`latitude` and `longitude` are strings, for example `"40.7506"`. `radiusMiles` is an integer.
+
+## Example
+
+```graphql
+mutation Order($input: OrderInput!) {
+  order(input: $input, metadata: { source: DIRECT_API }) {
+    __typename
+    ... on OrderPayload {
+      order { id state pharmacy { id name } }
+      unappliedChanges {
+        key
+        status
+        category
+        reason
+        options {
+          displayName
+          argument
+          value
+          ... on PharmacyChangeOption {
+            offers { source isPromoted priceSummary { priceType totalAmount } }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+```json
+{
+  "input": {
+    "patient": { "id": "pat_01M3D91NEJ0H6J9VJ17YA793E4" },
+    "prescriptions": { "add": [{ "id": "rx_01M3D933B9EV2ASY871K6SHYQB" }] },
+    "pharmacy": {
+      "name": "CVS",
+      "near": { "latLong": { "latitude": "40.7506", "longitude": "-73.9972", "radiusMiles": 1 } },
+      "fulfillmentType": "PICK_UP"
+    }
+  }
+}
+```
+
+## Multiple matches
+
+Response to the example above:
+
+```json
+{
+  "order": null,
+  "unappliedChanges": [
+    {
+      "key": "pharmacy",
+      "status": "AMBIGUOUS",
+      "category": "DISAMBIGUATION",
+      "reason": "References provided matched multiple candidates. Retry the request with pharmacy.id, or with additional references to narrow the candidate list.",
+      "options": [
+        {
+          "displayName": "CVS Pharmacy",
+          "argument": "pharmacy.id",
+          "value": "phr_01GA9HPX9ZGNE13YZ0S92BKC12",
+          "offers": [
+            { "source": "rxsense", "isPromoted": false, "priceSummary": { "priceType": "CASH", "totalAmount": 14.84 } }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "rx_01M3D933B9EV2ASY871K6SHYQB",
+      "status": "REJECTED",
+      "reason": "Not applied — a sibling change in this request was rejected."
+    }
+  ]
+}
+```
+
+To resolve it, resend the same request with `pharmacy: { id: "<option value>" }`.
+
+- More than 20 matches: `reason` gives the total, for example "matched 8968 candidates — showing 20". Narrow with `near.latLong` and `radiusMiles`.
+- `displayName` contains only the pharmacy name, so options with the same name cannot be told apart by name alone.
+- In `order`, options are `PharmacyChangeOption` and include `offers` (pricing from sources such as `rxsense` and `goodrx`). In `patient`, options are `GenericChangeOption` and have no offers.
+
+## `Pharmacy`
+
+Returned in `patient.demographic.preferredPharmacy` and `order.pharmacy`. `order.pharmacy` is `null` when no pharmacy is assigned.
+
+| Field | Type | Example |
+| --- | --- | --- |
+| `id` | `ID!` | `"phr_01GA9HPX9ZGNE13YZ0S92BKC12"` |
+| `name` | `String!` | `"CVS Pharmacy"` |
+| `address` | `PharmacyAddress` | `{ "street1": "5 PENN PLZ", "city": "NEW YORK", "state": "NY", "postalCode": "10001", "country": "US" }` |
+| `latitude`, `longitude` | `Float` | `40.75192`, `-73.994064` |
+| `fulfillmentType` | `[FulfillmentType!]` | `["PICK_UP"]` |

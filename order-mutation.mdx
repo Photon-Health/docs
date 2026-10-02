@@ -1,0 +1,344 @@
+---
+title: "Order Mutation"
+description: "Assemble a draft order, attach signed prescriptions, select a pharmacy, and submit it for fulfillment."
+---
+
+The `order` mutation groups one or more prescriptions into a single order and routes them to a pharmacy (or the patient). You assemble the order in `DRAFT`, then transition it to `SUBMITTED` to send it. It's the final step in the Rx workflow.
+
+## Order states
+
+```text
+DRAFT ──▶ SUBMITTED ──▶ CANCELED
+```
+
+| State | Meaning |
+| --- | --- |
+| `DRAFT` | Being assembled. Editable; no downstream events fire. |
+| `SUBMITTED` | Sent to the pharmacy for fulfillment; triggers the send event. |
+| `CANCELED` | Canceled. **Only reachable from** `SUBMITTED`**.** |
+
+`state` defaults to `DRAFT` on create — omit it. Set `state: SUBMITTED` in a later call to send. You can't cancel a `DRAFT` via a state transition (`CANCELED` only comes from `SUBMITTED`); to drop a draft, simply don't submit it.
+
+## Create an order
+
+Send a patient and one or more prescriptions, with an optional pharmacy, to create a new order in `DRAFT` state; nothing is sent until it's submitted.
+
+<CodeGroup>
+
+```graphql Mutation
+mutation Order($input: OrderInput!, $metadata: RequestMetadata!) {
+  order(input: $input, metadata: $metadata) {
+    __typename
+    ... on OrderPayload {
+      order {
+        id
+        state
+        patient {
+          __typename
+          ... on Patient { id }
+          ... on UpstreamServiceError { code message service retryable }
+        }
+        prescriptions { id status treatment { name } }
+        pharmacy {
+          id
+          name
+          fulfillmentType
+          address { street1 city state postalCode }
+        }
+        exceptions { id type message createdAt }
+      }
+      appliedChanges {
+        ...ChangeFields
+        ...PharmacyOffers
+      }
+      unappliedChanges {
+        ...ChangeFields
+        ...PharmacyOffers
+      }
+    }
+    ... on AmbiguousOrderMatch {
+      reason
+      candidates { id pharmacyId prescriptionIds }
+    }
+    ... on UnauthorizedError { code message requiredPermission }
+    ... on UpstreamServiceError { code message service retryable }
+  }
+}
+
+fragment ChangeFields on Change {
+  key
+  label
+  status
+  severity
+  category
+  operation
+  reason
+  options { displayName reason operation argument value match { matchType confidence } }
+  detail {
+    __typename
+    ... on FieldChangeDetail { previousValue { displayValue } newValue { displayValue } }
+    ... on EntityResolutionDetail { inputText resolvedEntityId }
+    ... on PharmacyResolutionDetail { inputText resolvedEntityId }
+  }
+}
+
+# Pharmacy offers appear on the resolved pharmacy (detail) and, when the
+# pharmacy match is AMBIGUOUS, on each candidate (options).
+fragment PharmacyOffers on Change {
+  detail { ... on PharmacyResolutionDetail { offers { ...Offer } } }
+  options { ... on PharmacyChangeOption { offers { ...Offer } } }
+}
+
+fragment Offer on PharmacyOffer {
+  source
+  isPromoted
+  attributeTags { kind label }
+  priceSummary { priceType totalAmount totalRetailAmount totalSavings }
+  prescriptionDeliveryEstimates { prescriptionId deliveryPromise deliveryPromiseRangeStart deliveryPromiseRangeEnd }
+}
+```
+
+```json Variables
+{
+  "input": {
+    "patient": { "id": "pat_01M3WQQHRB1T0K1469KD18BAWX" },
+    "prescriptions": { "add": [{ "id": "rx_01M3WT4NERS2YVQRF6YTWR4A6C" }] },
+    "pharmacy": { "id": "phr_01GA9HPW4SJGXGZSYA8FNCPM8C" }
+  },
+  "metadata": { "source": "DIRECT_API", "client": "docs-example", "requestId": "req_ord_0001" }
+}
+```
+
+</CodeGroup>
+
+## Retrieve an order
+
+Send only the order's `id` to get back its state, patient, prescriptions, pharmacy and any open problems.
+
+<CodeGroup>
+
+```graphql Mutation
+mutation Order($input: OrderInput!, $metadata: RequestMetadata!) {
+  order(input: $input, metadata: $metadata) {
+    __typename
+    ... on OrderPayload {
+      order {
+        id
+        state
+        patient {
+          __typename
+          ... on Patient { id }
+          ... on UpstreamServiceError { code message service retryable }
+        }
+        prescriptions {
+          id
+          status
+          treatment { id name }
+        }
+        pharmacy {
+          id
+          name
+          fulfillmentType
+          address { street1 city state postalCode }
+        }
+        exceptions { id type message createdAt }
+      }
+      unappliedChanges { key label status severity reason }
+    }
+    ... on UnauthorizedError { code message requiredPermission }
+    ... on UpstreamServiceError { code message service retryable }
+  }
+}
+```
+
+```json Variables
+{
+  "input": { "order": { "id": "ordd_01M3WT5GK51DBRH7ZKBKBV9QWK" } },
+  "metadata": { "source": "DIRECT_API", "client": "docs-example", "requestId": "req_ord_0002" }
+}
+```
+
+</CodeGroup>
+
+## Change an order
+
+Send the order's `id` to add or remove prescriptions or switch the pharmacy while it's still a `DRAFT`.
+
+<CodeGroup>
+
+```graphql Mutation
+mutation Order($input: OrderInput!, $metadata: RequestMetadata!) {
+  order(input: $input, metadata: $metadata) {
+    __typename
+    ... on OrderPayload {
+      order {
+        id
+        state
+        patient {
+          __typename
+          ... on Patient { id }
+          ... on UpstreamServiceError { code message service retryable }
+        }
+        prescriptions { id status treatment { name } }
+        pharmacy {
+          id
+          name
+          fulfillmentType
+          address { street1 city state postalCode }
+        }
+        exceptions { id type message createdAt }
+      }
+      appliedChanges {
+        ...ChangeFields
+        ...PharmacyOffers
+      }
+      unappliedChanges {
+        ...ChangeFields
+        ...PharmacyOffers
+      }
+    }
+    ... on AmbiguousOrderMatch {
+      reason
+      candidates { id pharmacyId prescriptionIds }
+    }
+    ... on UnauthorizedError { code message requiredPermission }
+    ... on UpstreamServiceError { code message service retryable }
+  }
+}
+
+fragment ChangeFields on Change {
+  key
+  label
+  status
+  severity
+  category
+  operation
+  reason
+  options { displayName reason operation argument value match { matchType confidence } }
+  detail {
+    __typename
+    ... on FieldChangeDetail { previousValue { displayValue } newValue { displayValue } }
+    ... on EntityResolutionDetail { inputText resolvedEntityId }
+    ... on PharmacyResolutionDetail { inputText resolvedEntityId }
+  }
+}
+
+# Pharmacy offers appear on the resolved pharmacy (detail) and, when the
+# pharmacy match is AMBIGUOUS, on each candidate (options).
+fragment PharmacyOffers on Change {
+  detail { ... on PharmacyResolutionDetail { offers { ...Offer } } }
+  options { ... on PharmacyChangeOption { offers { ...Offer } } }
+}
+
+fragment Offer on PharmacyOffer {
+  source
+  isPromoted
+  attributeTags { kind label }
+  priceSummary { priceType totalAmount totalRetailAmount totalSavings }
+  prescriptionDeliveryEstimates { prescriptionId deliveryPromise deliveryPromiseRangeStart deliveryPromiseRangeEnd }
+}
+```
+
+```json Variables
+{
+  "input": {
+    "order": { "id": "ordd_01M3WT5GK51DBRH7ZKBKBV9QWK" },
+    "prescriptions": { "add": [{ "id": "rx_01M3WT515TQ3D1348GGS70MV1Z" }] },
+    "pharmacy": { "id": "phr_01K7591AHEH0ZPBANPP1R6S71W" }
+  },
+  "metadata": { "source": "DIRECT_API", "client": "docs-example", "requestId": "req_ord_0003" }
+}
+```
+
+</CodeGroup>
+
+## Send an order
+
+Set `state` to `SUBMITTED` on a draft order to send it for fulfillment; the response returns a new order ID to use from then on.
+
+<CodeGroup>
+
+```graphql Mutation
+mutation Order($input: OrderInput!, $metadata: RequestMetadata!) {
+  order(input: $input, metadata: $metadata) {
+    __typename
+    ... on OrderPayload {
+      order {
+        id
+        state
+        patient {
+          __typename
+          ... on Patient { id }
+          ... on UpstreamServiceError { code message service retryable }
+        }
+        prescriptions { id status treatment { name } }
+        pharmacy {
+          id
+          name
+          fulfillmentType
+          address { street1 city state postalCode }
+        }
+        exceptions { id type message createdAt }
+      }
+      appliedChanges {
+        ...ChangeFields
+        ...PharmacyOffers
+      }
+      unappliedChanges {
+        ...ChangeFields
+        ...PharmacyOffers
+      }
+    }
+    ... on AmbiguousOrderMatch {
+      reason
+      candidates { id pharmacyId prescriptionIds }
+    }
+    ... on UnauthorizedError { code message requiredPermission }
+    ... on UpstreamServiceError { code message service retryable }
+  }
+}
+
+fragment ChangeFields on Change {
+  key
+  label
+  status
+  severity
+  category
+  operation
+  reason
+  options { displayName reason operation argument value match { matchType confidence } }
+  detail {
+    __typename
+    ... on FieldChangeDetail { previousValue { displayValue } newValue { displayValue } }
+    ... on EntityResolutionDetail { inputText resolvedEntityId }
+    ... on PharmacyResolutionDetail { inputText resolvedEntityId }
+  }
+}
+
+# Pharmacy offers appear on the resolved pharmacy (detail) and, when the
+# pharmacy match is AMBIGUOUS, on each candidate (options).
+fragment PharmacyOffers on Change {
+  detail { ... on PharmacyResolutionDetail { offers { ...Offer } } }
+  options { ... on PharmacyChangeOption { offers { ...Offer } } }
+}
+
+fragment Offer on PharmacyOffer {
+  source
+  isPromoted
+  attributeTags { kind label }
+  priceSummary { priceType totalAmount totalRetailAmount totalSavings }
+  prescriptionDeliveryEstimates { prescriptionId deliveryPromise deliveryPromiseRangeStart deliveryPromiseRangeEnd }
+}
+```
+
+```json Variables
+{
+  "input": {
+    "order": { "id": "ordd_01M3WT5GK51DBRH7ZKBKBV9QWK" },
+    "state": "SUBMITTED"
+  },
+  "metadata": { "source": "DIRECT_API", "client": "docs-example", "requestId": "req_ord_submit" }
+}
+```
+
+</CodeGroup>

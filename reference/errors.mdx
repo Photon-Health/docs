@@ -1,0 +1,195 @@
+---
+title: "Errors"
+description: "Where errors appear in Photon Rx API responses and how to handle each one."
+---
+
+Errors appear in three places. Check them in this order on every response.
+
+| Step | Where | Meaning |
+| --- | --- | --- |
+| 1 | Top-level `errors` array | The request did not run. Bad credentials or an invalid query. |
+| 2 | Result `__typename` | The operation failed, or it needs you to pick a record before it can run. |
+| 3 | `unappliedChanges` and `appliedChanges` | The operation ran. Some inputs may be rejected, ambiguous, or carry advice. |
+
+Prescriptions have one more check: [screening alerts](#4-screening-alerts).
+
+## 1. Top-level errors
+
+The request failed before any mutation ran. `data` is empty. Fix the request; retrying it unchanged will fail again.
+
+Missing `x-photon-auth-token` header:
+
+```json
+{
+  "errors": [{
+    "message": "An authentication token is not present",
+    "extensions": { "code": "EMPTY_AUTHORIZATION_HEADER", "missingHeaders": ["x-photon-auth-token"] }
+  }]
+}
+```
+
+Invalid or expired token:
+
+```json
+{
+  "errors": [{
+    "message": "Request failed with status code 401",
+    "extensions": { "code": "INTERNAL_SERVER_ERROR" }
+  }]
+}
+```
+
+Invalid queries (unknown fields, wrong argument types) also return here.
+
+## 2. Result type
+
+Every mutation returns a union. Always request `__typename` and branch on it.
+
+| `__typename` | Meaning | What to do |
+| --- | --- | --- |
+| `PatientPayload`, `PrescriptionPayload`, `OrderPayload` | The operation ran. | Go to step 3. |
+| `AmbiguousPatientMatch` | Two or more of email, phone, or last name + date of birth match an existing patient. Nothing was saved. | Retry with `patient.id` set to one of `candidates[].id`. |
+| `AmbiguousPrescriptionMatch` | The patient has two or more draft prescriptions and you did not send `prescription.id`. Nothing was saved. | Retry with `prescription.id`. |
+| `AmbiguousOrderMatch` | The patient has two or more draft orders and you did not send `order.id`. Nothing was saved. | Retry with `order.id`. |
+| `UnauthorizedError` | The caller is not allowed to do this. Example: signing without prescriber rights returns code `PRESCRIPTION_SIGNING_UNAUTHORIZED`, "You are not authorized to sign prescriptions." Returns `code`, `message`, `requiredPermission`. | Use a credential with the right permission. Do not retry unchanged. |
+| `UpstreamServiceError` | A downstream service failed. Returns `code`, `message`, `service`, `retryable`. | If `retryable` is `true`, retry with backoff. Otherwise do not retry. |
+
+`PatientPayload.patient` can also be an `UpstreamServiceError`. This means the change was processed but the patient record could not be read back.
+
+<Warning>
+  If you omit `prescription.id` and the patient has exactly one draft prescription, that draft is updated. Send `prescription.id` whenever you mean a specific draft.
+</Warning>
+
+## 3. Changes
+
+Every payload has two lists. Each entry describes one input you sent.
+
+| List | Contains |
+| --- | --- |
+| `appliedChanges` | Inputs that were accepted. `status` is `APPLIED`. If `unappliedChanges` has a `BLOCKING` entry, nothing was saved. |
+| `unappliedChanges` | Inputs that were not saved. `status` is `REJECTED` (fix the input) or `AMBIGUOUS` (pick an option). |
+
+Fields on each change:
+
+| Field | Description |
+| --- | --- |
+| `key` | Which input this is about, for example `demographic.phone` or `clinical.allergies.add.0`. |
+| `status` | `APPLIED`, `REJECTED`, or `AMBIGUOUS`. |
+| `severity` | `INFO`, `ADVISORY`, or `BLOCKING`. |
+| `category` | Why it matters, for example `DISAMBIGUATION`, `INVALID_INPUT`, `CODING_SPECIFICITY`. Can be `null`. |
+| `reason` | Plain-language explanation. |
+| `options` | Suggested fixes. Each option says: set `argument` to `value` and call `operation` again. |
+
+### Rules
+
+- **A request is all-or-nothing.** Currently, if any input is blocking, nothing is saved. Other inputs come back `REJECTED` with a `reason` that points to the failed input, stay in `appliedChanges`, or are left out of the response. Fix the root cause and resend the whole request.
+- **The payload can be `null`.** When nothing was saved, `patient`, `prescription`, or `order` can be `null`, even if `appliedChanges` is not empty. The cause is in `unappliedChanges`.
+- **Applied changes can carry advice.** An `APPLIED` change with severity `ADVISORY` was saved, but `reason` and `options` suggest a better value.
+- **Check `options` on every change**, not only unapplied ones. When `match.confidence` is `HIGH`, you can pick that option without asking the user.
+
+### Rejected input
+
+Nothing was saved because the phone number is invalid.
+
+```json
+{
+  "key": "demographic.phone",
+  "status": "REJECTED",
+  "severity": "BLOCKING",
+  "category": null,
+  "reason": "\"5555550100\" is not a valid phone number.",
+  "options": null
+}
+```
+
+### Ambiguous input
+
+The allergy name matched several catalog entries. Resend with one option's `value` at its `argument` path.
+
+```json
+{
+  "key": "clinical.allergies.add.0",
+  "status": "AMBIGUOUS",
+  "severity": "BLOCKING",
+  "category": "DISAMBIGUATION",
+  "reason": "\"penicillin\" matches 33 allergens — retry with one of the suggested ids, or provide an rxNormId to resolve exactly.",
+  "options": [
+    {
+      "displayName": "Penicillin G",
+      "operation": "patient",
+      "argument": "patient.clinical.allergies.add.0.id",
+      "value": "alg_01M38VKFQHZEB9E38X9FDC7QA4",
+      "match": { "matchType": "FUZZY_NAME_MATCH", "confidence": "MEDIUM" }
+    }
+  ]
+}
+```
+
+To avoid ambiguity, identify entities by ID or code (`rxNormId`, `icd10Code`, `ndc`) instead of by name.
+
+### Applied with advice
+
+The diagnosis was saved. A more specific code is suggested.
+
+```json
+{
+  "key": "clinical.diagnoses.add.0",
+  "status": "APPLIED",
+  "severity": "ADVISORY",
+  "category": "CODING_SPECIFICITY",
+  "reason": "More specific diagnosis codes are on file and are always preferable for claims processing — consider removing this diagnosis and adding one of the suggested alternatives instead.",
+  "options": [
+    {
+      "displayName": "Acute nasopharyngitis [common cold] (J00)",
+      "operation": "prescription",
+      "argument": "prescription.clinical.diagnoses.add.0.icd10Code",
+      "value": "J00"
+    }
+  ]
+}
+```
+
+### Rejected because another input failed
+
+The order was not created because the pharmacy input was rejected. The prescription input was fine.
+
+```json
+{
+  "order": null,
+  "unappliedChanges": [
+    {
+      "key": "pharmacy",
+      "status": "REJECTED",
+      "severity": "BLOCKING",
+      "category": "INVALID_INPUT",
+      "reason": "Matching on near.text is not yet supported."
+    },
+    {
+      "key": "rx_01M3D933B9EV2ASY871K6SHYQB",
+      "status": "REJECTED",
+      "severity": "BLOCKING",
+      "category": null,
+      "reason": "Not applied — a sibling change in this request was rejected."
+    }
+  ]
+}
+```
+
+## 4. Screening alerts
+
+`PrescriptionPayload.prescription` includes clinical screening results:
+
+- `status`: `READY`, `WARNING`, or `BLOCKED`.
+- `screeningAlerts`: drug, allergy, or condition conflicts. Each has `severity` (`MINOR`, `MODERATE`, `MAJOR`), `type`, `category`, `description`, `involvedEntities`, and optional `options` with an alternative.
+
+Show `WARNING` and `BLOCKED` alerts to the prescriber before signing.
+
+## Handling checklist
+
+1. If `errors` is present, stop. Fix the token or query.
+2. Branch on `__typename`. For an ambiguous match, retry with a candidate ID. For `UpstreamServiceError`, retry only if `retryable`.
+3. For each entry in `unappliedChanges`:
+   - `AMBIGUOUS`: choose an option (automatically if `confidence` is `HIGH`, otherwise ask the user).
+   - `REJECTED`: fix the input described in `reason`. Skip entries rejected only because another input failed.
+4. Resend the whole request with the fixes.
+5. Show `ADVISORY` changes and screening alerts to the user.

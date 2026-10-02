@@ -1,0 +1,116 @@
+{
+  "projectType": "api-service",
+  "projectName": "Photon Rx API",
+  "projectDescription": "A GraphQL API for the end-to-end prescription workflow — intaking patients, drafting and signing prescriptions, and routing orders to pharmacies.",
+  "theme": "luma",
+  "primaryColor": "#ef7025",
+  "lightColor": "#eec9bc",
+  "darkColor": "#4fa1ab",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "authentication"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/rx-workflow",
+              "concepts/change-model",
+              "concepts/entity-resolution",
+              "concepts/clinical-screening"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/intake-patient",
+              "guides/draft-prescription",
+              "guides/sign-prescription",
+              "guides/submit-order",
+              "guides/pharmacy-offers"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/errors",
+              "reference/enums",
+              "reference/pharmacy-search"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Mutations",
+            "pages": [
+              "api/patient",
+              "api/prescription",
+              "api/order"
+            ]
+          },
+          {
+            "group": "Types",
+            "pages": [
+              "api/types/patient-types",
+              "api/types/prescription-types",
+              "api/types/order-types",
+              "api/types/change-types",
+              "api/types/pharmacy-types"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Patient intake with demographic matching and deduplication",
+    "Clinical history management — allergies, medications, diagnoses, benefits",
+    "Prescription drafting with treatment resolution and ICD-10 coding",
+    "Automated clinical screening for drug interactions, allergy conflicts, and condition contraindications",
+    "Prescriber signing workflow with content-hash attestation",
+    "Order submission routing to specific pharmacies or patient choice",
+    "Pharmacy offer surfacing — sponsored placement, GoodRx/RxSense discount cards, Amazon Pharmacy",
+    "Structured Change reporting with applied/unapplied buckets and next-action options",
+    "Entity resolution for free-text drug names, allergens, and diagnoses via RxNorm and ICD-10",
+    "Request metadata and tracing for MCP connectors and LLM agents"
+  ],
+  "publicApiSurface": [
+    "mutation patient(patient: PatientInput, metadata: RequestMetadata!): PatientResult!",
+    "mutation prescription(prescription: PrescriptionInput, metadata: RequestMetadata!): PrescriptionResult!",
+    "mutation order(input: OrderInput!, metadata: RequestMetadata!): OrderResult!",
+    "query ping: String!",
+    "input PatientInput { id, demographic, clinical }",
+    "input PrescriptionInput { id, patient, templateId, treatment, instructions, dispense, clinical, signing }",
+    "input OrderInput { order, patient, prescriptions, state, pharmacy }",
+    "input PatientDemographicInput { name, dateOfBirth, sex, gender, email, phone, benefits, address, preferredPharmacy }",
+    "input PatientClinicalInput { allergies, medications, diagnoses, notes }",
+    "input AllergiesPatch { add, remove, none }",
+    "input MedicationsPatch { add, remove, update, none }",
+    "input DiagnosesPatch { add, remove, none }",
+    "input BenefitsPatch { add, remove, update, none }",
+    "input TreatmentReferenceInput { id, rxNormId, name, ndc, upc }",
+    "input DispenseInput { quantity, unit, daysSupply, refillsAllowed, dispenseAsWritten }",
+    "input PrescriptionSigningDetailsInput { signedHash, message }",
+    "input PharmacyReferenceInput { id, name, near, openAt, fulfillmentType }",
+    "enum RequestSource { WEB_APP, EMBEDDABLE_COMPONENT, DIRECT_API, MCP_CONNECTOR, LLM_AGENT }",
+    "enum OrderState { DRAFT, SUBMITTED, CANCELED }",
+    "enum DraftStatus { READY, WARNING, BLOCKED }",
+    "enum ChangeStatus { APPLIED, REJECTED, AMBIGUOUS }",
+    "enum ScreeningSeverity { MINOR, MODERATE, MAJOR }",
+    "type ChangeSet { appliedChanges, unappliedChanges }",
+    "type Change { key, label, status, severity, reason, options, category, operation, detail }",
+    "type PharmacyOffer { source, isPromoted, attributeTags, priceSummary, prescriptionDeliveryEstimates }",
+    "type ScreeningAlert { severity, type, description, involvedEntities, category, options }"
+  ]
+}

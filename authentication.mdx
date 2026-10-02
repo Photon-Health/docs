@@ -1,0 +1,150 @@
+---
+title: "Authenticate: API Keys and Metadata"
+description: "Learn how to obtain an access token, pass the x-photon-auth-token header, and use RequestMetadata to identify your application on every mutation."
+---
+
+Every request to the Photon Rx API must carry two pieces of identification: an `x-photon-auth-token` header that proves you are a valid caller, and a `metadata` argument on each mutation that tells the API which system is making the call. This guide covers both requirements, shows you how to handle authentication errors, and explains best practices for keeping your credentials safe.
+
+## Obtain an API key
+
+API keys are managed in the [Photon dashboard](https://app.photon.health). To generate one:
+
+1. Log in to [app.photon.health](https://app.photon.health).
+2. Navigate to **Settings → Developers**
+
+{/* TODO: add the remaining steps for creating credentials and requesting an access token. */}
+
+## Pass the access token header
+
+Send your access token in the `x-photon-auth-token` HTTP header on every request. The `Authorization` header is not read.
+
+```text
+x-photon-auth-token: <your-access-token>
+x-photon-auth-token-type: auth0-m2m
+```
+
+All requests go to the single GraphQL endpoint:
+
+```text
+https://network-api.photon.health/graphql
+```
+
+<CodeGroup>
+  ```bash curl
+  curl --request POST \
+    --url https://network-api.photon.health/graphql \
+    --header 'x-photon-auth-token: <your-access-token>' \
+    --header 'x-photon-auth-token-type: auth0-m2m' \
+    --header 'Content-Type: application/json' \
+    --data '{ "query": "{ ping }" }'
+  ```
+</CodeGroup>
+
+The `ping` query is a lightweight health check that returns `"pong 💊"`. Use it to verify your credentials are working before sending any mutation traffic.
+
+---
+
+## The `RequestMetadata` input
+
+Every mutation in the Photon Rx API requires a `metadata` argument of type `RequestMetadata`. 
+
+```graphql
+input RequestMetadata {
+  source: RequestSource!       # Required — identifies the type of caller
+  sourceVersion: String        # Optional — version of your application or component
+  client: String               # Optional — human-readable name of your application
+  requestId: String            # Optional — caller-supplied ID for end-to-end tracing
+}
+
+enum RequestSource {
+  WEB_APP                      # A browser-based web application
+  EMBEDDABLE_COMPONENT         # A Photon embeddable UI widget
+  DIRECT_API                   # A direct server-side API integration
+  MCP_CONNECTOR                # A Model Context Protocol connector
+  LLM_AGENT                    # An LLM or AI agent
+}
+```
+
+<Note>
+  `source` is the only required field. The remaining fields are optional but strongly recommended — `client` and `requestId` in particular make support and debugging significantly easier.
+</Note>
+
+### Field reference
+
+<ParamField body="source" type="RequestSource" required>
+  Identifies the type of system making the call. Choose the value that most accurately describes your integration. This field is used for audit logging and analytics.
+</ParamField>
+
+<ParamField body="sourceVersion" type="String">
+  The version string of your application or component (e.g. `"2.4.1"`). Useful for correlating API behaviour changes with deployment events.
+</ParamField>
+
+<ParamField body="client" type="String">
+  A human-readable name for your application (e.g. `"my-telehealth-app"`).
+</ParamField>
+
+<ParamField body="requestId" type="String">
+  A caller-supplied identifier for this specific request (e.g. a UUID or trace ID from your own system). Use it to correlate API calls with your internal logs.
+</ParamField>
+
+### Example metadata block
+
+```graphql
+mutation IntakePatient($patient: PatientInput, $metadata: RequestMetadata!) {
+  patient(patient: $patient, metadata: $metadata) {
+    ... on PatientPayload {
+      patient {
+        ... on Patient { id }
+      }
+    }
+    ... on UnauthorizedError {
+      code
+      message
+    }
+  }
+}
+```
+
+```json
+{
+  "patient": { "demographic": { "name": { "first": "Jane", "last": "Doe" } } },
+  "metadata": {
+    "source": "DIRECT_API",
+    "sourceVersion": "1.0.0",
+    "client": "my-app",
+    "requestId": "req_abc123"
+  }
+}
+```
+
+---
+
+## Handling authentication errors
+
+A missing or invalid token fails the whole request and returns a top-level `errors` array, not an `UnauthorizedError`:
+
+```json
+{ "errors": [{ "message": "An authentication token is not present", "extensions": { "code": "EMPTY_AUTHORIZATION_HEADER" } }] }
+```
+
+When the token is valid but not allowed to perform an action, the mutation returns an `UnauthorizedError` in its result union. Always include the `UnauthorizedError` fragment in your mutation selections.
+
+```graphql
+... on UnauthorizedError {
+  code
+  message
+  requiredPermission
+}
+```
+
+<ResponseField name="code" type="String">
+  A machine-readable error code (e.g. `PRESCRIPTION_SIGNING_UNAUTHORIZED`). Use this field to branch your error-handling logic.
+</ResponseField>
+
+<ResponseField name="message" type="String">
+  A human-readable explanation of why the request was rejected. Suitable for internal logging but not for display to end users.
+</ResponseField>
+
+<ResponseField name="requiredPermission" type="String">
+  When present, indicates the specific permission scope that the calling key lacks. Use this to determine whether you need to request a different key or additional scopes from the dashboard.
+</ResponseField>

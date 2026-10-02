@@ -1,0 +1,202 @@
+---
+title: "Change Model"
+description: "How every Photon mutation reports outcomes through a ChangeSet of applied and unapplied changes."
+sidebarTitle: "Change Model"
+---
+
+Every mutation response implements the `ChangeSet` interface. Instead of a plain success/error, it reports what was applied, what wasn't, and — when input is needed — how to resolve it. The structure is identical across all three mutations.
+
+## The ChangeSet interface
+
+```graphql
+interface ChangeSet {
+  appliedChanges: [Change!]!
+  unappliedChanges: [Change!]!
+}
+```
+
+The changes come pre-split:
+
+- **`appliedChanges`** — persisted. Use for audit logs, confirmation UI, downstream events.
+- **`unappliedChanges`** — not applied automatically. Always check it: empty means full success; non-empty means something needs handling.
+
+## Anatomy of a Change
+
+```graphql
+type Change {
+  key: String!
+  label: String!
+  status: ChangeStatus!
+  severity: ChangeSeverity!
+  reason: String
+  options: [ChangeOption!]
+  category: ChangeCategory
+  operation: ChangeOperation!
+  detail: ChangeDetail!
+}
+```
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `key` | `String` | Machine-readable ID. Stable across retries for the same logical event. |
+| `label` | `String` | Human-readable summary for display or logging. |
+| `status` | `ChangeStatus` | Outcome: `APPLIED`, `REJECTED`, or `AMBIGUOUS`. |
+| `severity` | `ChangeSeverity` | Urgency: `INFO`, `ADVISORY`, or `BLOCKING`. |
+| `reason` | `String?` | Plain-language explanation of the outcome. |
+| `options` | `[ChangeOption]?` | Next actions the caller can take. Always check; required when `AMBIGUOUS`. |
+| `category` | `ChangeCategory?` | What kind of change this is (see below). |
+| `operation` | `ChangeOperation` | Data effect: `ADDED`, `MODIFIED`, or `REMOVED`. |
+| `detail` | `ChangeDetail` | Union with the before/after or resolution data. |
+
+## Status values
+
+```graphql
+enum ChangeStatus {
+  APPLIED     # Accepted and written to the record
+  REJECTED    # Attempted but could not be applied
+  AMBIGUOUS   # Multiple candidates matched; caller must choose and retry
+}
+```
+
+<Warning>
+  An `AMBIGUOUS` change in `unappliedChanges` requires a response. The API cannot proceed until you select a `ChangeOption` and resubmit with the resolved value. Ignoring it leaves the operation incomplete.
+</Warning>
+
+## Severity values
+
+```graphql
+enum ChangeSeverity {
+  INFO       # Informational; no action required
+  ADVISORY   # Worth surfacing; does not block
+  BLOCKING   # Workflow cannot proceed until resolved
+}
+```
+
+`BLOCKING` entries in `unappliedChanges` prevent a draft from finalizing or an order from submitting. `INFO`/`ADVISORY` entries are notes — log or surface them at your discretion.
+
+## Operation values
+
+```graphql
+enum ChangeOperation {
+  ADDED    # A new value or entity was introduced
+  MODIFIED # An existing value was updated
+  REMOVED  # A value or entity was removed
+}
+```
+
+## Change categories
+
+`category` classifies why a change happened — use it to route or present the change.
+
+| Category | What it signals |
+| --- | --- |
+| `DISAMBIGUATION` | Multiple candidates could satisfy the reference; pick one. |
+| `OBSOLETE_REFERENCE` | The referenced code/product is retired or discontinued and no longer usable. |
+| `CODING_SPECIFICITY` | The reference is valid, but a more specific code is preferred for claims. |
+| `COST_SAVINGS` | A less expensive equivalent exists. |
+| `PRODUCT_PREFERENCE` | A specific brand/manufacturer may matter — NTI consistency, patient adherence, or a payer/DAW requirement. |
+| `SAFETY` | A clinical risk — an interaction, allergy conflict, or cross-reactivity. See [Clinical Screening](/concepts/clinical-screening). |
+| `MISSING_INPUT` | Required or optional data needed to proceed is absent. |
+| `INVALID_INPUT` | A provided value was malformed or not recognized. |
+| `CONFIRMATION_REQUIRED` | The action would succeed but needs explicit confirmation given its consequences. |
+
+## The ChangeDetail union
+
+`detail` carries the specific data for a change. Its type depends on what changed:
+
+```graphql
+union ChangeDetail =
+    FieldChangeDetail
+  | EntityResolutionDetail
+  | PharmacyResolutionDetail
+```
+
+**`FieldChangeDetail`** — scalar field updates. Holds the value before and after.
+
+```graphql
+type FieldChangeDetail {
+  previousValue: TypedValue  # Before (null if ADDED)
+  newValue: TypedValue       # After (null if REMOVED)
+}
+```
+
+**`EntityResolutionDetail`** — a free-text or coded reference resolved to a catalog entity. Holds the original input and the resolved ID. See [How Entity Resolution Works](/concepts/entity-resolution).
+
+```graphql
+type EntityResolutionDetail {
+  inputText: String       # What the caller submitted
+  resolvedEntityId: ID    # Resolved catalog ID (null if unresolved)
+}
+```
+
+**`PharmacyResolutionDetail`** — pharmacy lookup and matching, same pattern as entity resolution but scoped to pharmacies.
+
+## Handling AMBIGUOUS changes
+
+When `status` is `AMBIGUOUS`, `options` holds one `ChangeOption` per candidate. Each provides:
+
+- **`displayName`** — human-readable candidate name (e.g. "Penicillin G Potassium").
+- **`reason`** — why this option is offered.
+- **`operation`** — the mutation to call with this option, e.g. `"prescription"`.
+- **`argument`** — the input field the value writes to.
+- **`value`** — the value to submit on retry.
+- **`match`** — an `EntityMatch` with match type and confidence.
+
+To resolve, pick an option and resubmit the mutation with the option's `value` for the target field (typically an `id` replacing a free-text `name`).
+
+## Example: AMBIGUOUS drug name
+
+A `prescription` response where `"ibuprofen 800 mg oral tablet"` matched two catalog drugs while updating an existing draft — one `AMBIGUOUS` change, two options. The draft is returned unchanged.
+
+```json
+{
+  "data": {
+    "prescription": {
+      "prescription": {
+        "id": "rx_01M3D933B9EV2ASY871K6SHYQB",
+        "status": "READY"
+      },
+      "unappliedChanges": [
+        {
+          "key": "treatment",
+          "label": "Treatment",
+          "status": "AMBIGUOUS",
+          "severity": "BLOCKING",
+          "operation": "ADDED",
+          "category": "DISAMBIGUATION",
+          "reason": "\"ibuprofen 800 mg oral tablet\" matches 2 treatments — retry with one of the suggested ids, or a more specific reference.",
+          "options": [
+            {
+              "displayName": "Ibuprofen Oral Tablet 800 MG",
+              "reason": null,
+              "operation": "prescription",
+              "argument": "treatment.id",
+              "value": "med_01M3D93NFGCZJPQ3XW3AF7578G",
+              "match": null
+            },
+            {
+              "displayName": "Ibuprofen-Famotidine Oral Tablet 800-26.6 MG",
+              "reason": null,
+              "operation": "prescription",
+              "argument": "treatment.id",
+              "value": "med_01M3D93NFN58DDG2KZ7HX647WN",
+              "match": null
+            }
+          ],
+          "detail": {
+            "__typename": "EntityResolutionDetail",
+            "inputText": "ibuprofen 800 mg oral tablet",
+            "resolvedEntityId": null
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+Retry with `treatment: { id: "med_01M3D93NFGCZJPQ3XW3AF7578G" }` in place of the free-text name.
+
+<Tip>
+  When a `ChangeOption` is `HIGH` confidence and it's the only option, your integration can auto-select it — if your workflow policy allows. Always route `MEDIUM` and `LOW` matches to human review.
+</Tip>

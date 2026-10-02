@@ -1,0 +1,101 @@
+---
+title: "Entity Resolution"
+description: "Learn how the Photon API resolves free-text names, codes, and IDs for allergens, medications, diagnoses, and pharmacies."
+---
+
+You can reference clinical entities — allergens, medications, diagnoses, pharmacies — by catalog `id`, a standard code (RxNorm, ICD-10, NDC, UPC), or a free-text `name`. The resolution layer normalizes each input to a canonical catalog record and reports the outcome in the response's `ChangeSet`.
+
+## How to reference an entity
+
+Every reference input accepts several identifiers:
+
+```graphql
+input AllergyReferenceInput {
+  id: ID           # Exact catalog ID from a prior resolution
+  name: String     # Free-text; triggers fuzzy resolution
+  rxNormId: String
+}
+
+input TreatmentReferenceInput {
+  id: ID
+  rxNormId: String
+  name: String
+  ndc: String
+  upc: String
+}
+
+input DiagnosisReferenceInput {
+  id: ID
+  name: String
+  icd10Code: String
+}
+```
+
+Send one identifier per reference — the most specific you have. If you send a code and a `name` together, the name is checked against the code's catalog entry, and a mismatch is `REJECTED` with category `SAFETY`.
+
+<Tip>
+  Once you've resolved an entity to a catalog `id`, use `id` on later calls. ID references skip resolution and never produce `AMBIGUOUS` changes.
+</Tip>
+
+## Match types
+
+Every name/code resolution records how it matched:
+
+```graphql
+enum EntityMatchType {
+  EXACT_NAME_MATCH   # Exact match on the submitted name
+  FUZZY_NAME_MATCH   # Close, but not an exact string match
+  RXNORM_CODE_MATCH  # Matched via an RxNorm concept ID
+  DRUG_CLASS_MATCH   # Matched a drug class, not a specific product
+}
+```
+
+`DRUG_CLASS_MATCH` is the broadest type and usually carries `LOW` confidence — treat it as a prompt for the prescriber to pick a specific product.
+
+## Confidence levels
+
+Each resolution carries a `ConfidenceLevel`:
+
+```graphql
+enum ConfidenceLevel {
+  LOW     # Weak; always route to human review
+  MEDIUM  # Likely; consider confirming
+  HIGH    # Strong; safe to auto-proceed in most workflows
+}
+```
+
+You can auto-accept a single `HIGH` match without interrupting the user. Surface `LOW` and `MEDIUM` for review.
+
+## Resolution as a Change
+
+Every resolution appears as a `Change` whose `detail` is an `EntityResolutionDetail`:
+
+```graphql
+type EntityResolutionDetail {
+  inputText: String       # What you submitted
+  resolvedEntityId: ID    # Resolved catalog ID, or null
+}
+```
+
+- **Unambiguous** → `appliedChanges`, status `APPLIED`.
+- **Multiple candidates** → `unappliedChanges`, status `AMBIGUOUS`, with an `options` list to choose from.
+
+## Single vs. multiple matches
+
+| Scenario | Status | Location | Action |
+| --- | --- | --- | --- |
+| One high-confidence match | `APPLIED` | `appliedChanges` | Proceed |
+| One low/medium-confidence match | `APPLIED` (advisory) | `appliedChanges` | Optionally confirm |
+| Multiple candidates | `AMBIGUOUS` | `unappliedChanges` | Present options, retry with chosen `id` |
+| No match | `REJECTED` | `unappliedChanges` | Prompt for a more specific input |
+
+## ADDED vs. REMOVED scope
+
+The change's `operation` sets which catalog resolution runs against:
+
+- **`ADDED`** — resolves against the **global clinical catalog** (adding to a record).
+- **`REMOVED`** — resolves only against the **patient's current list**. A name that exists globally but not on this patient's record comes back `REJECTED`.
+
+<Note>
+  Set `metadata.requestId` to a unique value per call so a retry stays distinct from the original in your logs.
+</Note>

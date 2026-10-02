@@ -1,0 +1,279 @@
+---
+title: "Pharmacy Output Types — Photon Rx GraphQL API Reference"
+sidebarTitle: "Pharmacy Types"
+description: "Reference for all pharmacy-related output types in the Photon Rx GraphQL API, including location, fulfillment, pricing offers, and delivery estimates."
+---
+
+Pharmacy types represent the pharmacies available for order fulfillment, along with the real-time pricing offers and delivery estimates the API surfaces when routing a prescription. The `Pharmacy` type provides location and fulfillment capability data, while `PharmacyOffer` carries pricing summaries and per-prescription delivery windows. These types also appear in the change model — `PharmacyResolutionDetail` and `PharmacyChangeOption` extend the core change types with pharmacy-specific offer data to support intelligent pharmacy selection.
+
+---
+
+## Pharmacy
+
+Represents a pharmacy that can fulfill prescriptions. Returned as a nested object in patient records (preferred pharmacy), order payloads, and pharmacy search results.
+
+```graphql
+type Pharmacy {
+  id: ID!
+  name: String!
+  address: PharmacyAddress
+  latitude: Float
+  longitude: Float
+  fulfillmentType: [FulfillmentType!]
+}
+```
+
+<ResponseField name="id" type="ID!" required>
+  The unique identifier for the pharmacy.
+</ResponseField>
+
+<ResponseField name="name" type="String!" required>
+  The display name of the pharmacy (e.g., `"CVS Pharmacy #1234"` or `"Alto Pharmacy"`).
+</ResponseField>
+
+<ResponseField name="address" type="PharmacyAddress">
+  The physical address of the pharmacy location.
+
+  <Expandable title="PharmacyAddress fields">
+    <ResponseField name="street1" type="String">
+      Primary street address line.
+    </ResponseField>
+    <ResponseField name="street2" type="String">
+      Secondary address line (suite, unit, etc.), if applicable.
+    </ResponseField>
+    <ResponseField name="city" type="String">
+      City name.
+    </ResponseField>
+    <ResponseField name="state" type="String">
+      State or province code (e.g., `"CA"`, `"NY"`).
+    </ResponseField>
+    <ResponseField name="postalCode" type="String">
+      ZIP or postal code.
+    </ResponseField>
+    <ResponseField name="country" type="String">
+      ISO 3166-1 alpha-2 country code (e.g., `"US"`).
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="latitude" type="Float">
+  The geographic latitude of the pharmacy location, in decimal degrees. Use together with `longitude` to compute distances or render a map pin.
+</ResponseField>
+
+<ResponseField name="longitude" type="Float">
+  The geographic longitude of the pharmacy location, in decimal degrees.
+</ResponseField>
+
+<ResponseField name="fulfillmentType" type="[FulfillmentType!]">
+  The fulfillment methods this pharmacy supports. A pharmacy may support one or both of `MAIL_ORDER` and `PICK_UP`.
+</ResponseField>
+
+---
+
+## PharmacyOffer
+
+A real-time offer from a pharmacy for a set of prescriptions, including pricing and delivery information. Offers are surfaced within `PharmacyResolutionDetail` and `PharmacyChangeOption` during pharmacy selection.
+
+```graphql
+type PharmacyOffer {
+  source: String!
+  isPromoted: Boolean!
+  attributeTags: [OfferAttributeTag!]!
+  priceSummary: OfferPriceSummary
+  prescriptionDeliveryEstimates: [PrescriptionDeliveryEstimate!]!
+}
+```
+
+<ResponseField name="source" type="String!" required>
+  The data source or pricing network that provided this offer (e.g., `"GoodRx"`, `"InsurancePBM"`).
+</ResponseField>
+
+<ResponseField name="isPromoted" type="Boolean!" required>
+  `true` when this offer has been promoted or sponsored by the source. You may wish to surface this information to end users for transparency.
+</ResponseField>
+
+<ResponseField name="attributeTags" type="[OfferAttributeTag!]!" required>
+  A list of descriptive tags for this offer (e.g., "Free Delivery", "Best Price"). Returns an empty array when no tags apply.
+
+  <Expandable title="OfferAttributeTag fields">
+    <ResponseField name="kind" type="String!" required>
+      A machine-readable tag category (e.g., `"DELIVERY"`, `"PRICE"`).
+    </ResponseField>
+    <ResponseField name="label" type="String!" required>
+      A human-readable tag label suitable for display in a UI (e.g., `"Free Delivery"`, `"Lowest Price"`).
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="priceSummary" type="OfferPriceSummary">
+  A summary of the total price for all prescriptions in the offer. `null` when pricing is not available from this source.
+
+  <Expandable title="OfferPriceSummary fields">
+    <ResponseField name="priceType" type="OfferPriceType">
+      The pricing mechanism for this offer. One of `CASH`, `INSURANCE`, or `MEMBERSHIP`.
+    </ResponseField>
+    <ResponseField name="totalAmount" type="Float">
+      The total out-of-pocket cost for the patient under this offer, in USD.
+    </ResponseField>
+    <ResponseField name="totalRetailAmount" type="Float">
+      The total retail (undiscounted) price for all prescriptions in the offer, in USD. Compare against `totalAmount` to show savings.
+    </ResponseField>
+    <ResponseField name="totalSavings" type="Float">
+      The total savings this offer provides relative to the retail price, in USD. Equivalent to `totalRetailAmount - totalAmount`.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="prescriptionDeliveryEstimates" type="[PrescriptionDeliveryEstimate!]!" required>
+  Per-prescription delivery estimates for this offer.
+
+  <Expandable title="PrescriptionDeliveryEstimate fields">
+    <ResponseField name="prescriptionId" type="ID!" required>
+      The identifier of the prescription this estimate applies to.
+    </ResponseField>
+    <ResponseField name="deliveryPromise" type="String!" required>
+      A human-readable delivery commitment string (e.g., `"Same Day"`, `"2–3 Business Days"`).
+    </ResponseField>
+    <ResponseField name="deliveryPromiseRangeStart" type="DateTime">
+      The earliest date and time the prescription is expected to be available or delivered, in ISO 8601 format.
+    </ResponseField>
+    <ResponseField name="deliveryPromiseRangeEnd" type="DateTime">
+      The latest date and time the prescription is expected to be available or delivered, in ISO 8601 format.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## PharmacyResolutionDetail
+
+A specialization of `ChangeDetail` that describes how the API resolved a pharmacy selection. In addition to the input text and resolved entity, it surfaces available pharmacy offers so you can present pricing and delivery options to the user when disambiguation is required.
+
+```graphql
+type PharmacyResolutionDetail {
+  inputText: String
+  resolvedEntityId: ID
+  offers: [PharmacyOffer!]!
+}
+```
+
+<ResponseField name="inputText" type="String">
+  The original text provided as pharmacy input (e.g., a pharmacy name or address fragment like `"CVS on Main St"`).
+</ResponseField>
+
+<ResponseField name="resolvedEntityId" type="ID">
+  The identifier of the pharmacy the API resolved the input to. `null` when the resolution is still ambiguous and requires your input.
+</ResponseField>
+
+<ResponseField name="offers" type="[PharmacyOffer!]!" required>
+  Pricing and delivery offers associated with the resolved or candidate pharmacy. Use these offers to surface pricing comparisons and delivery estimates to the patient. Returns an empty array when no offer data is available.
+</ResponseField>
+
+---
+
+## PharmacyChangeOption
+
+A pharmacy-specific implementation of the [`ChangeOption`](/api/types/change-types#changeoption) interface. It extends the base option fields with pharmacy pricing offers, enabling you to present cost and delivery information alongside each selectable pharmacy candidate.
+
+```graphql
+type PharmacyChangeOption implements ChangeOption {
+  displayName: String!
+  reason: String
+  operation: String!
+  argument: String
+  value: String
+  match: EntityMatch
+  offers: [PharmacyOffer!]!
+}
+```
+
+<ResponseField name="displayName" type="String!" required>
+  A human-readable label for this pharmacy option, suitable for display in a selection UI (e.g., `"CVS Pharmacy #1234 — 123 Main St, San Francisco, CA"`).
+</ResponseField>
+
+<ResponseField name="reason" type="String">
+  An explanation of why this pharmacy is being offered as a candidate.
+</ResponseField>
+
+<ResponseField name="operation" type="String!" required>
+  The operation identifier to submit when the patient selects this pharmacy. Pass this value back to the relevant mutation argument.
+</ResponseField>
+
+<ResponseField name="argument" type="String">
+  An optional argument to accompany the operation when selecting this pharmacy.
+</ResponseField>
+
+<ResponseField name="value" type="String">
+  The raw pharmacy identifier or coded value associated with this option.
+</ResponseField>
+
+<ResponseField name="match" type="EntityMatch">
+  Metadata about how this pharmacy was matched to the input.
+
+  <Expandable title="EntityMatch fields">
+    <ResponseField name="matchType" type="EntityMatchType!" required>
+      The method used to match this pharmacy to the input. See [EntityMatchType](/api/types/change-types#entitymatchtype).
+    </ResponseField>
+    <ResponseField name="confidence" type="ConfidenceLevel">
+      The API's confidence in this match. See [ConfidenceLevel](/api/types/change-types#confidencelevel).
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="offers" type="[PharmacyOffer!]!" required>
+  Pricing and delivery offers from this pharmacy candidate. Surface these to the patient so they can compare cost and fulfillment speed before making a selection.
+</ResponseField>
+
+---
+
+## Example: PharmacyOffer
+
+The following example shows a `PharmacyOffer` for a single-prescription order, including a cash price summary and a same-day delivery estimate.
+
+```json
+{
+  "source": "GoodRx",
+  "isPromoted": false,
+  "attributeTags": [
+    { "kind": "PRICE", "label": "Best Cash Price" },
+    { "kind": "DELIVERY", "label": "Same Day" }
+  ],
+  "priceSummary": {
+    "priceType": "CASH",
+    "totalAmount": 12.50,
+    "totalRetailAmount": 48.00,
+    "totalSavings": 35.50
+  },
+  "prescriptionDeliveryEstimates": [
+    {
+      "prescriptionId": "rx_01J2XYZ",
+      "deliveryPromise": "Same Day",
+      "deliveryPromiseRangeStart": "2025-01-15T14:00:00Z",
+      "deliveryPromiseRangeEnd": "2025-01-15T20:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+## Enums
+
+### FulfillmentType
+
+The fulfillment methods a pharmacy supports.
+
+| Value        | Description                                                                                      |
+|--------------|--------------------------------------------------------------------------------------------------|
+| `MAIL_ORDER` | The pharmacy ships prescriptions directly to the patient's address.                              |
+| `PICK_UP`    | The patient picks up the prescription in person at the pharmacy's physical location.             |
+
+### OfferPriceType
+
+The pricing mechanism that determines the out-of-pocket cost in a `PharmacyOffer`.
+
+| Value        | Description                                                                                         |
+|--------------|-----------------------------------------------------------------------------------------------------|
+| `CASH`       | The patient pays the pharmacy's cash (self-pay) price, potentially with a discount card or coupon.  |
+| `INSURANCE`  | The price reflects the patient's insurance copay or coinsurance after benefit adjudication.         |
+| `MEMBERSHIP` | The price is available through a pharmacy membership program (e.g., a subscription discount plan).  |
