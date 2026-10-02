@@ -3,9 +3,9 @@
   "theme": "luma",
   "name": "Photon Rx API",
   "colors": {
-    "primary": "#ef7025",
-    "light": "#eec9bc",
-    "dark": "#4fa1ab"
+    "primary": "#1570EF",
+    "light": "#53B1FD",
+    "dark": "#175CD3"
   },
   "favicon": "/favicon.svg",
   "logo": {
@@ -81,5 +81,15 @@
     "socials": {
       "x": "https://x.com/photonhealth"
     }
+  },
+  "background": {
+    "color": {
+      "light": "#FFFFFF",
+      "dark": "#101828"
+    }
+  },
+  "fonts": {
+    "family": "Work Sans",
+    "weight": 400
   }
 }
