@@ -73,7 +73,8 @@
               "api/types/pharmacy-types"
             ]
           }
-        ]
+        ],
+        "hidden": true
       }
     ]
   },
