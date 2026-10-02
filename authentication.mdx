@@ -6,7 +6,7 @@ icon:
   library: "fontawesome"
 ---
 
-Every request to the Photon Network requires an `Authentication` header with a valid OAuth token. Tokens are scoped to a single account and to the permissions of the authenticated user, with the exception of machine (M2M) tokens, which have limited permissions.
+Every request to the Photon Network requires an `Authorization` header with a valid OAuth token. Tokens are scoped to a single account and to the permissions of the authenticated user, with the exception of machine (M2M) tokens, which have limited permissions.
 
 ## Credentials
 
@@ -70,15 +70,15 @@ https://network.neutron.health/graphql
 ```
 
 ```text
-Authentication: Bearer YOUR_ACCESS_TOKEN
+Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
-Both User and Machine tokens are passed via the `Authentication` header:
+Both User and Machine tokens are passed via the `Authorization` header:
 
 ```shellscript
 curl --request POST \
   --url https://network.neutron.health/graphql \
-  --header 'Authentication: Bearer YOUR_ACCESS_TOKEN' \
+  --header 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
   --header 'Content-Type: application/json' \
   --data '{ "query": "{ ping }" }'
 ```
