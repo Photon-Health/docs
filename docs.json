@@ -28,6 +28,8 @@
             "group": "Get started",
             "pages": [
               "introduction",
+              "how-photon-works",
+              "environments",
               "authentication"
             ]
           },
