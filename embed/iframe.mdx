@@ -1,0 +1,119 @@
+---
+title: "iframe"
+description: "Embed prescribing in any frontend with a URL. No credentials needed."
+icon: "browser"
+---
+
+The iframe is the full prescribing flow in a URL. It works with any frontend framework, needs no credentials, and signs the prescriber in to Photon by itself.
+
+```html
+<iframe
+  src="https://rx.neutron.health/order/embed?patient=pat_01M3WQQHRB1T0K1469KD18BAWX"
+  title="Prescribe"
+  style="width: 100%; border: 0"
+></iframe>
+```
+
+The page has no chrome and a transparent background, so your page shows through.
+
+## URLs
+
+The flow goes in the path. Ids go in the clear: the flow's own record in the path, and any others in the query.
+
+| URL | Opens |
+| --- | --- |
+| `/order/embed` | A new order. The prescriber finds or adds the patient. |
+| `/order/embed?patient=pat_…` | A new order for this patient |
+| `/order/embed?patient=pat_…&rx=rx_…` | A new order for this patient, with this draft on it |
+| `/order/embed/ord_…` | This order |
+| `/patient/embed/pat_…` | This patient |
+| `/prescription/embed/rx_…` | This prescription |
+| `/prescription/embed?patient=pat_…` | A new prescription for this patient |
+
+Prefix each URL with `https://rx.neutron.health` in the sandbox, or `https://rx.photon.health` in production.
+
+When the URL names the patient by id, the iframe stays on that patient, with no **Change patient**.
+
+## Passing more than ids
+
+To pass patient details, templates or several prescriptions, build the URL with `linkPath` from the [JavaScript client](/embed/javascript). It takes a record the same way the React components do and packs it into one short token after the path.
+
+```ts
+import { linkPath } from "@photon-rx/core";
+
+const src =
+  "https://rx.neutron.health" +
+  linkPath(
+    {
+      flow: "order",
+      patient: {
+        demographic: {
+          name: { first: "Paige", last: "Turner" },
+          dateOfBirth: "1990-01-01",
+          sex: "FEMALE",
+          phone: "+13175550142",
+        },
+      },
+      order: { prescriptions: { add: [{ templateId: "YOUR_TEMPLATE_ID" }] } },
+    },
+    { embed: true },
+  );
+// https://rx.neutron.health/order/embed/AQf3…
+```
+
+<Warning>
+  The token is encoded but not encrypted. Anyone who has the URL can read it, so treat a URL with patient details like the details themselves. Pass ids when you can.
+</Warning>
+
+## Height and events
+
+The iframe posts messages to your page. They contain ids and states only, never patient details.
+
+| `event` | Sent | Other fields |
+| --- | --- | --- |
+| `resize` | Whenever the content's height changes | `height`, in CSS pixels |
+| `PhotonOrder.onPatient` | The order's patient has a record or changed | `detail`: the patient's id |
+| `PhotonOrder.onOrder` | The order or one of its prescriptions changed | `detail`: a summary that starts with the order's id |
+| `PhotonOrder.onSent` | The order was sent | `detail`: the order's id and state |
+| `PhotonPatient.onPatient` | The patient has a record or changed | `detail`: the patient's id |
+| `PhotonPrescription.onPrescription` | The prescription was saved or signed | `detail`: a summary that starts with its id |
+| `PhotonPrescription.onSigned` | The prescription was signed | `detail`: its id |
+
+Every message has `source: "photon-rx"`. Use the `resize` message to size the iframe, because the iframe has no fixed height:
+
+<CodeGroup>
+
+```tsx React
+import { useEffect, useState } from "react";
+
+export function PrescribeFrame({ src, onSent }) {
+  const [height, setHeight] = useState(0);
+  useEffect(() => {
+    const onMessage = ({ origin, data }) => {
+      if (origin !== "https://rx.neutron.health" || data?.source !== "photon-rx") return;
+      if (data.event === "resize") setHeight(data.height);
+      if (data.event === "PhotonOrder.onSent") onSent();
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [onSent]);
+  return <iframe src={src} title="Prescribe" style={{ width: "100%", height, border: 0 }} />;
+}
+```
+
+```html HTML
+<iframe id="photon" src="https://rx.neutron.health/order/embed?patient=pat_01M3WQQHRB1T0K1469KD18BAWX" title="Prescribe" style="width: 100%; border: 0"></iframe>
+<script>
+  window.addEventListener("message", ({ origin, data }) => {
+    if (origin !== "https://rx.neutron.health" || data?.source !== "photon-rx") return;
+    if (data.event === "resize") document.getElementById("photon").style.height = `${data.height}px`;
+    if (data.event === "PhotonOrder.onSent") closeDialog();
+  });
+</script>
+```
+
+</CodeGroup>
+
+## Sign-in
+
+The first time, the iframe shows **Sign in to Photon**. Clicking it opens a popup. The prescriber signs in and picks their organization, and the iframe continues. Later loads stay signed in.
