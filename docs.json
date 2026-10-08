@@ -79,12 +79,15 @@
               "network/order",
               "network/changes",
               "network/screening",
-              "network/errors"
+              "network/errors",
+              "network/reference"
             ]
           },
           {
             "group": "MCP",
-            "pages": []
+            "pages": [
+              "network/mcp"
+            ]
           }
         ]
       }

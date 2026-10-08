@@ -1,0 +1,50 @@
+---
+title: "MCP"
+description: "Photon's prescribing tools for agents, over the Model Context Protocol."
+icon: "robot"
+tag: "Preview"
+---
+
+<Note>
+  MCP is in **private preview**, and tools may change. To get access, ask your Photon contact.
+</Note>
+
+Photon's MCP server gives an agent the same Network as GraphQL, in the form of tools. The agent can take intake, search drugs, draft prescriptions and, with a prescriber's confirmation, send them.
+
+## Connect
+
+| | URL |
+| --- | --- |
+| Neutron | `https://network.neutron.health/mcp` |
+| Photon | `https://network.photon.health/mcp` |
+
+During the preview, the server runs at `https://ai.neutron.health` (and `https://ai.photon.health` in production).
+
+The server supports OAuth discovery, so MCP clients such as Claude and ChatGPT can connect with the URL alone and sign the prescriber in. A backend agent sends a [machine token](/authentication#machine-tokens) as a bearer token instead. Either way, Photon's API enforces what the token can do: a machine token can't send.
+
+## Tools
+
+**Prescribing:** `rx_intake` → `rx_search` → `rx_draft` → `rx_send`
+
+| Tool | Does |
+| --- | --- |
+| `rx_intake` | Finds or adds the patient and records allergies and medications. Returns `patientId`. Call it again when new safety-relevant facts come up. |
+| `rx_search` | Searches your organization's templates and the drug catalog by name and strength. It doesn't need a patient. |
+| `rx_draft` | Drafts one unsigned prescription from a chosen `treatment`, with its instructions and dispense quantity and unit. It screens the draft and returns `prescriptionId` with `ready`, `warning` or `blocked`. |
+| `rx_send` | Signs and sends reviewed drafts. It needs a prescriber's token and their explicit confirmation. |
+
+**Fulfillment:** `rx_shop` → `rx_route`
+
+| Tool | Does |
+| --- | --- |
+| `rx_shop` | Reads an order's status, its pharmacy offers and prices, and pharmacy search results. Read-only. |
+| `rx_route` | Sends an order to the pharmacy that was chosen, or reroutes it |
+
+## Rules for agents
+
+- **Photon decides.** When a patient or drug is ambiguous, a tool fails closed and says what to ask or send next. Agents never invent ids, instructions or quantities.
+- **The agent holds the conversation.** The server keeps no state between calls. Records live in Photon, and the agent passes ids along.
+- **The prescriber is the prescriber.** The agent drafts, and a prescriber reviews and sends, either with `rx_send` in their own session or in [Embed](/embed/overview).
+- **Neutron never sends real prescriptions.** In the sandbox, `rx_send` creates test orders only.
+
+For the common pattern, where an agent drafts and a prescriber sends from Embed, see [Agent-drafted orders](/integrations/agent-drafted-orders).

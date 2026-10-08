@@ -1,0 +1,89 @@
+---
+title: "Reference"
+description: "Ids and enum values in one place."
+icon: "book"
+---
+
+For every type and field, introspect `https://network.neutron.health/graphql` with any GraphQL client.
+
+## Ids
+
+| Prefix | Record |
+| --- | --- |
+| `pat_` | Patient |
+| `rx_` | Prescription |
+| `ord_` | Order |
+| `med_` | Catalog drug (a treatment) |
+| `alg_` | Allergen |
+| `phr_` | Pharmacy |
+| `org_` | Organization |
+
+## Patients
+
+| Enum | Values |
+| --- | --- |
+| `Sex` | `MALE`, `FEMALE`, `UNKNOWN` |
+| `MedicationHistoryStatus` | `ACTIVE` (taking it now), `HISTORICAL` (took it in the past), `UNKNOWN` |
+
+## Prescriptions
+
+| Enum | Values |
+| --- | --- |
+| `DraftStatus` | `READY`, `WARNING`, `BLOCKED`. See [Screening](/network/screening). |
+| `PrescriptionSigningState` | `UNSIGNED`, `SIGNED`, `INVALIDATED_SIGN`. See [Signing](/network/prescription#signing). |
+| `ScreeningAlertType` | `DRUG`, `ALLERGEN`, `CONDITION` |
+| `ScreeningSeverity` | `MINOR` (never blocks), `MODERATE` (blocks), `MAJOR` (blocks) |
+| `CatalogEntityKind` | `MEDICATION`, `MEDICAL_EQUIPMENT`, `COMPOUND`, `SUBSTANCE` |
+
+## Orders
+
+| Enum | Values |
+| --- | --- |
+| `OrderState` | `DRAFT`, `SUBMITTED`, `CANCELED`. See [States](/network/order#states). |
+| `FulfillmentType` | `PICK_UP`, `MAIL_ORDER` |
+| `OfferPriceType` | `CASH`, `INSURANCE`, `MEMBERSHIP` |
+
+### Order exceptions
+
+`OrderExceptionType`, on a sent order's `exceptions`:
+
+| Value | Meaning |
+| --- | --- |
+| `ORDER_ERROR` | Something went wrong with the order |
+| `DEMOGRAPHIC_MISMATCH` | The pharmacy's patient details don't match |
+| `PHARMACY_UNREACHABLE` | The pharmacy can't be reached |
+| `PHARMACY_CLOSED` | The pharmacy is closed |
+| `EXTERNAL_TRANSFER` | The prescription was transferred to another pharmacy |
+| `PHARMACY_DOES_NOT_ACCEPT_INSURANCE` | The pharmacy doesn't take the patient's insurance |
+| `PHARMACY_NEEDS_INSURANCE_INFO` | The pharmacy needs insurance details |
+| `SUPERVISING_PHYSICIAN_NEEDED` | A supervising physician is required |
+| `DOCTOR_NOT_LICENSED_IN_STATE` | The prescriber isn't licensed in the patient's state |
+
+## Changes
+
+| Enum | Values |
+| --- | --- |
+| `ChangeStatus` | `APPLIED`, `REJECTED`, `AMBIGUOUS` |
+| `ChangeSeverity` | `INFO`, `ADVISORY`, `BLOCKING` |
+| `ChangeOperation` | `ADDED`, `MODIFIED`, `REMOVED` |
+| `ConfidenceLevel` | `LOW`, `MEDIUM`, `HIGH` |
+
+`ChangeCategory`:
+
+| Value | Meaning |
+| --- | --- |
+| `DISAMBIGUATION` | Several things fit, so pick one |
+| `MISSING_INPUT` | Something needed is missing |
+| `INVALID_INPUT` | A value is malformed or not recognized |
+| `SAFETY` | A clinical risk, such as an interaction or allergy |
+| `CODING_SPECIFICITY` | A more specific code is preferred for claims |
+| `COST_SAVINGS` | A cheaper equivalent exists |
+| `PRODUCT_PREFERENCE` | A specific brand or manufacturer may matter |
+| `OBSOLETE_REFERENCE` | The code or product is retired |
+| `CONFIRMATION_REQUIRED` | It would work, but needs explicit confirmation |
+
+`MatchReasonType` says why an option matched: `EXACT_NAME_MATCH`, `FUZZY_NAME_MATCH`, `RXNORM_CODE_MATCH`, `DRUG_CLASS_MATCH`, `NAME`, `ADDRESS`, `LAT_LONG`, `FULFILLMENT_TYPE`, `OPEN_AT`, `EMAIL`, `PHONE`, `NAME_AND_DOB`, `PARTIAL_NAME` or `DATE_OF_BIRTH`.
+
+## Metadata
+
+`RequestSource`: `DIRECT_API`, `WEB_APP`, `EMBEDDABLE_COMPONENT`, `MCP_CONNECTOR`, `LLM_AGENT`. See [Metadata](/network/graphql#metadata).
