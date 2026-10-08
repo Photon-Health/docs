@@ -5,9 +5,9 @@ Source for Photon's public documentation, published with [Mintlify](https://mint
 ## Structure
 
 - `docs.json`: site config, including theme, navigation and redirects
-- **Get started** tab: `introduction`, `architecture`, `environments`, `authentication`, plus `integrations/` (the four common integrations)
-- **Embed** tab: `embed/`, covering the React components, iframe, app links, JavaScript client and styling
-- **Network** tab: `network/`, covering GraphQL (patient, prescription, order, changes, screening, errors, reference) and MCP
+- **Get started** product: `introduction`, `architecture`, `environments`, `authentication`, plus `integrations/` (the four common integrations)
+- **Prescribe** product: `prescribe/`, covering the React components, iframe, app links, JavaScript client and styling
+- **Network** product: `network/`, covering GraphQL (patient, prescription, order, changes, screening, errors, reference) and MCP
 
 ## Conventions
 

@@ -5,17 +5,17 @@ description: "Four common integrations, from one component to agent-drafted orde
 icon: "route"
 ---
 
-Most integrations start in the frontend with one Embed component, then move work to their own backend as they grow. Each step below builds on the one before it, and the prescriber always signs and sends in Embed.
+Most integrations start in the frontend with one Prescribe component, then move work to their own backend as they grow. Each step below builds on the one before it, and the prescriber always signs and sends in Prescribe.
 
 | | Integration | Your frontend | Your backend | The prescriber |
 | --- | --- | --- | --- | --- |
-| 1 | [Prescribe embed](/integrations/prescribe-embed) | Renders `PhotonOrder` with your patient | Nothing | Picks drugs, signs, sends |
+| 1 | [Add Prescribe to your app](/integrations/add-prescribe) | Renders `PhotonOrder` with your patient | Nothing | Picks drugs, signs, sends |
 | 2 | [Sync patients](/integrations/sync-patients) | Passes the patient's Photon id | Keeps patients, allergies and medications up to date | Picks drugs, signs, sends |
 | 3 | [One-click orders](/integrations/one-click-orders) | Opens the drafted order by id | Drafts the order from templates using your own rules | Reviews, signs, sends |
 | 4 | [Agent-drafted orders](/integrations/agent-drafted-orders) | Opens the agent's draft | An agent takes intake and drafts prescriptions over MCP | Reviews, signs, sends |
 
 <CardGroup cols={2}>
-  <Card title="Prescribe embed" icon="window" href="/integrations/prescribe-embed">
+  <Card title="Add Prescribe to your app" icon="window" href="/integrations/add-prescribe">
     Start here. Use one component and no backend work.
   </Card>
   <Card title="Sync patients" icon="arrows-rotate" href="/integrations/sync-patients">
@@ -25,10 +25,10 @@ Most integrations start in the frontend with one Embed component, then move work
     Your rules choose the templates, and the prescriber only reviews and signs.
   </Card>
   <Card title="Agent-drafted orders" icon="robot" href="/integrations/agent-drafted-orders">
-    An agent drafts over MCP, and a prescriber sends from Embed.
+    An agent drafts over MCP, and a prescriber sends from Prescribe.
   </Card>
 </CardGroup>
 
-## Which Embed?
+## React or iframe?
 
-Every guide uses the React component. If your frontend isn't React, use the [iframe](/embed/iframe) instead. It takes the same records in its URL.
+Every guide uses the React component. If your frontend isn't React, use the [iframe](/prescribe/iframe) instead. It takes the same records in its URL.

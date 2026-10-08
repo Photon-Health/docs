@@ -5,13 +5,13 @@ description: "Your backend drafts the order from templates, and the prescriber r
 icon: "hand-pointer"
 ---
 
-When your product already knows what should be prescribed (a protocol, a plan or a refill), your backend drafts the whole order. The prescriber opens it in Embed, already filled in, and only reviews, signs and sends.
+When your product already knows what should be prescribed (a protocol, a plan or a refill), your backend drafts the whole order. The prescriber opens it in Prescribe, already filled in, and only reviews, signs and sends.
 
 ```mermaid
 sequenceDiagram
   participant B as Your backend
   participant N as Photon Network
-  participant F as Embed
+  participant F as Prescribe
   B->>N: prescription sync (patient + templateId)
   N-->>B: rx_… (draft)
   B->>N: order sync (patient + rx_…)
@@ -84,7 +84,7 @@ mutation DraftOrder($order: OrderInput!, $metadata: RequestMetadata!) {
 
 The order stays a `DRAFT`, and nothing goes to the patient yet. Store its `ord_…` id.
 
-## 3. Open the order in Embed
+## 3. Open the order in Prescribe
 
 <CodeGroup>
 
@@ -104,7 +104,7 @@ The prescriber sees the patient and each prescription, with screening alerts. Th
 
 ## Without a backend
 
-If your frontend already knows the templates, skip steps 1 and 2. Pass the templates in the order and Embed drafts the prescriptions itself:
+If your frontend already knows the templates, skip steps 1 and 2. Pass the templates in the order and Prescribe drafts the prescriptions itself:
 
 ```tsx
 <PhotonOrder

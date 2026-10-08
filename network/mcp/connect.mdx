@@ -38,7 +38,7 @@ When your client asks you to sign in, use your Neutron account. The client opens
     Point any MCP client that supports streamable HTTP at `https://ai.neutron.health`.
 
     - **To act for a prescriber**, let the client run OAuth. Without a token, the server answers with a `401` challenge that points to its OAuth metadata at `/.well-known/oauth-protected-resource`, so the client can find the sign-in flow from the URL alone.
-    - **To draft from a backend**, send a [machine token](/authentication#machine-tokens) as `Authorization: Bearer …`. A machine token can take intake, search and draft, but it can't send. A prescriber sends from [Embed](/embed/overview). See [Agent-drafted orders](/integrations/agent-drafted-orders).
+    - **To draft from a backend**, send a [machine token](/authentication#machine-tokens) as `Authorization: Bearer …`. A machine token can take intake, search and draft, but it can't send. A prescriber sends from [Prescribe](/prescribe/overview). See [Agent-drafted orders](/integrations/agent-drafted-orders).
   </Tab>
 </Tabs>
 

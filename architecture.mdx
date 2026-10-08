@@ -4,7 +4,7 @@ description: "Patients, prescriptions and orders, and why Photon's service makes
 icon: "sitemap"
 ---
 
-Photon has three records. Embed, GraphQL and MCP all work with the same three.
+Photon has three records. Prescribe, GraphQL and MCP all work with the same three.
 
 ```mermaid
 flowchart LR
@@ -50,7 +50,7 @@ Each record has one upsert. You call it in one of three ways, and they work the 
 | **Sync** | Whatever you know, with or without an id | Finds, matches, creates or updates the record. Photon decides which. |
 | **Update** | An id and the fields to change | Changes only those fields on that record. |
 
-Embed, GraphQL and MCP all use the same three calls. A React component given an id runs a get. Given fields, it runs a sync. Given both, it runs an update.
+Prescribe, GraphQL and MCP all use the same three calls. A React component given an id runs a get. Given fields, it runs a sync. Given both, it runs an update.
 
 ## Photon makes the decisions
 
@@ -66,13 +66,13 @@ Every response tells you what Photon did. It lists **applied** changes (saved) a
 
 ## Don't rebuild prescribing
 
-The prescriber's part of the flow (finding the patient, choosing the drug, reviewing screening, signing, sending) is already built in [Embed](/embed/overview). It takes one React component or one iframe, and it keeps up as Photon adds features. Spend your effort on what only your product knows:
+The prescriber's part of the flow (finding the patient, choosing the drug, reviewing screening, signing, sending) is already built in [Prescribe](/prescribe/overview). It takes one React component or one iframe, and it keeps up as Photon adds features. Spend your effort on what only your product knows:
 
 | Who | Does what | With |
 | --- | --- | --- |
 | **Your backend** | Keeps patients in sync, and drafts prescriptions and orders from your own rules | [Network](/network/overview) (GraphQL) and a machine token |
 | **An agent** | Takes intake, searches drugs and drafts prescriptions | [MCP](/network/mcp) |
-| **The prescriber** | Reviews, signs and sends | [Embed](/embed/overview) and their own sign-in |
+| **The prescriber** | Reviews, signs and sends | [Prescribe](/prescribe/overview) and their own sign-in |
 | **Photon** | Matching, drug resolution, screening, routing and pharmacy choice | Photon's service |
 
 <Note>

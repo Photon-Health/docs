@@ -55,7 +55,7 @@ The server speaks MCP over streamable HTTP and supports OAuth discovery. See [Co
 | Token | From | Can |
 | --- | --- | --- |
 | A prescriber's sign-in | Claude, ChatGPT, or any client that runs OAuth | Every tool, including `rx_send` |
-| A [machine token](/authentication#machine-tokens) | Your backend agent | Intake, search and draft. It can't send, so a prescriber sends from [Embed](/embed/overview). |
+| A [machine token](/authentication#machine-tokens) | Your backend agent | Intake, search and draft. It can't send, so a prescriber sends from [Prescribe](/prescribe/overview). |
 
 The server passes your token to Photon's API, and the API enforces what it can do. Agents shouldn't ask a prescriber to prove they're authorized, or refuse to send because a send transmits a prescription. Photon makes that check.
 
@@ -63,6 +63,6 @@ The server passes your token to Photon's API, and the API enforces what it can d
 
 - **Photon decides.** When a patient or drug is ambiguous, the tool fails closed and says what to ask next. Never invent ids, instructions, quantities or units.
 - **The agent holds the conversation.** The server keeps no state between calls. Records live in Photon, and the agent passes `patientId` and the draft fields from one call to the next.
-- **The prescriber sends.** The agent drafts. Only the prescriber's explicit confirmation sends, either with `rx_send` or in [Embed](/embed/overview).
+- **The prescriber sends.** The agent drafts. Only the prescriber's explicit confirmation sends, either with `rx_send` or in [Prescribe](/prescribe/overview).
 - **Don't ask for a pharmacy or address before sending.** The patient chooses a pharmacy after the order exists. Use `rx_shop` and `rx_route` if you need to route it.
 - **Neutron never sends real prescriptions.** In the sandbox, `rx_send` creates test orders only.
