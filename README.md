@@ -5,8 +5,8 @@ Source for Photon's public documentation, published with [Mintlify](https://mint
 ## Structure
 
 - `docs.json`: site config, including theme, navigation and redirects
-- **Get started** product: `introduction`, `architecture`, `environments`, `authentication`, plus `integrations/` (the four common integrations)
-- **Prescribe** product: `prescribe/`, covering the React components, iframe, app links, JavaScript client and styling
+- **Get started** product: `introduction`, `architecture`, `environments`, `authentication`, `dashboard`, plus `integrations/` (the four common integrations)
+- **Prescribe** product: `prescribe/overview`, then two sections: **App** (`prescribe/app`, the web app and deep links) and **Embed** (`prescribe/embed`, the React components, iframe, JavaScript client, styling and migrating from Elements)
 - **Network** product: `network/`, covering GraphQL (patient, prescription, order, changes, screening, errors, reference) and MCP
 
 ## Conventions

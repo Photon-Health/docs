@@ -39,8 +39,8 @@ Wrap the cards in one provider. It signs the prescriber in and gives every card 
 | `clientId` | `string` | Your Application `client_id`. Public, not a secret. |
 | `environment` | `"neutron" \| "photon"` | Defaults to `"photon"` (production). Set `"neutron"` while you build. |
 | `organization` | `string` | Sign in straight to this organization (`org_…`), skipping the organization picker. |
-| `client` | `Photon` | Your own [JavaScript client](/prescribe/javascript) instead of `clientId`, for example when you sign in yourself. |
-| `components` | `Partial<PhotonComponents>` | Your design system's building blocks. See [Styling](/prescribe/styling). |
+| `client` | `Photon` | Your own [JavaScript client](/prescribe/embed/javascript) instead of `clientId`, for example when you sign in yourself. |
+| `components` | `Partial<PhotonComponents>` | Your design system's building blocks. See [Styling](/prescribe/embed/styling). |
 | `onAuth` | `({ ok, error }) => void` | Whether Photon accepted the prescriber's token. |
 
 Providers can nest. A nested provider inherits what it doesn't set, and providers with the same `clientId` share one sign-in.
@@ -110,4 +110,4 @@ Every event gets the live object. `obj.id` is the record's id, and `obj.state` i
 
 ## Live objects as props
 
-Any record prop also takes a live object from the [JavaScript client](/prescribe/javascript). The card uses it as is and doesn't fetch it again, and anything else holding the same object sees every change.
+Any record prop also takes a live object from the [JavaScript client](/prescribe/embed/javascript). The card uses it as is and doesn't fetch it again, and anything else holding the same object sees every change.

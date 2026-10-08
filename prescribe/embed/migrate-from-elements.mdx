@@ -12,9 +12,9 @@ Most migrations change one component. Patients you synced before keep their `pat
 
 | Your frontend | Use |
 | --- | --- |
-| React | Prescribe's [React components](/prescribe/react) |
-| Angular, Vue, or anything else | Prescribe's [iframe](/prescribe/iframe). It needs no package or credentials. |
-| A link from another tool | An [app link](/prescribe/links), which replaces the `/prescriptions/new` deep link |
+| React | Prescribe's [React components](/prescribe/embed/react) |
+| Angular, Vue, or anything else | Prescribe's [iframe](/prescribe/embed/iframe). It needs no package or credentials. |
+| A link from another tool | A [deep link](/prescribe/app/deep-links), which replaces the `/prescriptions/new` link |
 
 ## 2. Replace the client
 
@@ -74,7 +74,7 @@ Prescribe events pass the live object: `order.id` and `order.state`. They don't 
 | Before | After |
 | --- | --- |
 | `app.neutron.health/prescriptions/new?patientId=pat_…` | `rx.neutron.health/order?patient=pat_…` |
-| `…&templateIds=tmp_…` | Build the link with `ph.order.url({ patient: { id }, prescriptions: { add: [{ templateId }] } })`. See [App links](/prescribe/links). |
+| `…&templateIds=tmp_…` | Build the link with `ph.order.url({ patient: { id }, prescriptions: { add: [{ templateId }] } })`. See [Deep links](/prescribe/app/deep-links). |
 
 {/* TODO(launch) */}
 ⚠️ `rx.neutron.health` isn't live yet.

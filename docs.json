@@ -33,7 +33,8 @@
               "quickstart",
               "architecture",
               "environments",
-              "authentication"
+              "authentication",
+              "dashboard"
             ]
           },
           {
@@ -51,18 +52,30 @@
       {
         "product": "Prescribe",
         "icon": "prescription",
-        "description": "The prescribing UI: React, iframe and links",
+        "description": "The prescribing app, deep links and embedding",
         "groups": [
           {
             "group": "Prescribe",
             "pages": [
-              "prescribe/overview",
-              "prescribe/react",
-              "prescribe/iframe",
-              "prescribe/links",
-              "prescribe/javascript",
-              "prescribe/styling",
-              "prescribe/migrate-from-elements"
+              "prescribe/overview"
+            ]
+          },
+          {
+            "group": "App",
+            "pages": [
+              "prescribe/app",
+              "prescribe/app/deep-links"
+            ]
+          },
+          {
+            "group": "Embed",
+            "pages": [
+              "prescribe/embed",
+              "prescribe/embed/react",
+              "prescribe/embed/iframe",
+              "prescribe/embed/javascript",
+              "prescribe/embed/styling",
+              "prescribe/embed/migrate-from-elements"
             ]
           }
         ]
@@ -148,8 +161,40 @@
       "destination": "/prescribe/overview"
     },
     {
+      "source": "/embed/overview",
+      "destination": "/prescribe/overview"
+    },
+    {
+      "source": "/embed/links",
+      "destination": "/prescribe/app/deep-links"
+    },
+    {
+      "source": "/prescribe/links",
+      "destination": "/prescribe/app/deep-links"
+    },
+    {
+      "source": "/prescribe/react",
+      "destination": "/prescribe/embed/react"
+    },
+    {
+      "source": "/prescribe/iframe",
+      "destination": "/prescribe/embed/iframe"
+    },
+    {
+      "source": "/prescribe/javascript",
+      "destination": "/prescribe/embed/javascript"
+    },
+    {
+      "source": "/prescribe/styling",
+      "destination": "/prescribe/embed/styling"
+    },
+    {
+      "source": "/prescribe/migrate-from-elements",
+      "destination": "/prescribe/embed/migrate-from-elements"
+    },
+    {
       "source": "/embed/:slug*",
-      "destination": "/prescribe/:slug*"
+      "destination": "/prescribe/embed/:slug*"
     },
     {
       "source": "/integrations/add-prescribe",

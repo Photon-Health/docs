@@ -1,0 +1,39 @@
+---
+title: "Prescribe app"
+sidebarTitle: "Overview"
+description: "Photon's own web app for prescribers: sign in, prescribe, and share a link to the work."
+icon: "browser"
+---
+
+The Prescribe app is Photon's own web app for prescribers. Use it before you integrate, or next to your product: a [deep link](/prescribe/app/deep-links) from your product opens it on the right patient or order.
+
+| Neutron (sandbox) | Photon (production) |
+| --- | --- |
+| [rx.neutron.health](https://rx.neutron.health) | [rx.photon.health](https://rx.photon.health) |
+
+{/* TODO(launch) */}⚠️ Neither is live yet.
+
+## Signing in
+
+Prescribers sign in with their Photon account. They need an invite to your organization with the **Prescriber** role. See [Team](/dashboard#team). Someone in more than one organization picks one when they sign in.
+
+## Prescribing
+
+**Prescribe** in the top bar starts a new order:
+
+1. Find the patient, or add them.
+2. Search for a drug and fill in the sig and quantity, or start from a [template](/dashboard#templates). Screening runs as the prescriber types.
+3. Sign each prescription.
+4. Click **Send**. Photon texts the patient a link to choose a pharmacy.
+
+## The address bar is the link
+
+The URL always points at the work on screen. Copy it to hand the same order to a colleague, and it opens just as it was. Once the order exists, the link opens that order rather than starting a new one.
+
+| Path | Opens |
+| --- | --- |
+| `/order` | A new order. `/` goes here. |
+| `/patient` | Find or add a patient, and edit their details |
+| `/prescription` | One prescription on its own |
+
+To open the app on a record from your product, an email or a text, build a [deep link](/prescribe/app/deep-links).
