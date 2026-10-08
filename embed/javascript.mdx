@@ -35,7 +35,7 @@ With `clientId`, `ph.session` handles sign-in: `start()` on load, `signIn()` fro
 
 ## Get, sync, update
 
-`ph.patient`, `ph.prescription` and `ph.order` each have the [same three calls](/how-photon-works#get-sync-and-update):
+`ph.patient`, `ph.prescription` and `ph.order` each have the [same three calls](/architecture#get-sync-and-update):
 
 ```ts
 const existing = await ph.patient.get("pat_01M3WQQHRB1T0K1469KD18BAWX"); // read, change nothing

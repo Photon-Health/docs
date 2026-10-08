@@ -28,7 +28,7 @@
             "group": "Get started",
             "pages": [
               "introduction",
-              "how-photon-works",
+              "architecture",
               "environments",
               "authentication"
             ]
@@ -183,6 +183,10 @@
     {
       "source": "/integrations/embed-for-a-patient",
       "destination": "/integrations/prescribe-embed"
+    },
+    {
+      "source": "/how-photon-works",
+      "destination": "/architecture"
     }
   ]
 }
