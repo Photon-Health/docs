@@ -1,6 +1,6 @@
 ---
 title: "Architecture"
-description: "Patients, prescriptions and orders, and why Photon's backend makes the decisions."
+description: "Patients, prescriptions and orders, and why Photon's service makes the decisions."
 icon: "sitemap"
 ---
 
@@ -52,9 +52,9 @@ Each record has one upsert. You call it in one of three ways, and they work the 
 
 Embed, GraphQL and MCP all use the same three calls. A React component given an id runs a get. Given fields, it runs a sync. Given both, it runs an update.
 
-## Photon's backend makes the decisions
+## Photon makes the decisions
 
-You don't need to reimplement prescribing rules. Send what you know, and Photon's backend:
+You don't need to reimplement prescribing rules. Send what you know, and Photon's service:
 
 - matches patients and avoids duplicates
 - resolves free-text drug, allergy and diagnosis names to catalog entries
@@ -73,7 +73,7 @@ The prescriber's part of the flow (finding the patient, choosing the drug, revie
 | **Your backend** | Keeps patients in sync, and drafts prescriptions and orders from your own rules | [Network](/network/overview) (GraphQL) and a machine token |
 | **An agent** | Takes intake, searches drugs and drafts prescriptions | [MCP](/network/mcp) |
 | **The prescriber** | Reviews, signs and sends | [Embed](/embed/overview) and their own sign-in |
-| **Photon** | Matching, drug resolution, screening, routing and pharmacy choice | The backend |
+| **Photon** | Matching, drug resolution, screening, routing and pharmacy choice | Photon's service |
 
 <Note>
   Only a signed-in prescriber can sign. Machine tokens can draft but can't sign prescriptions, so the last step always happens in a browser. See [Authentication](/authentication).

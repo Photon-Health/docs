@@ -13,7 +13,8 @@
 - Keep it simple. Lead with the shortest path that works, and don't rebuild workflows that Embed already provides.
 - Link to Neutron (`*.neutron.health`, the sandbox) by default. Use Photon (`*.photon.health`, production) only when a page is about production. Never document boson.
 - Machine tokens can't sign prescriptions. Any flow that signs or sends goes through a prescriber's user token, usually in Embed.
-- Photon's backend makes the decisions (matching, drug resolution, screening). Docs describe what to send and how to read `changes`, not client-side rules.
+- Photon's service makes the decisions (matching, drug resolution, screening). Docs describe what to send and how to read `changes`, not client-side rules.
+- Call Photon a **service**, never a backend. "Backend" always means the customer's own service ("your backend").
 - Validate GraphQL examples against the live schema at `https://network.neutron.health/graphql` (introspection is open).
 - MCP is in private preview. Label it that way. Its tools are documented as they are today and will change when MCP moves to `network.<env>.health/mcp`.
 - Mark anything documented ahead of launch (a URL that isn't live, a package that isn't published) with ⚠️ and a `{/* TODO(launch): … */}` comment. Search for `TODO(launch)` before going public, and remove each marker as it's fixed. Inline components inside table cells don't survive the editor, so use the plain ⚠️ there.
