@@ -1,0 +1,61 @@
+---
+title: "Dashboard"
+description: "Where admins manage API credentials, the team, the catalog and templates."
+icon: "gear"
+---
+
+The dashboard is where your organization is set up. Prescribers don't prescribe here: they use [Prescribe](/prescribe/overview).
+
+| Page | Use it to | Open in |
+| --- | --- | --- |
+| [Developers](#developers) | Create API credentials and webhooks | [Neutron](https://app.neutron.health/settings/developers) · [Photon](https://app.photon.health/settings/developers) |
+| [Team](#team) | Invite people and choose their roles | [Neutron](https://app.neutron.health/settings/team) · [Photon](https://app.photon.health/settings/team) |
+| [Catalog](#catalog) | Choose the treatments your organization prescribes | [Neutron](https://app.neutron.health/settings/catalog) · [Photon](https://app.photon.health/settings/catalog) |
+| [Templates](#templates) | Save prescriptions with the drug, sig and dispense filled in | [Neutron](https://app.neutron.health/settings/templates) · [Photon](https://app.photon.health/settings/templates) |
+
+Each environment has its own dashboard, team, catalog and templates. Nothing carries over from Neutron to Photon.
+
+## Developers
+
+**API credentials** are the `client_id` and secret your code uses. Application credentials sign prescribers in to Prescribe. Machine credentials let your backend call the API. See [Authentication](/authentication) for which to use. If a secret leaks, rotate it here.
+
+**Webhooks** tell your backend when prescriptions and orders change. See [Webhooks](/network/webhooks).
+
+## Team
+
+Everyone who uses Photon needs an invite to your organization, including prescribers who only use Prescribe inside your app.
+
+1. Open **Team** and click **Invite user**.
+2. Enter their email and choose one or more roles.
+3. Click **Send invitation**. They get an email, and they join your organization the first time they sign in.
+
+| Role | For |
+| --- | --- |
+| **Admin** | People who manage the organization, its team, catalog and templates |
+| **Developer** | People who manage API credentials and webhooks |
+| **Prescriber** | Clinicians who write, sign and send prescriptions |
+
+A prescriber also needs their NPI, phone, fax and address. Pharmacies use them to identify the prescriber, so enter them when you give someone the Prescriber role.
+
+Invites wait under **Pending invitations** until they're accepted. Resend one if the email was missed, or delete it to cancel. Removing someone from the team takes effect immediately.
+
+<Tip>
+  Someone who signs in without an accepted invite sees "not associated with any organizations". Send them an invite, or ask them to accept the one in their email.
+</Tip>
+
+## Catalog
+
+The catalog is the list of treatments your organization prescribes. Drug search marks treatments that are in your catalog, and prescribers can still choose one that isn't.
+
+To add one, open **Catalog**, click **Add treatment to catalog** and search for it. Removing a treatment can't be undone, but you can add it again.
+
+Templates are built from catalog treatments, so add a treatment to the catalog before you make a template for it.
+
+## Templates
+
+A template is a saved prescription with the drug, sig and dispense filled in, so prescribers don't type the same prescription twice.
+
+- **Organization templates** are shared by everyone in your organization. Admins create them under **Templates** from a treatment in the catalog.
+- **Personal templates** belong to one prescriber, who saves them while prescribing.
+
+Each template has an id (`tmp_…`). Pass it as `templateId` to draft a prescription from it. See [Prescriptions](/network/prescription) and [One-click orders](/integrations/one-click-orders).
