@@ -11,12 +11,12 @@ The Prescribe app is Photon's own web app for prescribers. Sign in and prescribe
   <Card title="Open Neutron" icon="flask" href="https://rx.neutron.health" cta="Sign in to the sandbox">
     The sandbox. Prescribe for test patients. Nothing is sent to a real pharmacy.
   </Card>
-  <Card title="Open Photon" icon="prescription" href="https://rx.photon.health" cta="Sign in">
+  <Card title="Open Photon" icon="prescription" href="https://rx.new" cta="Sign in">
     Production. Prescribe for real patients and send to their pharmacies.
   </Card>
 </CardGroup>
 
-{/* TODO(launch) */}⚠️ `rx.neutron.health` and `rx.photon.health` aren't live yet.
+{/* TODO(launch) */}⚠️ The sandbox, `rx.neutron.health`, isn't live yet.
 
 Prescribers sign in with their Photon account, which needs an [invite](#invites) with the **Prescriber** role. Someone in more than one organization picks one when they sign in.
 
@@ -34,7 +34,7 @@ An order holds the work: you start one, add the patient and prescriptions, and s
 
 ## Write a prescription
 
-1. Click **Prescribe** in the top bar. A new order opens.
+1. Go to [rx.new](https://rx.new), or [rx.neutron.health](https://rx.neutron.health) in the sandbox. A new order opens.
 2. Find the patient, or add them. Give a mobile phone number: Photon texts the patient when you send.
 3. Under **Medication**, type the drug and pick the right product.
 4. Fill in **Directions (sig)**, **Quantity**, **Unit**, **Days supply** and **Refills**. Check **Dispense as written** if the pharmacy mustn't substitute. Some values arrive filled in. Check them before you sign.

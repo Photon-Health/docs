@@ -12,7 +12,7 @@ Photon has two environments. They run the same API but keep separate data, accou
 | Prescriptions | Never sent to a real pharmacy | Sent to pharmacies |
 | Patients | Fake ones only | Real |
 | Credentials | Free with every sandbox account | A paid feature |
-| Prescribe app | [rx.neutron.health](https://rx.neutron.health) ⚠️ | [rx.photon.health](https://rx.photon.health) ⚠️ |
+| Prescribe app | [rx.neutron.health](https://rx.neutron.health) ⚠️ | [rx.new](https://rx.new) |
 | [Dashboard](/dashboard) | [app.neutron.health/settings](https://app.neutron.health/settings) | [app.photon.health/settings](https://app.photon.health/settings) |
 
 <Tip>
@@ -21,20 +21,20 @@ Photon has two environments. They run the same API but keep separate data, accou
 
 ## URLs
 
-Every URL follows from the environment's name, so switching environments means changing one word.
+Every URL follows from the environment's name, so switching environments means changing one word. The one exception is the Prescribe app, which is `rx.new` in production.
 
 | Service | Neutron | Photon |
 | --- | --- | --- |
 | GraphQL | `https://network.neutron.health/graphql` | `https://network.photon.health/graphql` ⚠️ |
 | MCP ([private preview](/network/mcp)) | `https://network.neutron.health/mcp` ⚠️ | `https://network.photon.health/mcp` ⚠️ |
-| Prescribe app | `https://rx.neutron.health` ⚠️ | `https://rx.photon.health` ⚠️ |
+| Prescribe app | `https://rx.neutron.health` ⚠️ | `https://rx.new` |
 | Sign-in (Auth0) | `auth.neutron.health` | `auth.photon.health` |
 | Token audience | `https://api.neutron.health` | `https://api.photon.health` |
 
 {/* TODO(launch): fix each ⚠️ above, then delete the ⚠️ marks and this Warning. */}
 
 <Warning>
-  ⚠️ **Not live yet.** `network.photon.health/graphql` returns a 403 for POST requests. MCP still runs at `ai.<env>.health`. `rx.neutron.health` and `rx.photon.health` return a 404, and neither environment has a Prescribe Auth0 client yet.
+  ⚠️ **Not live yet.** `network.photon.health/graphql` returns a 403 for POST requests. MCP still runs at `ai.<env>.health`. `rx.neutron.health` returns a 404.
 </Warning>
 
 ## In code
