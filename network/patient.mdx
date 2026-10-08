@@ -1,0 +1,168 @@
+---
+title: "Patient"
+description: "Find, add and update patients, and record their allergies, medications and insurance."
+icon: "user"
+---
+
+```graphql
+patient(patient: PatientInput!, metadata: RequestMetadata!): PatientResult!
+```
+
+| Call | `patient` input | Result |
+| --- | --- | --- |
+| **Get** | `{ id }` | The patient. Nothing changes. |
+| **Sync** | `{ demographic, clinical }` | The matched patient, updated, or a new patient, or candidates to choose from |
+| **Update** | `{ id, demographic?, clinical? }` | That patient, with only those fields changed |
+
+## Example
+
+<CodeGroup>
+
+```graphql Mutation
+mutation Patient($patient: PatientInput!, $metadata: RequestMetadata!) {
+  patient(patient: $patient, metadata: $metadata) {
+    __typename
+    ... on PatientPayload {
+      patient {
+        ... on Patient {
+          id
+          demographic { name { first last } dateOfBirth sex phone email }
+          clinical {
+            allergies { id name rxNormId }
+            medications { id name rxNormId status }
+            diagnoses { id name icd10Code }
+          }
+        }
+      }
+      unappliedChanges { key status severity reason options { displayName argument value } }
+    }
+    ... on AmbiguousPatientMatch { reason candidates { id firstName lastName dateOfBirth } }
+    ... on OperationError { code message }
+  }
+}
+```
+
+```json Sync
+{
+  "patient": {
+    "demographic": {
+      "name": { "first": "Paige", "last": "Turner" },
+      "dateOfBirth": "1990-01-01",
+      "sex": "FEMALE",
+      "phone": "+13175550142",
+      "email": "paige@example.com"
+    },
+    "clinical": {
+      "allergies": { "add": [{ "rxNormId": "723" }] },
+      "medications": { "add": [{ "name": "lisinopril 10 mg oral tablet", "status": "ACTIVE" }] }
+    }
+  },
+  "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
+}
+```
+
+```json Get
+{
+  "patient": { "id": "pat_01M3WQQHRB1T0K1469KD18BAWX" },
+  "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
+}
+```
+
+```json Update
+{
+  "patient": {
+    "id": "pat_01M3WQQHRB1T0K1469KD18BAWX",
+    "demographic": { "phone": "+13175550199" },
+    "clinical": { "allergies": { "none": true } }
+  },
+  "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
+}
+```
+
+</CodeGroup>
+
+## How matching works
+
+Without an `id`, Photon uses the demographics to find the patient:
+
+| You send | Photon |
+| --- | --- |
+| An exact first name, last name and date of birth, or two of email and phone that match | Uses that patient |
+| A partial name, a date of birth alone, or only one of email and phone that matches | Returns `AmbiguousPatientMatch` with up to 20 `candidates`, and saves nothing |
+| Nothing that matches, with enough to add someone (first name, last name, date of birth and sex) | Adds a new patient |
+| Nothing that matches, without enough | Lists what's missing in `unappliedChanges` |
+
+To choose a candidate, resend with its `id`. Never pick one automatically: even a single candidate is a judgment call for a person or your own rules.
+
+Once you have a patient's id, send it on every call.
+
+## Fields
+
+### `demographic`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `name` | `{ first, last }` | |
+| `dateOfBirth` | `Date` | `YYYY-MM-DD` |
+| `sex` | `MALE`, `FEMALE`, `UNKNOWN` | |
+| `gender` | `String` | Free text |
+| `phone` | `String` | Not needed to add a patient, but **required to send an order**: Photon texts the patient their order link. It must be a mobile number that can receive texts. |
+| `email` | `String` | |
+| `address` | `{ street1, street2, city, state, postalCode, country }` | Optional, including for sending |
+| `benefits` | `BenefitsPatch` | Insurance. `add` needs `bin` and `memberId`. `pcn` and `groupId` are optional. |
+| `preferredPharmacy` | `PharmacyReferenceInput` | See [Pharmacies](/network/order#pharmacies) |
+
+### `clinical`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `allergies` | `AllergiesPatch` | Each entry by one of `id`, `rxNormId` or `name` |
+| `medications` | `MedicationsPatch` | Each entry by one of `id`, `rxNormId` or `name`, plus `status`: `ACTIVE`, `HISTORICAL` or `UNKNOWN` |
+| `diagnoses` | `DiagnosesPatch` | Each entry by one of `id`, `icd10Code` or `name`. Used as screening context. |
+| `notes` | `String` | |
+
+## Lists are patches
+
+Allergies, medications, diagnoses and benefits change through patches, so you never resend the whole list:
+
+| Key | Does |
+| --- | --- |
+| `add` | Adds entries |
+| `remove` | Removes entries already on file |
+| `update` | Changes entries already on file: a medication's `status`, or a benefit's `pcn` and `groupId` |
+| `none: true` | Records that there are none, such as no known drug allergies. You can't combine it with `add` or `remove`. |
+
+To leave a list unchanged, leave out the field. An empty patch is rejected.
+
+An entry given by `id` resolves exactly. A `name` or code may match several catalog entries. When it does, Photon returns the options instead of guessing. See [Changes and choices](/network/changes).
+
+<Tip>
+  Send allergies by `rxNormId` whenever you can. [Screening](/network/screening) relies on coded entries.
+</Tip>
+
+<Accordion title="Full selection set">
+
+```graphql
+fragment PatientFields on Patient {
+  id
+  demographic {
+    name { first middle last }
+    dateOfBirth
+    sex
+    gender
+    email
+    phone
+    address { street1 street2 city state postalCode country }
+    benefits { id bin pcn groupId memberId }
+    preferredPharmacy { id name address { street1 city state postalCode } fulfillmentType }
+  }
+  clinical {
+    allergies { id name rxNormId }
+    medications { id name rxNormId status }
+    diagnoses { id name icd10Code }
+    notes
+  }
+}
+```
+
+</Accordion>
