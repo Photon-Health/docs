@@ -1,11 +1,11 @@
 ---
 title: "Prescribe app"
-sidebarTitle: "How it works"
-description: "Photon's own web app for prescribers: sign in, prescribe, and share a link to the work."
+sidebarTitle: "Get started"
+description: "Sign in to Photon's web app and write your first prescription."
 icon: "browser"
 ---
 
-The Prescribe app is Photon's own web app for prescribers. Use it before you integrate, or next to your product: a [deep link](/prescribe/app/deep-links) from your product opens it on the right patient or order.
+The Prescribe app is Photon's own web app for prescribers. Sign in and prescribe, with no integration. Later, a [deep link](/prescribe/app/deep-links) from your product can open it on the right patient or order.
 
 <CardGroup cols={2}>
   <Card title="Open Neutron" icon="flask" href="https://rx.neutron.health" cta="Sign in to the sandbox">
@@ -18,20 +18,51 @@ The Prescribe app is Photon's own web app for prescribers. Use it before you int
 
 {/* TODO(launch) */}⚠️ `rx.neutron.health` and `rx.photon.health` aren't live yet.
 
-## Signing in
+Prescribers sign in with their Photon account, which needs an [invite](#invites) with the **Prescriber** role. Someone in more than one organization picks one when they sign in.
 
-Prescribers sign in with their Photon account. They need an invite to your organization with the **Prescriber** role. See [Team](/dashboard#team). Someone in more than one organization picks one when they sign in.
+## Patients, prescriptions and orders
 
-The app is only for prescribing. Admins manage API credentials, the team, the catalog and templates in the [dashboard](/dashboard).
+Everything in the app is one of three records:
 
-## Prescribing
+| Record | What it is |
+| --- | --- |
+| **Patient** | Who you're prescribing for: their details, allergies, medications and conditions. |
+| **Prescription** | One drug for one patient, with its directions and quantity. It's a draft until a prescriber signs it. A signed prescription can't change: to change it, write a new one. |
+| **Order** | One or more signed prescriptions for one patient, sent together. |
 
-**Prescribe** in the top bar starts a new order:
+An order holds the work: you start one, add the patient and prescriptions, and send it. See [Architecture](/architecture) for how the records fit together.
 
-1. Find the patient, or add them.
-2. Search for a drug and fill in the sig and quantity, or start from a [template](/dashboard#templates). Screening runs as the prescriber types.
-3. Sign each prescription.
-4. Click **Send**. Photon texts the patient a link to choose a pharmacy.
+## Write a prescription
+
+1. Click **Prescribe** in the top bar. A new order opens.
+2. Find the patient, or add them. Give a mobile phone number: Photon texts the patient when you send.
+3. Under **Medication**, type the drug and pick the right product.
+4. Fill in **Directions (sig)**, **Quantity**, **Unit**, **Days supply** and **Refills**. Check **Dispense as written** if the pharmacy mustn't substitute. Some values arrive filled in. Check them before you sign.
+5. Review screening. Photon checks the drug against the patient's allergies, medications and conditions as you type, and shows any alert on the card as **Warning** or **Blocked**.
+6. Click **Sign**. Use **Add prescription** to add more drugs to the same order, and sign each one.
+7. Click **Send prescription to patient**.
+
+Drafts save as you go, so you can leave and come back. The app offers to **Continue a draft** when the patient has one.
+
+## Sent to the patient
+
+By default, the app sends the order to the patient, not to a pharmacy. Photon texts them a link where they compare pharmacies by price, hours, delivery and stock, and pick one. Nothing is routed until they choose, and if a pharmacy can't fill it, they can switch.
+
+After you send, the order shows **The patient will choose a pharmacy**. If the order already names a pharmacy, for example one your backend set, the button reads **Send to** that pharmacy instead.
+
+## Invites
+
+Everyone who uses the app needs an invite to your organization. An admin invites them by email and gives them roles: **Prescriber** to prescribe, plus **Admin** or **Developer** for setup. A prescriber's invite also needs their NPI, phone, fax and address. See [Team](/dashboard#team).
+
+{/* TODO: link to Prescribe once it manages the team. */}
+For now, manage invites in the dashboard: [Neutron](https://app.neutron.health/settings/team) · [Photon](https://app.photon.health/settings/team).
+
+## Templates
+
+A template is a saved prescription with the drug, directions and quantity filled in. Admins build them from treatments in your organization's catalog. A [deep link](/prescribe/app/deep-links) or your backend can start a prescription from a template (`templateId`), so the prescriber only reviews and signs. See [Templates](/dashboard#templates).
+
+{/* TODO: link to Prescribe once it manages templates. */}
+For now, create and edit templates in the dashboard: [Neutron](https://app.neutron.health/settings/templates) · [Photon](https://app.photon.health/settings/templates).
 
 ## The address bar is the link
 
