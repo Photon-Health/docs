@@ -53,7 +53,10 @@
             "pages": [
               "embed/overview",
               "embed/react",
-              "embed/iframe"
+              "embed/iframe",
+              "embed/links",
+              "embed/javascript",
+              "embed/styling"
             ]
           }
         ]

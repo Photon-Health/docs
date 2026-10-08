@@ -1,0 +1,39 @@
+---
+title: "App links"
+description: "Send a prescriber straight to a patient, prescription or order in the Photon app."
+icon: "link"
+---
+
+An app link opens Photon in its own tab, with Photon's navigation, on the record you name. Use one when Embed doesn't fit in your page: a link in an email or text, or a **Prescribe in Photon** button in an internal tool.
+
+App links use the same URLs as the [iframe](/embed/iframe) without `/embed`:
+
+| URL | Opens |
+| --- | --- |
+| `https://rx.neutron.health/order?patient=pat_…` | A new order for this patient |
+| `https://rx.neutron.health/order/ord_…` | This order, such as one [your backend drafted](/integrations/one-click-orders) |
+| `https://rx.neutron.health/patient/pat_…` | This patient |
+| `https://rx.neutron.health/prescription/rx_…` | This prescription |
+
+The prescriber signs in to Photon if they haven't already, and lands on the record.
+
+## Building a link
+
+Ids alone are fine to write by hand. For anything more, use the [JavaScript client](/embed/javascript):
+
+```ts
+import { photon } from "@photon-rx/core";
+
+const ph = photon({ environment: "neutron", auth: { getToken }, appUrl: "https://rx.neutron.health" });
+
+ph.order.url({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" }, prescriptions: { add: [{ templateId: "YOUR_TEMPLATE_ID" }] } });
+// https://rx.neutron.health/order/AQf3…
+
+order.url(); // a live order you already have
+```
+
+For the iframe, use `frame()` in place of `url()`.
+
+<Warning>
+  A link with patient details carries them in its token. The token is encoded but not encrypted, so anyone with the link can read it. Prefer ids in links you send by email or text.
+</Warning>
