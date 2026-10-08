@@ -1,27 +1,53 @@
 ---
-title: "Network API"
+title: "Photon"
 sidebarTitle: "Introduction"
-description: "A GraphQL API that covers the full prescription lifecycle – from patient intake through pharmacy fulfillment."
-icon:
-  name: "rocket-launch"
-  style: "regular"
-  library: "fontawesome"
+description: "Let prescribers in your product write, sign and send prescriptions."
+icon: "rocket-launch"
 ---
 
-This API powers every stage of the prescription workflow: **patient** intake, **prescription** drafting, **coverage** checks, **interaction** screening, and **order** routing.
+Photon lets your product prescribe. A prescriber finds the patient, writes the prescription, signs it and sends it. The patient then picks a pharmacy and gets their medication.
 
-Whether you're building a telehealth platform, an EHR integration, or an AI-assisted prescribing tool, the API gives you a single, typed interface to the complete prescription lifecycle. 
+Photon comes as two products: 
 
-<CardGroup cols={3}>
-  <Card title="Patient" icon="head-side" href="/patient-mutation">
-    Create, retrieve, and update patients.
+<CardGroup cols={2}>
+  <Card title="Embed" icon="window" href="/embed/overview">
+    The prescribing UI: React components, an iframe or a link. It handles sign-in, drug search, screening, signing and sending.
   </Card>
 
-  <Card title="Prescription" icon="prescription-bottle-pill" href="/prescription-mutation">
-    Draft, modify, and sign prescriptions. 
-  </Card>
-
-  <Card title="Order" icon="box-isometric" href="/order-mutation">
-    Submit and manage orders to pharmacies. 
+  <Card title="Network" icon="diagram-project" href="/network/overview">
+    The API underneath. Use GraphQL from your backend or MCP from an agent to keep patients in sync and draft prescriptions and orders.
   </Card>
 </CardGroup>
+
+Most integrations use both: Embed for the prescriber, and Network from your backend to fill in what you already know.
+
+## Start here
+
+<Steps>
+  <Step title="Get a sandbox">
+    [Request a Neutron sandbox](https://photonhealth.com/onboard#developer), then find your credentials in the [dashboard](https://app.neutron.health/settings/developers). See [Environments](/environments).
+  </Step>
+  <Step title="Learn the model">
+    Photon has three records: patients, prescriptions and orders. [How Photon works](/how-photon-works) covers them in a few minutes.
+  </Step>
+  <Step title="Embed prescribing for a patient">
+    Most teams start with one component on their patient page. See [Embed for a patient](/integrations/embed-for-a-patient).
+  </Step>
+</Steps>
+
+```tsx
+import { PhotonOrder, PhotonProvider } from "@photon-rx/react";
+
+<PhotonProvider clientId="YOUR_CLIENT_ID" environment="neutron">
+  <PhotonOrder
+    patient={{
+      demographic: {
+        name: { first: "Paige", last: "Turner" },
+        dateOfBirth: "1990-01-01",
+        sex: "FEMALE",
+        phone: "+13175550142",
+      },
+    }}
+  />
+</PhotonProvider>
+```

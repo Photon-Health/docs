@@ -22,59 +22,46 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
+        "tab": "Get started",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Get started",
             "pages": [
               "introduction",
               "authentication"
             ]
           },
           {
-            "group": "Core Concepts",
-            "pages": [
-              "patient-mutation",
-              "prescription-mutation",
-              "order-mutation"
-            ]
+            "group": "Integrations",
+            "pages": []
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "Embed",
         "groups": [
           {
-            "group": "Mutations",
-            "pages": [
-              "api/patient",
-              "api/prescription",
-              "api/order"
-            ]
-          },
-          {
-            "group": "Reference",
-            "pages": [
-              "concepts/entity-resolution",
-              "untitled-page",
-              "concepts/clinical-screening",
-              "reference/errors",
-              "reference/enums",
-              "reference/pharmacy-search"
-            ]
-          },
-          {
-            "group": "Types",
-            "pages": [
-              "api/types/patient-types",
-              "api/types/prescription-types",
-              "api/types/order-types",
-              "api/types/change-types",
-              "api/types/pharmacy-types"
-            ]
+            "group": "Embed",
+            "pages": []
           }
-        ],
-        "hidden": true
+        ]
+      },
+      {
+        "tab": "Network",
+        "groups": [
+          {
+            "group": "Network",
+            "pages": []
+          },
+          {
+            "group": "GraphQL",
+            "pages": []
+          },
+          {
+            "group": "MCP",
+            "pages": []
+          }
+        ]
       }
     ]
   },
