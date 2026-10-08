@@ -1,20 +1,20 @@
 ---
 title: "Webhooks"
 sidebarTitle: "Overview"
-description: "Get notified when orders and prescriptions change after they're sent."
+description: "Get notified as orders and prescriptions move after they're sent."
 icon: "webhook"
 ---
 
-GraphQL and MCP let you write to Photon. Webhooks tell your backend what happens after an order is sent: when the patient picks a pharmacy, when it's ready or shipped, and when it's picked up or delivered.
+GraphQL and MCP let you write to Photon. Webhooks tell your backend what happens next: when an order reaches a pharmacy, when it's ready or shipped, and when it's picked up or delivered.
 
 Typical uses:
 
-- Email or text the patient when their order ships or is ready
+- Text or email the patient when their order ships or is ready
 - Record sent prescriptions in your own chart
-- Follow up on orders that are stuck or canceled
+- Follow up on orders that are canceled or hit an error
 
 <Note>
-  Drafts don't send webhooks. An order's first event, `photon:order:created`, fires when it's sent (`state: SUBMITTED`). Its id is the same `ord_…` id the draft had.
+  Drafts don't send webhooks. Events start when an order is sent (`state: SUBMITTED`). The order keeps the `ord_…` id it had as a draft.
 </Note>
 
 ## Subscribe
@@ -27,7 +27,7 @@ In the dashboard, open [Settings](https://app.neutron.health/settings) and add a
 
 ## The request
 
-Photon sends a `POST` with a JSON body in the [CloudEvents](https://cloudevents.io) format:
+Photon sends one `POST` per event. The body is a JSON [CloudEvent](https://cloudevents.io):
 
 ```json
 {
@@ -55,16 +55,15 @@ Photon sends a `POST` with a JSON body in the [CloudEvents](https://cloudevents.
 | `time` | When the event happened |
 | `data` | The event's details. Their shape depends on `type`. |
 
-Each request also carries two headers:
-
 | Header | Description |
 | --- | --- |
+| `Content-Type` | `application/cloudevents-batch+json`. The body is still a single event. |
 | `X-Photon-Signature` | A hex-encoded HMAC-SHA256 of the request body, keyed with your shared secret |
-| `X-Photon-Timestamp` | When the request was sent, in Unix seconds |
+| `X-Photon-Timestamp` | When the request was sent, in Unix **milliseconds** |
 
 ## Verify the signature
 
-Compute the HMAC of the request body with your shared secret, and compare it with `X-Photon-Signature`. Reject the request if they don't match.
+Compute the HMAC-SHA256 of the raw request body with your shared secret, and compare it with `X-Photon-Signature`. Reject the request if they don't match.
 
 ```ts Node.js (Express)
 import crypto from "node:crypto";
@@ -72,7 +71,7 @@ import express from "express";
 
 const app = express();
 
-app.post("/webhooks/photon", express.raw({ type: "application/json" }), (req, res) => {
+app.post("/webhooks/photon", express.raw({ type: "*/*" }), (req, res) => {
   const expected = crypto
     .createHmac("sha256", process.env.PHOTON_WEBHOOK_SECRET)
     .update(req.body) // the raw body, exactly as received
@@ -89,21 +88,38 @@ app.post("/webhooks/photon", express.raw({ type: "application/json" }), (req, re
 });
 ```
 
-Hash the raw body before parsing it. Re-serializing parsed JSON can change the bytes and break the match.
+Hash the body before you parse it. Re-serializing parsed JSON can change the bytes and break the match. The content type isn't `application/json`, so make sure your framework gives you the raw body.
+
+## Responses and retries
+
+| You respond | Photon |
+| --- | --- |
+| `2xx` | Done |
+| `5xx`, `408` or `429`, a timeout, or no connection | Retries the event later |
+| Any other `4xx` | Drops the event. It isn't sent again. |
+
+Return `2xx` for events you don't use, too. Return `2xx` as soon as you've stored the event, and do slow work afterward.
 
 ## Handling events
 
 - **Expect duplicates.** The same event can arrive more than once. Make your handler idempotent, for example by recording each event `id` you've processed.
-- **Expect any order.** Events aren't guaranteed to arrive in the order they happened. Compare each event's `time` to tell which is latest.
-- **Respond quickly.** Return a `2xx` as soon as you've stored the event, and do slow work afterward.
+- **Expect any order.** Events aren't guaranteed to arrive in the order they happened. Compare `time` to tell which is latest.
 
-## After an order is sent
+## Status: Network first, webhooks for progress
 
-Once submitted, an order moves through fulfillment. The steps depend on how it's filled:
+The status a [Network API](/network/overview) call returns is the source of truth:
 
-| Fulfillment | Order status |
+| Record | Status | Values |
+| --- | --- | --- |
+| Order | `state` | `DRAFT`, `SUBMITTED`, `CANCELED` |
+| Prescription | `signing.state` | `UNSIGNED`, `SIGNED`, `INVALIDATED_SIGN` |
+| Prescription | `status` (screening) | `READY`, `WARNING`, `BLOCKED` |
+
+Once an order is `SUBMITTED`, webhooks report its progress through fulfillment. Expect these events, in this order:
+
+| Fulfillment | Events |
 | --- | --- |
-| Local pickup | Routing → Pending → Placed → Sent → Received → Ready |
-| Partner mail order | Pending → Placed → Sent → Filling → Shipped → Delivered → Completed |
+| Pickup | `order:created` → `order:placed` → `order:fulfillment` (`RECEIVED`, `READY`, `PICKED_UP`) → `order:completed` |
+| Delivery | `order:created` → `order:placed` → `order:fulfillment` (`FILLING`, `SHIPPED`, `DELIVERED`) → `order:completed` |
 
-**Routing** means Photon is waiting for the patient to pick a pharmacy from their text. It's skipped when the pharmacy was chosen for them. A patient can reroute between local pharmacies, so a placed order can return to pending and be placed again. Each step arrives as an [order event](/network/webhooks/events#order-events).
+At any point, an order can also be `order:rerouted` (then `order:placed` again at the new pharmacy), `order:canceled`, or hit an `order:error`. See [Events](/network/webhooks/events).

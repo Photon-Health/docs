@@ -122,7 +122,7 @@ If the content changed after the prescriber reviewed it, the hashes don't match.
 | --- | --- | --- |
 | `id` | `ID` | Leave it out to draft a new prescription |
 | `patient` | `PatientReferenceInput` | Usually `{ id }`. Without it, a sync only looks the drug up. |
-| `templateId` | `ID` | Fills in the drug, sig and dispense |
+| `templateId` | `ID` | Fills in the drug, sig and dispense. Find ids under [Settings → Templates](https://app.neutron.health/settings/templates). |
 | `treatment` | `TreatmentReferenceInput` | Exactly one of `id`, `rxNormId`, `name`, `ndc` or `upc` |
 | `instructions` | `String` | The sig |
 | `dispense` | `{ quantity, unit, daysSupply, refillsAllowed, dispenseAsWritten }` | |

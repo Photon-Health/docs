@@ -21,7 +21,7 @@ flowchart LR
 | **Prescription** | `rx_…` | One drug for one patient: the treatment, instructions (the sig), dispense quantity and diagnoses. | A draft until a prescriber signs it. Once signed, it can't change. |
 | **Order** | `ord_…` | One or more signed prescriptions for one patient, sent together. | `DRAFT`, then `SUBMITTED` when it's sent. |
 
-A **template** is a saved prescription your organization sets up, with the drug, sig and dispense filled in. Start a prescription from one by passing its `templateId`.
+A **template** is a saved prescription your organization sets up, with the drug, sig and dispense filled in. Manage templates and find their ids in the dashboard under [Settings → Templates](https://app.neutron.health/settings/templates). Start a prescription from one by passing its `templateId`.
 
 ## The flow
 
