@@ -1,61 +1,61 @@
 ---
 title: "Prescribe"
 sidebarTitle: "Overview"
-description: "The prescribing workflow, ready to drop into your app as React components, an iframe or a link."
+description: "How prescribing works in Photon, and where prescribers do it: the Prescribe app or your product."
 icon: "window"
 ---
 
-Prescribe is Photon's prescribing UI. It covers the prescriber's whole workflow: signing in, finding the patient, choosing the drug, reviewing screening, signing and sending. You place it in your app and give it the records you already have.
+Prescribe is Photon's prescribing UI. It runs the prescriber's whole workflow, and it's the only place a prescription gets signed.
 
-## Use the Photon app
+## How prescribing works
 
-You don't need an integration to start. Sign in to the Photon app and prescribe there. Try it in Neutron with test patients first.
+Every prescription follows the same steps, however you integrate:
+
+<Steps>
+  <Step title="Intake patient">
+    Find the patient, or add them. Photon matches what you pass to an existing record before it creates a new one.
+  </Step>
+  <Step title="Draft prescription">
+    Each drug becomes a draft with its sig and quantity. Photon screens it against the patient's allergies, medications and conditions, and checks it against their benefits, as it's written.
+  </Step>
+  <Step title="Sign prescription">
+    The prescriber reviews the draft and signs it. Repeat for each prescription on the order.
+  </Step>
+  <Step title="Send order">
+    The signed prescriptions go out together as one order. Choosing a pharmacy now is optional.
+  </Step>
+  <Step title="Shop order">
+    Compare prices for the whole order across pharmacies. By default, Photon texts the patient a link to shop.
+  </Step>
+  <Step title="Fulfill order">
+    Route the order to the chosen pharmacy. Nothing is routed until a pharmacy is chosen.
+  </Step>
+</Steps>
+
+Anyone can draft, but only a signed-in prescriber can sign. See [Architecture](/architecture) for the records behind these steps.
+
+## Who drafts
+
+The prescriber always signs and sends in Prescribe. What changes between integrations is who does the drafting:
+
+| Drafting | The prescriber | Guide |
+| --- | --- | --- |
+| The prescriber, from scratch | Writes, signs and sends | [Prescribe embed](/integrations/prescribe-embed) |
+| The prescriber, on a patient your backend keeps current | Writes, signs and sends, with screening that sees the full history | [Sync patients](/integrations/sync-patients) |
+| Your backend, from templates and your rules | Reviews, signs and sends | [One-click orders](/integrations/one-click-orders) |
+| An agent, over MCP | Reviews, signs and sends | [Agent-drafted orders](/integrations/agent-drafted-orders) |
+
+The more your product drafts, the less the prescriber types. See [Choose an integration](/integrations/overview).
+
+## Where the prescriber works
 
 <CardGroup cols={2}>
-  <Card title="Open Neutron" icon="flask" href="https://app.neutron.health" cta="Sign in to the sandbox">
-    The sandbox. Prescribe for test patients. Nothing is sent to a real pharmacy.
+  <Card title="App" icon="browser" href="/prescribe/app">
+    Photon's own web app. Sign in and prescribe, or follow a deep link from your product, an email or a text.
   </Card>
-  <Card title="Open Photon" icon="prescription" href="https://app.photon.health" cta="Sign in">
-    Production. Prescribe for real patients and send to their pharmacies.
+  <Card title="Embed" icon="code" href="/prescribe/embed">
+    Inside your product, with React components, an iframe or the JavaScript client.
   </Card>
 </CardGroup>
 
-## Three ways to add it to your app
-
-| | [React components](/prescribe/react) | [iframe](/prescribe/iframe) | [App link](/prescribe/links) |
-| --- | --- | --- | --- |
-| What it is | `<PhotonOrder />` and friends, rendered in your page | Photon's page inside yours | A URL that opens Photon in a new tab |
-| Looks like | Your app: it uses your styles and components | Photon, on a transparent background | Photon |
-| Sign-in | Your Application `client_id` | Photon's own (no credentials) | Photon's own (no credentials) |
-| Events | Callbacks with live objects | `postMessage` with ids | None |
-| Best for | React apps | Other frameworks, or the fastest start | Email, SMS, or a button in a backend tool |
-
-All three show the same cards and follow the same rules, and they're all built on the [JavaScript client](/prescribe/javascript).
-
-<Tip>
-  Using Photon Elements (`<photon-prescribe-workflow>`)? See [Migrate from Elements](/prescribe/migrate-from-elements).
-</Tip>
-
-## The cards
-
-| Card | Shows | Use it for |
-| --- | --- | --- |
-| `PhotonOrder` | The patient, a card for each prescription, then **Send** | Prescribing. Most integrations need only this card. |
-| `PhotonPatient` | Find or add a patient, and edit their details | Patient intake on its own |
-| `PhotonPrescription` | One prescription: drug, sig, dispense, screening, **Sign** | A single prescription inside your own flow |
-
-## Giving it records
-
-Each card takes its records (`patient`, `prescription`, `order`) the same way. Pass whatever you have:
-
-| You pass | Example | Prescribe |
-| --- | --- | --- |
-| An id | `"pat_01M3WQ…"` | Opens that record (get) |
-| Fields, no id | `{ demographic: { name, dateOfBirth, sex } }` | Finds, matches or adds it (sync) |
-| An id with fields | `{ id: "pat_01M3WQ…", demographic: { phone } }` | Updates only those fields (update) |
-
-These are the same [get, sync and update](/architecture#get-sync-and-update) calls the API uses, with the same field names. An order can also take prescriptions, either drafts by id (`{ id: "rx_…" }`) or new ones from a template (`{ templateId }`).
-
-## Environments
-
-Prescribe runs at `https://rx.neutron.health` in the sandbox and `https://rx.photon.health` in production. {/* TODO(launch) */}⚠️ Neither is live yet. The React components choose one with `environment`. See [Environments](/environments).
+Both run the same workflow on the same records, so a draft started in one opens in the other. Start with the app to see the workflow, then embed it when you're ready.

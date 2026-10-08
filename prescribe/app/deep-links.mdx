@@ -1,12 +1,12 @@
 ---
-title: "App links"
-description: "Send a prescriber straight to a patient, prescription or order in the Photon app."
+title: "Deep links"
+description: "Send a prescriber straight to a patient, prescription or order in the Prescribe app."
 icon: "link"
 ---
 
-An app link opens Photon in its own tab, with Photon's navigation, on the record you name. Use one when Prescribe doesn't fit in your page: a link in an email or text, or a **Prescribe in Photon** button in an internal tool.
+A deep link opens the [Prescribe app](/prescribe/app) in its own tab, with the app's navigation, on the record you name. Use one when embedding doesn't fit: a link in an email or text, or a **Prescribe in Photon** button in an internal tool.
 
-App links use the same URLs as the [iframe](/prescribe/iframe) without `/embed`. {/* TODO(launch) */}⚠️ `rx.neutron.health` isn't live yet.
+Deep links use the same URLs as the [iframe](/prescribe/embed/iframe) without `/embed`. {/* TODO(launch) */}⚠️ `rx.neutron.health` isn't live yet.
 
 | URL | Opens |
 | --- | --- |
@@ -19,7 +19,7 @@ The prescriber signs in to Photon if they haven't already, and lands on the reco
 
 ## Building a link
 
-Ids alone are fine to write by hand. For anything more, use the [JavaScript client](/prescribe/javascript):
+Ids alone are fine to write by hand. For anything more, use the [JavaScript client](/prescribe/embed/javascript):
 
 ```ts
 import { photon } from "@photon-rx/core";

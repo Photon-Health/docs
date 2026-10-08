@@ -2,10 +2,10 @@
 
 ## About this project
 
-- Public documentation for Photon, built on [Mintlify](https://mintlify.com). It covers two products: **Prescribe** (React components, iframe, app links and the JavaScript client) and **Network** (GraphQL, MCP and webhooks).
-- The prescribing UI is always **Prescribe**, whatever the mechanism (React, iframe, link, or anything added later). Use "embed" only as a verb or in app URLs like `/order/embed`. Elements is deprecated. Mention it only in the migration guide.
+- Public documentation for Photon, built on [Mintlify](https://mintlify.com). It covers two products: **Prescribe** (the web app and deep links, plus embedding with React components, an iframe or the JavaScript client) and **Network** (GraphQL, MCP and webhooks).
+- The prescribing UI is always **Prescribe**, whatever the mechanism (React, iframe, link, or anything added later). Its docs have two sections: **App** (the Prescribe app and deep links) and **Embed** (putting Prescribe in your product). "Embed" names that section and the act of embedding, never the product. Link prescribing to the Prescribe app: `rx.neutron.health` in the sandbox and `rx.new` in production (not `rx.photon.health`); link `app.<env>.health` only for dashboard settings (API credentials, team, catalog, templates). Elements is deprecated. Mention it only in the migration guide.
 - Don't document the previous APIs (`api.<env>.health`, `clinical-api.<env>.health`) or vendor-specific migrations (DoseSpot, MDToolbox).
-- Benefits and coverage checks aren't documented yet. Benefits will arrive as offers on prescriptions and orders.
+- Benefits and coverage checks aren't documented yet beyond a high-level mention in the prescribing workflow (the Draft step). Benefits will arrive as offers on prescriptions and orders.
 - Pages are MDX files with YAML frontmatter
 - Configuration lives in `docs.json`
 - Use the Mintlify MCP server, `https://mcp.mintlify.com`, to edit content and settings via MCP

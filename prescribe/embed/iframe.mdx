@@ -30,36 +30,34 @@ The flow goes in the path. Ids go in the clear: the flow's own record in the pat
 | `/prescription/embed/rx_…` | This prescription |
 | `/prescription/embed?patient=pat_…` | A new prescription for this patient |
 
-Prefix each URL with `https://rx.neutron.health` in the sandbox, or `https://rx.photon.health` in production. {/* TODO(launch) */}⚠️ Neither is live yet.
+Prefix each URL with `https://rx.neutron.health` in the sandbox, or `https://rx.new` in production. {/* TODO(launch) */}⚠️ The sandbox isn't live yet.
 
 When the URL names the patient by id, the iframe stays on that patient, with no **Change patient**.
 
 ## Passing more than ids
 
-To pass patient details, templates or several prescriptions, build the URL with `linkPath` from the [JavaScript client](/prescribe/javascript). It takes a record the same way the React components do and packs it into one short token after the path.
+To pass patient details, templates or several prescriptions, build the URL with `frame()` from the [JavaScript client](/prescribe/embed/javascript). It takes a record the same way the React components do, reads and writes nothing, and packs the record into one short token after the path.
 
 ```ts
-import { linkPath } from "@photon-rx/core";
+import { photon } from "@photon-rx/core";
 
-const src =
-  "https://rx.neutron.health" +
-  linkPath(
-    {
-      flow: "order",
-      patient: {
-        demographic: {
-          name: { first: "Paige", last: "Turner" },
-          dateOfBirth: "1990-01-01",
-          sex: "FEMALE",
-          phone: "+13175550142",
-        },
-      },
-      order: { prescriptions: { add: [{ templateId: "YOUR_TEMPLATE_ID" }] } },
+const ph = photon({ environment: "neutron", auth: { getToken }, appUrl: "https://rx.neutron.health" });
+
+const src = ph.order.frame({
+  patient: {
+    demographic: {
+      name: { first: "Paige", last: "Turner" },
+      dateOfBirth: "1990-01-01",
+      sex: "FEMALE",
+      phone: "+13175550142",
     },
-    { embed: true },
-  );
+  },
+  prescriptions: { add: [{ templateId: "YOUR_TEMPLATE_ID" }] },
+});
 // https://rx.neutron.health/order/embed/AQf3…
 ```
+
+For a patient on their own, use `ph.patient.frame({ demographic: { … } })`. A live object you already have makes its own: `order.frame()`.
 
 <Warning>
   The token is encoded but not encrypted. Anyone who has the URL can read it, so treat a URL with patient details like the details themselves. Pass ids when you can.

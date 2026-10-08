@@ -1,0 +1,55 @@
+---
+title: "Embed"
+sidebarTitle: "Ways to embed"
+description: "Put the prescribing workflow inside your product with React components, an iframe or the JavaScript client."
+icon: "code"
+---
+
+Embed Prescribe and prescribers never leave your product. You place it on your page and give it the records you already have.
+
+## Choose how
+
+| | [React components](/prescribe/embed/react) | [iframe](/prescribe/embed/iframe) | [JavaScript client](/prescribe/embed/javascript) |
+| --- | --- | --- | --- |
+| What it is | `<PhotonOrder />` and friends, rendered in your page | The Prescribe app's page inside yours | `@photon-rx/core`, the client both are built on |
+| Looks like | Your app: it uses your styles and components | Photon, on a transparent background | Whatever you render |
+| Sign-in | Your Application `client_id` | Photon's own (no credentials) | Your Application `client_id`, or your own tokens |
+| Events | Callbacks with live objects | `postMessage` with ids | Live objects you subscribe to |
+| Best for | React apps | Other frameworks, or the fastest start | Other frameworks, Node, and building links |
+
+All of them show the same cards and follow the same rules. To start with a complete example, follow [Prescribe embed](/integrations/prescribe-embed).
+
+## The cards
+
+| Card | Shows | Use it for |
+| --- | --- | --- |
+| `PhotonOrder` | The patient, a card for each prescription, then **Send** | Prescribing. Most integrations need only this card. |
+| `PhotonPatient` | Find or add a patient, and edit their details | Patient intake on its own |
+| `PhotonPrescription` | One prescription: drug, sig, dispense, screening, **Sign** | A single prescription inside your own flow |
+
+## Giving it records
+
+Each card takes its records (`patient`, `prescription`, `order`) the same way, and so do the iframe and [deep links](/prescribe/app/deep-links). Pass whatever you have:
+
+| You pass | Example | Prescribe |
+| --- | --- | --- |
+| An id | `"pat_01M3WQ…"` | Opens that record (get) |
+| Fields, no id | `{ demographic: { name, dateOfBirth, sex } }` | Finds, matches or adds it (sync) |
+| An id with fields | `{ id: "pat_01M3WQ…", demographic: { phone } }` | Updates only those fields (update) |
+
+These are the same [get, sync and update](/architecture#get-sync-and-update) calls the API uses, with the same field names. An order can also take prescriptions, either drafts by id (`{ id: "rx_…" }`) or new ones from a template (`{ templateId }`).
+
+## Environments
+
+Embedded Prescribe runs against `https://rx.neutron.health` in the sandbox and `https://rx.new` in production. {/* TODO(launch) */}⚠️ The sandbox isn't live yet. The React components and the JavaScript client choose one with `environment`. See [Environments](/environments).
+
+## Make it yours
+
+<CardGroup cols={2}>
+  <Card title="Styling" icon="palette" href="/prescribe/embed/styling">
+    Make the React components look like the rest of your app.
+  </Card>
+  <Card title="Migrate from Elements" icon="right-left" href="/prescribe/embed/migrate-from-elements">
+    Using `<photon-prescribe-workflow>`? Move to Prescribe.
+  </Card>
+</CardGroup>
