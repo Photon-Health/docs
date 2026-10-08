@@ -2,7 +2,10 @@
 
 ## About this project
 
-- Public documentation for Photon, built on [Mintlify](https://mintlify.com). It covers two products: **Embed** (React components, iframe, app links and the JavaScript client) and **Network** (GraphQL and MCP).
+- Public documentation for Photon, built on [Mintlify](https://mintlify.com). It covers two products: **Embed** (React components, iframe, app links and the JavaScript client) and **Network** (GraphQL, MCP and webhooks).
+- The prescribing UI is always **Embed**, whatever the mechanism (React, iframe, link, or anything added later). Elements is deprecated. Mention it only in the migration guide.
+- Don't document the previous APIs (`api.<env>.health`, `clinical-api.<env>.health`) or vendor-specific migrations (DoseSpot, MDToolbox).
+- Benefits and coverage checks aren't documented yet. Benefits will arrive as offers on prescriptions and orders.
 - Pages are MDX files with YAML frontmatter
 - Configuration lives in `docs.json`
 - Use the Mintlify MCP server, `https://mcp.mintlify.com`, to edit content and settings via MCP

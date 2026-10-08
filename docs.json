@@ -57,7 +57,8 @@
               "embed/iframe",
               "embed/links",
               "embed/javascript",
-              "embed/styling"
+              "embed/styling",
+              "embed/migrate-from-elements"
             ]
           }
         ]
@@ -91,6 +92,13 @@
               "network/mcp/connect",
               "network/mcp/prescribing",
               "network/mcp/fulfillment"
+            ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "network/webhooks",
+              "network/webhooks/events"
             ]
           }
         ]
