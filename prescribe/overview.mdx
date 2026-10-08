@@ -1,61 +1,46 @@
 ---
 title: "Prescribe"
 sidebarTitle: "Overview"
-description: "Photon's prescribing workflow: use the app, or embed it in yours."
+description: "How prescribing works in Photon, and where prescribers do it: the Prescribe app or your product."
 icon: "window"
 ---
 
-Prescribe is Photon's prescribing UI. It covers the prescriber's whole workflow: signing in, finding the patient, choosing the drug, reviewing screening, signing and sending.
+Prescribe is Photon's prescribing UI. It runs the prescriber's whole workflow, and it's the only place a prescription gets signed.
 
-## Try the app
+## How prescribing works
 
-You don't need an integration to start. Prescribers sign in to Prescribe and prescribe there. Try it in Neutron with test patients first.
+Every prescription follows the same steps, however you integrate:
 
-<CardGroup cols={2}>
-  <Card title="Open Neutron" icon="flask" href="https://rx.neutron.health" cta="Sign in to the sandbox">
-    The sandbox. Prescribe for test patients. Nothing is sent to a real pharmacy.
-  </Card>
-  <Card title="Open Photon" icon="prescription" href="https://rx.photon.health" cta="Sign in">
-    Production. Prescribe for real patients and send to their pharmacies.
-  </Card>
-</CardGroup>
+1. **Patient.** The prescriber finds the patient, or Photon matches or adds them from what you pass.
+2. **Draft.** Each drug becomes a draft prescription with its sig and quantity. Photon screens it against the patient's allergies, medications and conditions as it's written.
+3. **Sign.** The prescriber reviews each draft and signs it.
+4. **Send.** The signed prescriptions go out together as one order.
+5. **Choose.** Photon texts the patient, who compares prices and picks a pharmacy. Nothing is routed until they do.
 
-{/* TODO(launch) */}⚠️ `rx.neutron.health` and `rx.photon.health` aren't live yet.
+Anyone can draft, but only a signed-in prescriber can sign. See [Architecture](/architecture) for the records behind these steps.
 
-## Two ways to use it
+## Who drafts
 
-| | [App](/prescribe/app) | [Embed](/prescribe/embed) |
+The prescriber always signs and sends in Prescribe. What changes between integrations is who does the drafting:
+
+| Drafting | The prescriber | Guide |
 | --- | --- | --- |
-| Where it runs | Photon's own web app | Inside your product |
-| How you start | Sign in, or follow a deep link | React components or an iframe |
-| Looks like | Photon | Your app (React) or Photon (iframe) |
-| Best for | Getting started, and links from email, SMS or another tool | Prescribing without leaving your product |
+| The prescriber, from scratch | Writes, signs and sends | [Prescribe embed](/integrations/prescribe-embed) |
+| The prescriber, on a patient your backend keeps current | Writes, signs and sends, with screening that sees the full history | [Sync patients](/integrations/sync-patients) |
+| Your backend, from templates and your rules | Reviews, signs and sends | [One-click orders](/integrations/one-click-orders) |
+| An agent, over MCP | Reviews, signs and sends | [Agent-drafted orders](/integrations/agent-drafted-orders) |
+
+The more your product drafts, the less the prescriber types. See [Choose an integration](/integrations/overview).
+
+## Where the prescriber works
 
 <CardGroup cols={2}>
   <Card title="App" icon="browser" href="/prescribe/app">
-    How the app works, and deep links that open a patient, prescription or order.
+    Photon's own web app. Sign in and prescribe, or follow a deep link from your product, an email or a text.
   </Card>
   <Card title="Embed" icon="code" href="/prescribe/embed">
-    React components, the iframe and the JavaScript client, plus styling and migrating from Elements.
+    Inside your product, with React components, an iframe or the JavaScript client.
   </Card>
 </CardGroup>
 
-Both run the same workflow on the same records, so a draft started in one opens in the other.
-
-## Giving it records
-
-Deep links, the iframe and the React components all take records (`patient`, `prescription`, `order`) the same way. Pass whatever you have:
-
-| You pass | Example | Prescribe |
-| --- | --- | --- |
-| An id | `"pat_01M3WQ…"` | Opens that record (get) |
-| Fields, no id | `{ demographic: { name, dateOfBirth, sex } }` | Finds, matches or adds it (sync) |
-| An id with fields | `{ id: "pat_01M3WQ…", demographic: { phone } }` | Updates only those fields (update) |
-
-These are the same [get, sync and update](/architecture#get-sync-and-update) calls the API uses, with the same field names. An order can also take prescriptions, either drafts by id (`{ id: "rx_…" }`) or new ones from a template (`{ templateId }`).
-
-## Environments
-
-Prescribe runs at `https://rx.neutron.health` in the sandbox and `https://rx.photon.health` in production. See [Environments](/environments).
-
-Admins set up API credentials, the team, the catalog and templates in the [dashboard](/dashboard), not in Prescribe.
+Both run the same workflow on the same records, so a draft started in one opens in the other. Start with the app to see the workflow, then embed it when you're ready.

@@ -7,15 +7,22 @@ icon: "browser"
 
 The Prescribe app is Photon's own web app for prescribers. Use it before you integrate, or next to your product: a [deep link](/prescribe/app/deep-links) from your product opens it on the right patient or order.
 
-| Neutron (sandbox) | Photon (production) |
-| --- | --- |
-| [rx.neutron.health](https://rx.neutron.health) | [rx.photon.health](https://rx.photon.health) |
+<CardGroup cols={2}>
+  <Card title="Open Neutron" icon="flask" href="https://rx.neutron.health" cta="Sign in to the sandbox">
+    The sandbox. Prescribe for test patients. Nothing is sent to a real pharmacy.
+  </Card>
+  <Card title="Open Photon" icon="prescription" href="https://rx.photon.health" cta="Sign in">
+    Production. Prescribe for real patients and send to their pharmacies.
+  </Card>
+</CardGroup>
 
-{/* TODO(launch) */}⚠️ Neither is live yet.
+{/* TODO(launch) */}⚠️ `rx.neutron.health` and `rx.photon.health` aren't live yet.
 
 ## Signing in
 
 Prescribers sign in with their Photon account. They need an invite to your organization with the **Prescriber** role. See [Team](/dashboard#team). Someone in more than one organization picks one when they sign in.
+
+The app is only for prescribing. Admins manage API credentials, the team, the catalog and templates in the [dashboard](/dashboard).
 
 ## Prescribing
 

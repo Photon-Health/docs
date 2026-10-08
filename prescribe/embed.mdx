@@ -27,7 +27,21 @@ All of them show the same cards and follow the same rules. To start with a compl
 | `PhotonPatient` | Find or add a patient, and edit their details | Patient intake on its own |
 | `PhotonPrescription` | One prescription: drug, sig, dispense, screening, **Sign** | A single prescription inside your own flow |
 
-Each card takes records the way every part of Prescribe does. See [Giving it records](/prescribe/overview#giving-it-records).
+## Giving it records
+
+Each card takes its records (`patient`, `prescription`, `order`) the same way, and so do the iframe and [deep links](/prescribe/app/deep-links). Pass whatever you have:
+
+| You pass | Example | Prescribe |
+| --- | --- | --- |
+| An id | `"pat_01M3WQ…"` | Opens that record (get) |
+| Fields, no id | `{ demographic: { name, dateOfBirth, sex } }` | Finds, matches or adds it (sync) |
+| An id with fields | `{ id: "pat_01M3WQ…", demographic: { phone } }` | Updates only those fields (update) |
+
+These are the same [get, sync and update](/architecture#get-sync-and-update) calls the API uses, with the same field names. An order can also take prescriptions, either drafts by id (`{ id: "rx_…" }`) or new ones from a template (`{ templateId }`).
+
+## Environments
+
+Embedded Prescribe runs against `https://rx.neutron.health` in the sandbox and `https://rx.photon.health` in production. {/* TODO(launch) */}⚠️ Neither is live yet. The React components and the JavaScript client choose one with `environment`. See [Environments](/environments).
 
 ## Make it yours
 
