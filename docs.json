@@ -37,7 +37,8 @@
             "group": "Integrations",
             "pages": [
               "integrations/overview",
-              "integrations/embed-for-a-patient"
+              "integrations/embed-for-a-patient",
+              "integrations/sync-patients"
             ]
           }
         ]
