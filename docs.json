@@ -66,11 +66,15 @@
         "groups": [
           {
             "group": "Network",
-            "pages": []
+            "pages": [
+              "network/overview"
+            ]
           },
           {
             "group": "GraphQL",
-            "pages": []
+            "pages": [
+              "network/graphql"
+            ]
           },
           {
             "group": "MCP",
