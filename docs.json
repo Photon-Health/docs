@@ -76,7 +76,10 @@
               "network/graphql",
               "network/patient",
               "network/prescription",
-              "network/order"
+              "network/order",
+              "network/changes",
+              "network/screening",
+              "network/errors"
             ]
           },
           {

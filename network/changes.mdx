@@ -1,0 +1,71 @@
+---
+title: "Changes and choices"
+description: "How every response reports what Photon did, and how to answer when it asks which one."
+icon: "code-compare"
+---
+
+Every payload reports what happened to each thing you sent, split into two lists:
+
+- **`appliedChanges`**: saved.
+- **`unappliedChanges`**: not saved. Its `status` is `REJECTED` (fix the input) or `AMBIGUOUS` (pick an option).
+
+An empty `unappliedChanges` means everything you sent took effect.
+
+## A change
+
+| Field | Description |
+| --- | --- |
+| `key` | Which input it's about, such as `demographic.phone`, `treatment` or `clinical.allergies.add.0` |
+| `label` | A human-readable name for it |
+| `status` | `APPLIED`, `REJECTED` or `AMBIGUOUS` |
+| `severity` | `INFO` (no action needed), `ADVISORY` (worth showing, doesn't block) or `BLOCKING` (must be resolved) |
+| `category` | Why it matters: `DISAMBIGUATION`, `MISSING_INPUT`, `INVALID_INPUT`, `SAFETY`, `CODING_SPECIFICITY`, `COST_SAVINGS` and [others](/network/reference#changes). It can be null. |
+| `operation` | `ADDED`, `MODIFIED` or `REMOVED` |
+| `reason` | An explanation to show a person. Don't parse it. |
+| `options` | What you can do about it. Always present for `AMBIGUOUS`, and sometimes present on others. |
+| `detail` | Before and after values (`FieldChangeDetail`), or what a name resolved to (`EntityResolutionDetail`, `PharmacyResolutionDetail`) |
+
+## Answering a choice
+
+When a name fits several things (a drug, an allergen, a pharmacy), Photon doesn't guess. It returns an `AMBIGUOUS` change, saves nothing, and lists the candidates as `options`:
+
+```json
+{
+  "key": "treatment",
+  "status": "AMBIGUOUS",
+  "severity": "BLOCKING",
+  "category": "DISAMBIGUATION",
+  "reason": "\"ibuprofen 800 mg oral tablet\" matches 2 treatments — retry with one of the suggested ids, or a more specific reference.",
+  "options": [
+    {
+      "displayName": "Ibuprofen Oral Tablet 800 MG",
+      "operation": "prescription",
+      "argument": "treatment.id",
+      "value": "med_01M3D93NFGCZJPQ3XW3AF7578G",
+      "matchReasons": [{ "type": "FUZZY_NAME_MATCH", "label": "Name match", "confidence": "MEDIUM" }]
+    },
+    {
+      "displayName": "Ibuprofen-Famotidine Oral Tablet 800-26.6 MG",
+      "operation": "prescription",
+      "argument": "treatment.id",
+      "value": "med_01M3D93NFN58DDG2KZ7HX647WN",
+      "matchReasons": [{ "type": "FUZZY_NAME_MATCH", "label": "Name match", "confidence": "LOW" }]
+    }
+  ]
+}
+```
+
+Each option says exactly what to do: in the input of the `operation` mutation, set the `argument` path to `value`, then resend. Here that means resending with `treatment: { id: "med_01M3D93NFGCZJPQ3XW3AF7578G" }` in place of the name.
+
+**Who picks:** pick automatically only when there's a single option that matched exactly (`EXACT_NAME_MATCH` or `RXNORM_CODE_MATCH`). Otherwise, show the options to a person, or apply your own deterministic rule. Embed and the [JavaScript client](/embed/javascript) follow this same rule.
+
+<Tip>
+  Ids and codes avoid choices entirely. Send `rxNormId`, `icd10Code`, `ndc` or a Photon `id` when you have one.
+</Tip>
+
+## Rules
+
+- **A call is all or nothing.** If any input is `BLOCKING`, nothing is saved. Inputs that were fine come back `REJECTED`, with a `reason` pointing at the input that failed. Fix that input and resend the whole call.
+- **The record can be null.** When nothing was saved, `patient`, `prescription` or `order` may be `null`. The cause is in `unappliedChanges`.
+- **Applied changes can carry advice.** An `APPLIED` change with `ADVISORY` severity was saved, but its options suggest something better, such as a more specific diagnosis code.
+- **Ambiguous records are separate.** When Photon can't tell which existing patient, draft or order you meant, the whole result is an `Ambiguous…Match` with `candidates`, not a change. Resend with the candidate's `id`.
