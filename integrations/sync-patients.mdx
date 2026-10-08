@@ -1,19 +1,19 @@
 ---
 title: "Sync patients from your backend"
 sidebarTitle: "Sync patients"
-description: "Keep Photon's patients, allergies and medications current, then open them in Embed by id."
+description: "Keep Photon's patients, allergies and medications current, then open them in Prescribe by id."
 icon: "arrows-rotate"
 ---
 
 Screening is only as good as the patient record. When your backend sends each patient's allergies, medications and diagnoses to Photon, every prescription is checked against them. The prescriber also starts with the right patient instead of searching.
 
-Your backend syncs with a [machine token](/authentication#machine-tokens), and your frontend opens Embed with the Photon id.
+Your backend syncs with a [machine token](/authentication#machine-tokens), and your frontend opens Prescribe with the Photon id.
 
 ```mermaid
 sequenceDiagram
   participant B as Your backend
   participant N as Photon Network
-  participant F as Your frontend (Embed)
+  participant F as Your frontend (Prescribe)
   B->>N: patient sync (demographics, allergies, medications)
   N-->>B: pat_…
   Note over B: store pat_… with your patient
@@ -105,7 +105,7 @@ switch (result.__typename) {
     break;
   case "AmbiguousPatientMatch":
     // Photon isn't sure which patient this is. Don't guess: leave it unlinked and
-    // let the prescriber pick in Embed, or match one of result.candidates yourself.
+    // let the prescriber pick in Prescribe, or match one of result.candidates yourself.
     break;
   default:
     // UnauthorizedError or UpstreamServiceError (retry if retryable)
@@ -131,7 +131,7 @@ Sync whenever the patient changes in your system, such as a new allergy, a new m
 
 Leave out a field to keep it as it is.
 
-## 4. Open Embed by id
+## 4. Open Prescribe by id
 
 ```tsx
 <PhotonOrder patient={ourPatient.photonId} fixed onSent={onDone} />

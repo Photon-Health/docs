@@ -18,7 +18,7 @@ Every request to Photon carries an OAuth token in the `Authorization` header. A 
   **Machine tokens can't sign prescriptions.** Signing needs the `write:prescription` permission, which machine tokens can never be given. Your backend can sync patients, draft prescriptions and draft orders, but a signed-in prescriber always signs. That step happens in a browser, with a user token.
 </Warning>
 
-That's why Photon ships [Embed](/embed/overview). It signs the prescriber in, holds their token, and runs the signing and sending, so your frontend never handles a token or calls GraphQL itself. We don't recommend calling the API directly from a frontend. When you need lower-level control in the browser, use the [JavaScript client](/embed/javascript): it handles sign-in, tokens and the workflow rules for you.
+That's why Photon ships [Prescribe](/prescribe/overview). It signs the prescriber in, holds their token, and runs the signing and sending, so your frontend never handles a token or calls GraphQL itself. We don't recommend calling the API directly from a frontend. When you need lower-level control in the browser, use the [JavaScript client](/prescribe/javascript): it handles sign-in, tokens and the workflow rules for you.
 
 ## Permissions
 
@@ -41,24 +41,24 @@ A machine token can send an order once a prescriber has signed every prescriptio
 
 Find both kinds in your dashboard under [Settings → Developers](https://app.neutron.health/settings/developers).
 
-- **Application** credentials are a public `client_id` and a list of allowed URLs. The list must include every domain your app runs on. Use them with Embed's React components or the JavaScript client.
+- **Application** credentials are a public `client_id` and a list of allowed URLs. The list must include every domain your app runs on. Use them with Prescribe's React components or the JavaScript client.
 - **Backend** credentials are a `client_id` and a `client_secret`. Keep the secret on your server, out of client-side code and version control.
 
 Credentials come with every Neutron sandbox account. In production they're a paid feature. If you can't see them on a paid account, ask your organization's admin.
 
 <Tip>
-  The [iframe](/embed/iframe) needs no credentials. It signs the prescriber in to Photon on its own.
+  The [iframe](/prescribe/iframe) needs no credentials. It signs the prescriber in to Photon on its own.
 </Tip>
 
 ## User tokens
 
-With Embed, you don't handle user tokens:
+With Prescribe, you don't handle user tokens:
 
 | You use | Sign-in |
 | --- | --- |
-| [iframe](/embed/iframe) or [app link](/embed/links) | Photon's own. No credentials needed. |
-| [React components](/embed/react) | `<PhotonProvider clientId="…">` signs the prescriber in with your Application credential. |
-| [JavaScript client](/embed/javascript) | `photon({ auth: { clientId } })` does the same without React. |
+| [iframe](/prescribe/iframe) or [app link](/prescribe/links) | Photon's own. No credentials needed. |
+| [React components](/prescribe/react) | `<PhotonProvider clientId="…">` signs the prescriber in with your Application credential. |
+| [JavaScript client](/prescribe/javascript) | `photon({ auth: { clientId } })` does the same without React. |
 | Your own Auth0 sign-in | Pass `photon({ auth: { getToken } })`, and Photon calls your function before each request. |
 
 Behind each of these, the prescriber signs in at `auth.neutron.health` with Auth0's authorization code flow (with PKCE), for the audience `https://api.neutron.health`, and picks their organization. The token they get can do whatever their role allows, including signing.

@@ -1,6 +1,6 @@
 ---
 title: "Agent-drafted orders"
-description: "An agent takes intake and drafts prescriptions over MCP, and a prescriber sends them from Embed."
+description: "An agent takes intake and drafts prescriptions over MCP, and a prescriber sends them from Prescribe."
 icon: "robot"
 tag: "Preview"
 ---
@@ -9,13 +9,13 @@ tag: "Preview"
   MCP is in **private preview**. To get access, ask your Photon contact.
 </Note>
 
-The most advanced integrations put an agent in front. It talks to the patient or reads the encounter, records what it learns on the patient, finds the right drug, and drafts the prescriptions. A prescriber then opens the drafts in Embed and signs and sends them.
+The most advanced integrations put an agent in front. It talks to the patient or reads the encounter, records what it learns on the patient, finds the right drug, and drafts the prescriptions. A prescriber then opens the drafts in Prescribe and signs and sends them.
 
 ```mermaid
 sequenceDiagram
   participant A as Your agent
   participant M as Photon MCP
-  participant F as Embed
+  participant F as Prescribe
   A->>M: rx_intake (demographics, allergies, medications)
   M-->>A: patientId
   A->>M: rx_search ("semaglutide")
@@ -52,7 +52,7 @@ If the agent learns something safety-relevant after drafting, such as a new alle
 
 ## 3. Hand the drafts to a prescriber
 
-Pass the patient and the draft prescriptions to Embed. The prescriber sees each draft with its screening, signs, and sends.
+Pass the patient and the draft prescriptions to Prescribe. The prescriber sees each draft with its screening, signs, and sends.
 
 <CodeGroup>
 
@@ -77,4 +77,4 @@ To hand over a single id instead, put the drafts on a draft order from your back
 
 ## Sending from the agent
 
-When the agent runs as the prescriber, it can send without Embed. `rx_send` takes the reviewed drafts and the prescriber's explicit confirmation, and Photon checks on the server that the token belongs to a prescriber. A machine token can't send. See [`rx_send`](/network/mcp/prescribing#rx_send).
+When the agent runs as the prescriber, it can send without Prescribe. `rx_send` takes the reviewed drafts and the prescriber's explicit confirmation, and Photon checks on the server that the token belongs to a prescriber. A machine token can't send. See [`rx_send`](/network/mcp/prescribing#rx_send).

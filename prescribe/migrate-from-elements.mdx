@@ -1,10 +1,10 @@
 ---
 title: "Migrate from Elements"
-description: "Move from Photon Elements to Embed: what replaces each attribute and event."
+description: "Move from Photon Elements to Prescribe: what replaces each attribute and event."
 icon: "right-left"
 ---
 
-Photon Elements (`@photonhealth/elements`, with `<photon-client>` and `<photon-prescribe-workflow>`) is deprecated. Embed replaces it. It covers the same prescribing workflow, runs on the [Network API](/network/overview), and lets the patient choose their pharmacy by default.
+Photon Elements (`@photonhealth/elements`, with `<photon-client>` and `<photon-prescribe-workflow>`) is deprecated. Prescribe replaces it. It covers the same prescribing workflow, runs on the [Network API](/network/overview), and lets the patient choose their pharmacy by default.
 
 Most migrations change one component. Patients you synced before keep their `pat_…` ids.
 
@@ -12,9 +12,9 @@ Most migrations change one component. Patients you synced before keep their `pat
 
 | Your frontend | Use |
 | --- | --- |
-| React | Embed's [React components](/embed/react) |
-| Angular, Vue, or anything else | Embed's [iframe](/embed/iframe). It needs no package or credentials. |
-| A link from another tool | An [app link](/embed/links), which replaces the `/prescriptions/new` deep link |
+| React | Prescribe's [React components](/prescribe/react) |
+| Angular, Vue, or anything else | Prescribe's [iframe](/prescribe/iframe). It needs no package or credentials. |
+| A link from another tool | An [app link](/prescribe/links), which replaces the `/prescriptions/new` deep link |
 
 ## 2. Replace the client
 
@@ -34,13 +34,13 @@ Most migrations change one component. Patients you synced before keep their `pat
 
 </CodeGroup>
 
-| `<photon-client>` | Embed |
+| `<photon-client>` | Prescribe |
 | --- | --- |
 | `id` | `clientId`. It's the same Application credential. |
 | `org` | `organization` |
-| `dev-mode="true"` | `environment="neutron"`. Embed defaults to production. |
+| `dev-mode="true"` | `environment="neutron"`. Prescribe defaults to production. |
 | `redirect-uri`, `redirect-path` | Not needed. Sign-in returns to the page it started on. |
-| `auto-login` | Not needed. Embed signs in on its own when it can, and otherwise shows **Sign in to Photon**. |
+| `auto-login` | Not needed. Prescribe signs in on its own when it can, and otherwise shows **Sign in to Photon**. |
 
 The iframe takes no client at all. It signs the prescriber in to Photon itself.
 
@@ -48,11 +48,11 @@ The iframe takes no client at all. It signs the prescriber in to Photon itself.
 
 `<photon-prescribe-workflow>` becomes `<PhotonOrder>`. In an iframe, it becomes `/order/embed`.
 
-| `<photon-prescribe-workflow>` | Embed |
+| `<photon-prescribe-workflow>` | Prescribe |
 | --- | --- |
-| `patient-id` | `patient="pat_…"`, or `?patient=pat_…` in an iframe. Embed takes Photon ids only. To pass your own patient, give their details (`patient={{ demographic: { … } }}`) and Photon matches them. |
+| `patient-id` | `patient="pat_…"`, or `?patient=pat_…` in an iframe. Prescribe takes Photon ids only. To pass your own patient, give their details (`patient={{ demographic: { … } }}`) and Photon matches them. |
 | `template-ids` | `order={{ patient: { id }, prescriptions: { add: [{ templateId: "…" }] } }}` |
-| `prescription-ids` | `order={{ prescriptions: { add: [{ id: "rx_…" }] } }}`. Embed puts the draft itself on the order rather than copying it. |
+| `prescription-ids` | `order={{ prescriptions: { add: [{ id: "rx_…" }] } }}`. Prescribe puts the draft itself on the order rather than copying it. |
 | `initial-prescriptions`, `template-overrides`, `prescription-overrides` | Draft the prescriptions from your backend with the values you want ([prescription sync](/network/prescription)), then pass their ids. See [One-click orders](/integrations/one-click-orders). |
 | `enable-order`, `enable-send-to-patient` | Always on. **Send** texts the patient, who chooses their pharmacy. |
 | `pharmacy-id` | Set the pharmacy on the draft order from your backend ([`pharmacy`](/network/order#pharmacies)), then open the order by id |
@@ -61,31 +61,31 @@ The iframe takes no client at all. It signs the prescriber in to Photon itself.
 
 ### Events
 
-| Elements event | Embed |
+| Elements event | Prescribe |
 | --- | --- |
 | `photon-order-created` | `onSent(order)`, or the `PhotonOrder.onSent` message from an iframe |
 | `photon-prescriptions-created`, `photon-draft-prescription-created` | `onOrder(order)`, which fires as each prescription is saved or signed. Read them from `order.prescriptions`. A standalone `PhotonPrescription` has `onPrescription(rx)` and `onSigned(rx)`. |
 | `photon-prescriptions-error`, `photon-order-error` | No event. The card shows the error to the prescriber. |
 
-Embed events pass the live object: `order.id` and `order.state`. They don't pass a raw GraphQL payload. For what happens after sending, use [webhooks](/network/webhooks). They haven't changed.
+Prescribe events pass the live object: `order.id` and `order.state`. They don't pass a raw GraphQL payload. For what happens after sending, use [webhooks](/network/webhooks). They haven't changed.
 
 ## 4. Replace deep links
 
 | Before | After |
 | --- | --- |
 | `app.neutron.health/prescriptions/new?patientId=pat_…` | `rx.neutron.health/order?patient=pat_…` |
-| `…&templateIds=tmp_…` | Build the link with `ph.order.url({ patient: { id }, prescriptions: { add: [{ templateId }] } })`. See [App links](/embed/links). |
+| `…&templateIds=tmp_…` | Build the link with `ph.order.url({ patient: { id }, prescriptions: { add: [{ templateId }] } })`. See [App links](/prescribe/links). |
 
 {/* TODO(launch) */}
 ⚠️ `rx.neutron.health` isn't live yet.
 
-## Not in Embed yet
+## Not in Prescribe yet
 
-These Elements features don't have an Embed equivalent yet. If you rely on one, talk to your Photon contact before you migrate.
+These Elements features don't have a Prescribe equivalent yet. If you rely on one, talk to your Photon contact before you migrate.
 
 - Prescriber-chosen pharmacy in the UI: `enable-local-pickup`, `enable-delivery-pharmacies` and `mail-order-ids`. Your backend can still set the pharmacy on a draft order.
 - Catalog limits: `disable-list` and `allow-off-catalog-search`
-- Coverage checks: `enable-coverage-check`. Benefits are coming to Embed as pharmacy offers.
+- Coverage checks: `enable-coverage-check`. Benefits are coming to Prescribe as pharmacy offers.
 - Patient context in the workflow: `weight`, `weight-unit`, `address`, and the `supervisor` for an order
 - `additional-notes`, `hide-templates` and `hide-submit`
 - Recent prescriptions: `<photon-med-history>`, `enable-med-history*` and `enable-combine-and-duplicate`
