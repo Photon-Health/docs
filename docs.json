@@ -40,7 +40,7 @@
             "group": "Integrations",
             "pages": [
               "integrations/overview",
-              "integrations/add-prescribe",
+              "integrations/prescribe-embed",
               "integrations/sync-patients",
               "integrations/one-click-orders",
               "integrations/agent-drafted-orders"
@@ -152,10 +152,6 @@
       "destination": "/prescribe/:slug*"
     },
     {
-      "source": "/integrations/prescribe-embed",
-      "destination": "/integrations/add-prescribe"
-    },
-    {
       "source": "/patient-mutation",
       "destination": "/network/patient"
     },
@@ -209,7 +205,7 @@
     },
     {
       "source": "/integrations/embed-for-a-patient",
-      "destination": "/integrations/add-prescribe"
+      "destination": "/integrations/prescribe-embed"
     },
     {
       "source": "/how-photon-works",
