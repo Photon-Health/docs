@@ -75,7 +75,8 @@
             "pages": [
               "network/graphql",
               "network/patient",
-              "network/prescription"
+              "network/prescription",
+              "network/order"
             ]
           },
           {
