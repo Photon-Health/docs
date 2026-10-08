@@ -74,7 +74,8 @@
             "group": "GraphQL",
             "pages": [
               "network/graphql",
-              "network/patient"
+              "network/patient",
+              "network/prescription"
             ]
           },
           {

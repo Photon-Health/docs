@@ -1,0 +1,156 @@
+---
+title: "Prescription"
+description: "Look up drugs, draft prescriptions from templates or treatments, and sign them."
+icon: "prescription-bottle-medical"
+---
+
+```graphql
+prescription(prescription: PrescriptionInput!, metadata: RequestMetadata!): PrescriptionResult!
+```
+
+| Call | `prescription` input | Result |
+| --- | --- | --- |
+| **Get** | `{ id }` | The prescription, draft or signed. Nothing changes. |
+| **Sync**, no patient | `{ treatment }` | A drug lookup: the matches come back as options. **Nothing is created.** |
+| **Sync** | `{ patient, templateId }` or `{ patient, treatment, … }` | A new draft, or the patient's draft in progress continued |
+| **Update** | `{ id, …fields }` | That draft, with only those fields changed |
+| **Sign** | `{ id, signing: { signedHash } }` | The prescription, signed. Needs a [user token](/authentication). |
+
+Every call screens the draft and returns its `status` and `screeningAlerts`. See [Screening](/network/screening).
+
+## Example
+
+<CodeGroup>
+
+```graphql Mutation
+mutation Prescription($prescription: PrescriptionInput!, $metadata: RequestMetadata!) {
+  prescription(prescription: $prescription, metadata: $metadata) {
+    __typename
+    ... on PrescriptionPayload {
+      prescription {
+        id
+        status
+        treatment { id name }
+        instructions
+        dispense { quantity unit daysSupply refillsAllowed }
+        screeningAlerts { severity type description }
+        signing { state contentHash }
+      }
+      unappliedChanges { key status severity reason options { displayName argument value } }
+    }
+    ... on AmbiguousPrescriptionMatch { reason candidates { id instructions } }
+    ... on OperationError { code message }
+  }
+}
+```
+
+```json From a template
+{
+  "prescription": {
+    "patient": { "id": "pat_01M3WQQHRB1T0K1469KD18BAWX" },
+    "templateId": "YOUR_TEMPLATE_ID"
+  },
+  "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
+}
+```
+
+```json From a treatment
+{
+  "prescription": {
+    "patient": { "id": "pat_01M3WQQHRB1T0K1469KD18BAWX" },
+    "treatment": { "rxNormId": "861007" },
+    "instructions": "Take 1 tablet by mouth twice daily with meals.",
+    "dispense": { "quantity": 60, "unit": "tablet", "daysSupply": 30, "refillsAllowed": 2 },
+    "clinical": { "diagnoses": { "add": [{ "icd10Code": "E11.9" }] } }
+  },
+  "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
+}
+```
+
+```json Look up a drug
+{
+  "prescription": { "treatment": { "name": "lisinopril 10 mg" } },
+  "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
+}
+```
+
+```json Sign
+{
+  "prescription": {
+    "id": "rx_01M3WXVP8G9GB7811W74VE3ZTP",
+    "signing": { "signedHash": "211ce2887eb9ed5c3c383a1950617decd0e75acc33e258b85fae3f354ddea8f4" }
+  },
+  "metadata": { "source": "WEB_APP", "client": "acme-ehr" }
+}
+```
+
+</CodeGroup>
+
+## Choosing the drug
+
+Identify the treatment by exactly one of `id`, `rxNormId`, `ndc`, `upc` or `name`, or start from a `templateId`, which fills in the drug, sig and dispense. An `id` resolves exactly. A name that fits several products comes back as an `AMBIGUOUS` change whose options are the candidate drugs. Resend with the chosen option's `value` (a `treatment.id`). See [Changes and choices](/network/changes).
+
+Syncing without a patient is a safe lookup that never creates anything. Use it to resolve the drug before you draft.
+
+<Warning>
+  Always send a `templateId` or a `treatment` when you draft. With a patient, a sync may continue a draft the patient already has in progress. If they have several, you get `AmbiguousPrescriptionMatch`. Resend with the `id` of the one you mean.
+</Warning>
+
+## Signing
+
+Signing is the prescriber's approval of exactly what they reviewed:
+
+1. Every response includes `signing.contentHash`, a hash of the prescription's current clinical content.
+2. Show the prescriber the prescription and its screening alerts.
+3. Send that hash back as `signing.signedHash`, and send no other changes in the same call.
+
+If the content changed after the prescriber reviewed it, the hashes don't match. Photon rejects the attempt and returns `INVALIDATED_SIGN`. Show the prescriber the new content and sign again.
+
+| `signing.state` | Meaning |
+| --- | --- |
+| `UNSIGNED` | Not signed yet |
+| `SIGNED` | Signed. The prescription is final, and a change means writing a new one. |
+| `INVALIDATED_SIGN` | The hash sent doesn't match the current content |
+
+<Note>
+  Only a prescriber's [user token](/authentication) can sign. A machine token gets an `UnauthorizedError`. Most integrations let [Embed](/embed/overview) do the signing.
+</Note>
+
+## Fields
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id` | `ID` | Leave it out to draft a new prescription |
+| `patient` | `PatientReferenceInput` | Usually `{ id }`. Without it, a sync only looks the drug up. |
+| `templateId` | `ID` | Fills in the drug, sig and dispense |
+| `treatment` | `TreatmentReferenceInput` | Exactly one of `id`, `rxNormId`, `name`, `ndc` or `upc` |
+| `instructions` | `String` | The sig |
+| `dispense` | `{ quantity, unit, daysSupply, refillsAllowed, dispenseAsWritten }` | |
+| `clinical` | `{ diagnoses, notes }` | `diagnoses` is a patch of the ICD-10 codes that justify this prescription |
+| `signing` | `{ signedHash, message }` | See [Signing](#signing) |
+
+<Accordion title="Full selection set">
+
+```graphql
+fragment PrescriptionFields on Prescription {
+  id
+  status
+  templateId
+  patient { id }
+  treatment { id name rxNormId ndc upc }
+  instructions
+  dispense { quantity unit daysSupply refillsAllowed dispenseAsWritten }
+  clinical { diagnoses { id name icd10Code } notes }
+  screeningAlerts {
+    severity
+    type
+    description
+    category
+    involvedEntities { id name }
+    options { displayName reason operation argument value }
+  }
+  signing { state contentHash message signedAt }
+}
+```
+
+</Accordion>
