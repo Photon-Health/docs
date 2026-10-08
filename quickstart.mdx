@@ -1,0 +1,77 @@
+---
+title: "Quickstart"
+description: "Prescribe from your own app in the Neutron sandbox."
+icon: "bolt"
+---
+
+In a few minutes you'll render Photon's order card in your app, prescribe for a test patient, and send it. Everything here runs in **Neutron**, the sandbox, where nothing reaches a real pharmacy.
+
+<Steps>
+  <Step title="Get a sandbox">
+    [Sign up for Neutron](https://photonhealth.com/onboard#developer). Your account is ready right away.
+
+    In the [dashboard](https://app.neutron.health/settings/developers), open **Settings → Developers**. Copy your **Application** `client_id`, and add your app's URL (for example, `http://localhost:5173`) to its allowed URLs.
+  </Step>
+  <Step title="Install">
+    ```bash
+    npm install @photon-rx/react @photon-rx/core
+    ```
+
+    {/* TODO(launch): publish to npm, then delete this line. */}
+    ⚠️ Not published to npm yet.
+  </Step>
+  <Step title="Render the order card">
+    Pass a test patient. Photon finds them or adds them.
+
+    ```tsx Prescribe.tsx
+    import { PhotonOrder, PhotonProvider } from "@photon-rx/react";
+    import "@photon-rx/react/styles.css";
+
+    export function Prescribe() {
+      return (
+        <PhotonProvider clientId="YOUR_CLIENT_ID" environment="neutron">
+          <PhotonOrder
+            patient={{
+              demographic: {
+                name: { first: "Paige", last: "Turner" },
+                dateOfBirth: "1990-01-01",
+                sex: "FEMALE",
+                phone: "+13175550142",
+              },
+            }}
+            onSent={(order) => console.log("Sent", order.id)}
+          />
+        </PhotonProvider>
+      );
+    }
+    ```
+  </Step>
+  <Step title="Prescribe">
+    1. Click **Sign in to Photon** and sign in with your Neutron account.
+    2. Search for a drug, such as `amlodipine`, and fill in the sig and quantity. Screening runs as you go.
+    3. Click **Sign**, then **Send**.
+
+    In production, the patient would now get a text with their pharmacy options and prices. In Neutron, the order is created but never sent to a real pharmacy.
+  </Step>
+</Steps>
+
+<Tip>
+  Not using React? The [iframe](/embed/iframe) does the same with a URL and needs no credentials.
+</Tip>
+
+## Next
+
+<CardGroup cols={2}>
+  <Card title="Architecture" icon="sitemap" href="/architecture">
+    Patients, prescriptions and orders, and how Photon decides.
+  </Card>
+  <Card title="Choose an integration" icon="route" href="/integrations/overview">
+    From one component to backend-drafted and agent-drafted orders.
+  </Card>
+  <Card title="Authentication" icon="lock" href="/authentication">
+    User and machine tokens, and who can sign.
+  </Card>
+  <Card title="Environments" icon="server" href="/environments">
+    Neutron for building, Photon for production.
+  </Card>
+</CardGroup>

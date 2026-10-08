@@ -1,17 +1,49 @@
 ---
 title: "Photon"
 sidebarTitle: "Introduction"
-description: "Let prescribers in your product write, sign and send prescriptions."
+description: "Prescribing infrastructure for tech-enabled care: fast, safe and secure for prescribers, with price transparency and choice for patients."
 icon: "rocket-launch"
 ---
 
-Photon lets your product prescribe. A prescriber finds the patient, writes the prescription, signs it and sends it. The patient then picks a pharmacy and gets their medication.
+Photon is prescribing infrastructure for telehealth and virtual-care platforms. It lets prescribers in your product write prescriptions **quickly, safely and securely**. Above all, it gives patients **price transparency and a real choice** of where to fill them.
 
-Photon comes as two products: 
+## For patients: price transparency and choice
+
+Most prescriptions are sent straight to a pharmacy before the patient knows what they'll pay or whether it's in stock. Photon reverses that:
+
+<CardGroup cols={2}>
+  <Card title="Choose before it's sent" icon="hand-pointer">
+    The patient gets a secure text link with pharmacy options in real time. They compare price, hours, delivery and availability, then pick. Nothing is routed until they do.
+  </Card>
+
+  <Card title="See the price up front" icon="tag">
+    Each pharmacy option shows its price, including discount-card and sponsored offers where they apply, so the patient picks knowing what they'll pay.
+  </Card>
+
+  <Card title="Stay informed" icon="bell">
+    The patient gets status updates and out-of-stock alerts as their order moves.
+  </Card>
+
+  <Card title="Switch in one tap" icon="arrows-rotate">
+    If a pharmacy can't fill the order, the patient reroutes it themselves. Your care team stays out of the loop.
+  </Card>
+</CardGroup>
+
+More prescriptions get filled, more affordably, with less work for your team.
+
+## For prescribers: fast, safe, secure
+
+|  | How |
+| --- | --- |
+| **Fast** | Templates fill in the drug, sig and quantity. Drug names resolve to the catalog as the prescriber types. Your backend or an agent can draft the whole order, so the prescriber only reviews, signs and sends. |
+| **Safe** | Every prescription is screened against the patient's allergies, medications and conditions before it's signed. When Photon isn't sure which patient or drug is meant, it asks rather than guessing. |
+| **Secure** | Only a signed-in prescriber can sign, and the signature covers exactly what they reviewed. Tokens are scoped to one organization, and machine credentials can draft but never sign. |
+
+## Two products
 
 <CardGroup cols={2}>
   <Card title="Embed" icon="window" href="/embed/overview">
-    The prescribing UI: React components, an iframe or a link. It handles sign-in, drug search, screening, signing and sending.
+    The prescribing UI: React components, an iframe or a link. It handles sign-in, drug search, screening, signing and sending, in your app.
   </Card>
 
   <Card title="Network" icon="diagram-project" href="/network/overview">
@@ -19,35 +51,8 @@ Photon comes as two products:
   </Card>
 </CardGroup>
 
-Most integrations use both: Embed for the prescriber, and Network from your backend to fill in what you already know.
+Most platforms use both: Embed for the prescriber, and Network to fill in what your product already knows.
 
-## Start here
-
-<Steps>
-  <Step title="Get a sandbox">
-    [Request a Neutron sandbox](https://photonhealth.com/onboard#developer), then find your credentials in the [dashboard](https://app.neutron.health/settings/developers). See [Environments](/environments).
-  </Step>
-  <Step title="Learn the model">
-    Photon has three records: patients, prescriptions and orders. [Architecture](/architecture) covers them in a few minutes.
-  </Step>
-  <Step title="Add the prescribe embed">
-    Most teams start with one component on their patient page. See [Prescribe embed](/integrations/prescribe-embed).
-  </Step>
-</Steps>
-
-```tsx
-import { PhotonOrder, PhotonProvider } from "@photon-rx/react";
-
-<PhotonProvider clientId="YOUR_CLIENT_ID" environment="neutron">
-  <PhotonOrder
-    patient={{
-      demographic: {
-        name: { first: "Paige", last: "Turner" },
-        dateOfBirth: "1990-01-01",
-        sex: "FEMALE",
-        phone: "+13175550142",
-      },
-    }}
-  />
-</PhotonProvider>
-```
+<Card title="Quickstart" icon="bolt" horizontal href="/quickstart">
+  Prescribe from your own app in Neutron, the sandbox, in a few minutes.
+</Card>
