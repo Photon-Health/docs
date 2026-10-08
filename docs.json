@@ -199,8 +199,8 @@
     }
   ],
   "favicon": {
-    "light": "/favicon-dark.svg",
-    "dark": "/favicon.svg"
+    "light": "/favicon.svg",
+    "dark": "/favicon-dark.svg"
   },
   "integrations": {
     "gtm": {
