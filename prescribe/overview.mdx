@@ -11,11 +11,26 @@ Prescribe is Photon's prescribing UI. It runs the prescriber's whole workflow, a
 
 Every prescription follows the same steps, however you integrate:
 
-1. **Patient.** The prescriber finds the patient, or Photon matches or adds them from what you pass.
-2. **Draft.** Each drug becomes a draft prescription with its sig and quantity. Photon screens it against the patient's allergies, medications and conditions as it's written.
-3. **Sign.** The prescriber reviews each draft and signs it.
-4. **Send.** The signed prescriptions go out together as one order.
-5. **Choose.** Photon texts the patient, who compares prices and picks a pharmacy. Nothing is routed until they do.
+<Steps>
+  <Step title="Intake patient">
+    Find the patient, or add them. Photon matches what you pass to an existing record before it creates a new one.
+  </Step>
+  <Step title="Draft prescription">
+    Each drug becomes a draft with its sig and quantity. Photon screens it against the patient's allergies, medications and conditions, and checks it against their benefits, as it's written.
+  </Step>
+  <Step title="Sign prescription">
+    The prescriber reviews the draft and signs it. Repeat for each prescription on the order.
+  </Step>
+  <Step title="Send order">
+    The signed prescriptions go out together as one order. Choosing a pharmacy now is optional.
+  </Step>
+  <Step title="Shop order">
+    Compare prices for the whole order across pharmacies. By default, Photon texts the patient a link to shop.
+  </Step>
+  <Step title="Fulfill order">
+    Route the order to the chosen pharmacy. Nothing is routed until a pharmacy is chosen.
+  </Step>
+</Steps>
 
 Anyone can draft, but only a signed-in prescriber can sign. See [Architecture](/architecture) for the records behind these steps.
 
