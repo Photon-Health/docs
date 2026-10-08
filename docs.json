@@ -51,7 +51,8 @@
           {
             "group": "Embed",
             "pages": [
-              "embed/overview"
+              "embed/overview",
+              "embed/react"
             ]
           }
         ]
