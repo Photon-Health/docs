@@ -18,6 +18,8 @@ Every request to Photon carries an OAuth token in the `Authorization` header. A 
   **Machine tokens can't sign prescriptions.** Signing needs the `write:prescription` permission, which machine tokens can never be given. Your backend can sync patients, draft prescriptions and draft orders, but a signed-in prescriber always signs. That step happens in a browser, with a user token.
 </Warning>
 
+That's why Photon ships [Embed](/embed/overview). It signs the prescriber in, holds their token, and runs the signing and sending, so your frontend never handles a token or calls GraphQL itself. We don't recommend calling the API directly from a frontend. When you need lower-level control in the browser, use the [JavaScript client](/embed/javascript): it handles sign-in, tokens and the workflow rules for you.
+
 ## Permissions
 
 | Permission | Lets a token | User token | Machine token |
@@ -28,8 +30,6 @@ Every request to Photon carries an OAuth token in the `Authorization` header. A 
 | `write:order` | Draft, update and submit orders | ✓ | ✓ |
 
 Drafting and editing a prescription doesn't need `write:prescription`. Only signing does. A machine token can submit an order whose prescriptions a prescriber has already signed.
-
-That's why Photon ships [Embed](/embed/overview). It signs the prescriber in, holds their token, and runs the signing and sending, so your frontend never handles a token or calls GraphQL itself. We don't recommend calling the API directly from a frontend. When you need lower-level control in the browser, use the [JavaScript client](/embed/javascript): it handles sign-in, tokens and the workflow rules for you.
 
 ## Credentials
 
