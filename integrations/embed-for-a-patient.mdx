@@ -1,0 +1,84 @@
+---
+title: "Embed for a patient"
+description: "Add prescribing to your patient page with one component."
+icon: "window"
+---
+
+The simplest integration is entirely in your frontend. Your patient page gets a **Prescribe** button, and the prescriber writes, signs and sends without leaving your app. You need no backend work and no Photon ids up front.
+
+## What you need
+
+- An **Application** `client_id` from the [Neutron dashboard](https://app.neutron.health/settings/developers), with your app's URL in its allowed URLs
+- A prescriber account in your Neutron organization
+
+## 1. Install
+
+```bash
+npm install @photon-rx/react @photon-rx/core
+```
+
+## 2. Render the order for your patient
+
+Pass the patient as you have them. Photon finds the matching record or adds a new one.
+
+```tsx Prescribe.tsx
+import { PhotonOrder, PhotonProvider } from "@photon-rx/react";
+import "@photon-rx/react/styles.css";
+
+export function Prescribe({ patient, onDone }) {
+  return (
+    <PhotonProvider clientId="YOUR_CLIENT_ID" environment="neutron">
+      <PhotonOrder
+        patient={{
+          demographic: {
+            name: { first: patient.firstName, last: patient.lastName },
+            dateOfBirth: patient.dateOfBirth, // "1990-01-01"
+            sex: patient.sex, // "FEMALE" | "MALE" | "UNKNOWN"
+            phone: patient.mobile, // needed to send: Photon texts the patient
+            email: patient.email,
+          },
+        }}
+        fixed
+        onPatient={(p) => p && savePhotonPatientId(patient.id, p.id)}
+        onSent={() => onDone()}
+      />
+    </PhotonProvider>
+  );
+}
+```
+
+What happens:
+
+1. The first time, the card shows **Sign in to Photon**. The prescriber signs in and stays signed in.
+2. Photon matches the patient. If it isn't sure, the prescriber picks from the candidates. If there's no match, Photon adds the patient.
+3. The prescriber searches for a drug and fills in the sig and quantity. Screening runs as they type.
+4. They sign each prescription, then click **Send**. Photon texts the patient a link to choose a pharmacy.
+
+`fixed` hides **Change patient**, because your page is already about this patient.
+
+## 3. Keep the Photon id
+
+`onPatient` gives you the patient once Photon has a record. Store `p.id` (`pat_…`) beside your own patient. Next time, pass the id instead of the details:
+
+```tsx
+<PhotonOrder patient="pat_01M3WQQHRB1T0K1469KD18BAWX" fixed onSent={onDone} />
+```
+
+If your details changed, pass the id together with them, and Photon updates only those fields:
+
+```tsx
+<PhotonOrder patient={{ id: photonPatientId, demographic: { phone: patient.mobile } }} fixed />
+```
+
+## Not using React?
+
+The [iframe](/embed/iframe) does the same with a URL and needs no credentials:
+
+```html
+<iframe src="https://rx.neutron.health/order/embed?patient=pat_01M3WQQHRB1T0K1469KD18BAWX" title="Prescribe" style="width: 100%; border: 0"></iframe>
+```
+
+## Next
+
+- [Sync patients](/integrations/sync-patients) from your backend, so allergies and medications are already there for screening.
+- [Every prop](/embed/react) on `PhotonOrder` and `PhotonProvider`.
