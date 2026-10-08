@@ -86,7 +86,8 @@
           {
             "group": "MCP",
             "pages": [
-              "network/mcp"
+              "network/mcp",
+              "network/mcp/connect"
             ]
           }
         ]

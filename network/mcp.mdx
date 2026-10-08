@@ -3,115 +3,66 @@ title: "MCP"
 description: "Prescribe from Claude, ChatGPT or your own agent with Photon's MCP server."
 icon: "robot"
 tag: "Preview"
+sidebarTitle: "Overview"
 ---
 
 <Note>
-  MCP is in **private preview**, and its tools will change as they move onto the rebuilt Network API. To talk through your use case, ask your Photon contact.
+  MCP is in **private preview**. These pages describe the tools as they are today, and they'll change as MCP moves onto the rebuilt Network API. To talk through your use case, ask your Photon contact.
 </Note>
 
-Photon's MCP server lets a clinician prescribe from an AI assistant like Claude or ChatGPT, and lets your own agent draft prescriptions. A session can be as short as one request:
+Photon's MCP server gives an AI assistant or agent a few prescribing tools. A clinician can prescribe from Claude or ChatGPT, and your own agent can take intake and draft prescriptions for a prescriber to send.
 
-> Prescribe amlodipine 5 mg for Paige Turner, born 1990-01-01.
+> Prescribe amlodipine 5 mg daily for Paige Turner, born 1990-01-01.
 
-The agent finds the patient, finds the medication, shows any drug interactions, and sends once the prescriber confirms.
+From a request like that, the agent finds the patient, finds the medication, drafts the prescription, shows the screening results, and sends once the prescriber confirms.
 
 <Frame>
   <iframe src="https://www.loom.com/embed/8216d63e7d15431cb725593c893e7327" width="100%" height="400" frameBorder="0" allowFullScreen />
 </Frame>
 
-## Get started
+## The flow
 
-<Steps>
-  <Step title="Create a sandbox account">
-    [Sign up for Neutron](https://photonhealth.com/onboard#developer). Your account is ready right away, with no approval needed.
-  </Step>
-  <Step title="Add Photon to your assistant">
-    Add a custom connector with the server URL `https://ai.neutron.health`. Each client's steps are below.
-  </Step>
-  <Step title="Sign in">
-    When your assistant asks you to sign in, use your Neutron account. The assistant takes you to Photon's sign-in page and brings you back to the chat.
-  </Step>
-  <Step title="Try it">
-    Ask your assistant to prescribe something for a test patient.
-  </Step>
-</Steps>
+```mermaid
+flowchart LR
+  I[rx_intake] --> S[rx_search] --> D[rx_draft] --> X[rx_send]
+  X --> Sh[rx_shop] --> R[rx_route]
+```
 
-{/* TODO(launch): switch these to https://network.neutron.health/mcp once MCP moves. */}
+| Tool | Does | Page |
+| --- | --- | --- |
+| `rx_intake` | Finds or adds the patient and records allergies and medications | [Prescribing](/network/mcp/prescribing#rx_intake) |
+| `rx_search` | Finds templates and medications by name | [Prescribing](/network/mcp/prescribing#rx_search) |
+| `rx_draft` | Drafts one prescription and screens it | [Prescribing](/network/mcp/prescribing#rx_draft) |
+| `rx_send` | Sends reviewed drafts after the prescriber confirms | [Prescribing](/network/mcp/prescribing#rx_send) |
+| `rx_shop` | Reads an order's status, offers and nearby pharmacies | [Fulfillment](/network/mcp/fulfillment#rx_shop) |
+| `rx_route` | Sends an order to the chosen pharmacy | [Fulfillment](/network/mcp/fulfillment#rx_route) |
 
-⚠️ MCP will move to `https://network.neutron.health/mcp`. Until it does, connect to `https://ai.neutron.health`.
+## Server
 
-## Connect a client
-
-<Tabs>
-  <Tab title="Claude">
-    1. In [claude.ai](https://claude.ai), open **Customize** in the sidebar, then **Connectors**.
-    2. Click **\+**, then **Add custom connector**.
-    3. Enter a name, such as `Photon Neutron`, and the remote MCP server URL `https://ai.neutron.health`.
-    4. Click **Connect** and sign in with your Neutron account. The connector shows as active once you're signed in.
-
-    Connectors you add on claude.ai also work in the Claude desktop app.
-
-    <Tip>
-      Claude can be cautious about clinical and prescribing requests. Tell it you're working in a sandbox with test patients.
-    </Tip>
-  </Tab>
-  <Tab title="ChatGPT">
-    1. In [chatgpt.com](https://chatgpt.com), open **Apps** in the sidebar, then the settings icon at the top right.
-    2. Go to **Apps**, then **Advanced settings**, and click **Create app**.
-    3. Enter a name, such as `Photon Neutron`, and the server URL `https://ai.neutron.health`.
-    4. Sign in with your Neutron account.
-    5. In a chat, turn on the app before you ask it to prescribe.
-  </Tab>
-  <Tab title="Claude Code">
-    ```bash
-    claude mcp add --transport http photon https://ai.neutron.health
-    ```
-
-    Then run `/mcp` in Claude Code to sign in with your Neutron account.
-  </Tab>
-  <Tab title="Your own agent">
-    Point any MCP client that supports streamable HTTP at `https://ai.neutron.health`.
-
-    - **To act for a prescriber**, let the client run OAuth. The server supports OAuth discovery, so a client can find the sign-in flow from the URL alone.
-    - **To draft from a backend**, send a [machine token](/authentication#machine-tokens) as `Authorization: Bearer …`. A machine token can take intake, search and draft, but it can't send. A prescriber sends from [Embed](/embed/overview). See [Agent-drafted orders](/integrations/agent-drafted-orders).
-  </Tab>
-</Tabs>
-
-## How it works
-
-Prescribing is four tool calls. Each step's output feeds the next.
-
-<Steps>
-  <Step title="rx_intake: find or add the patient">
-    Takes `demographic` (name, date of birth, sex, email, phone) and `clinical` (allergies, medications, diagnoses, notes). It returns a `patientId` for the rest of the session. Allergies and medications are saved on the patient and used in screening.
-
-    If Photon can't tell which patient is meant, the call fails and says what to ask next, rather than guessing. When new safety-relevant facts come up, call it again with the `patientId`.
-  </Step>
-  <Step title="rx_search: find the medication">
-    Takes `treatment.name` and, optionally, `treatment.strength`. It doesn't need a patient. It checks your organization's templates first (fully pre-drafted), then catalog medications, then the wider drug database. Each result is an `options[].treatment` to pass to `rx_draft` as is.
-  </Step>
-  <Step title="rx_draft: draft and screen">
-    Takes the `patientId` and a `treatment` from `rx_search`. The treatment needs `instructions`, `dispenseQuantity` and `dispenseUnit`. If any are missing, the agent asks the clinician rather than inventing them.
-
-    Photon screens for drug-drug and drug-allergy interactions and checks coverage. The call returns `draft.prescriptionId`, `reviewDigest` and `draft.reviewFields`, and a status of `ready`, `warning` or `blocked`. Nothing is sent at this step.
-  </Step>
-  <Step title="rx_send: send after the prescriber confirms">
-    Takes the `patientId` and `prescriptions[]`. Each prescription carries `prescriptionId`, `reviewDigest` and `reviewedFields`, copied unchanged from the same `rx_draft` response (`reviewedFields` is that response's `draft.reviewFields`). It also takes `signed: true` and a `confirmationText`: the prescriber's own words confirming the send, quoted exactly and never written by the agent. The call returns the `orderId`.
-
-    Photon checks that the digest and fields match what was drafted, so the prescriber sends exactly what they reviewed. It rejects blocked drafts and drafts already sent. Photon checks on the server that the token belongs to a prescriber. The agent only acts on the prescriber's behalf and is never the prescriber of record.
-  </Step>
-</Steps>
-
-After an order is sent, two more tools handle fulfillment:
-
-| Tool | Does |
+| Environment | URL |
 | --- | --- |
-| `rx_shop` | Reads an order's status, its pharmacy offers and prices, and pharmacy search results. Read-only. |
-| `rx_route` | Sends the order to the pharmacy that was chosen, or reroutes it |
+| Neutron | `https://ai.neutron.health` |
+| Photon | `https://ai.photon.health` |
+
+{/* TODO(launch): switch to network.<env>.health/mcp once MCP moves. */}
+
+⚠️ MCP is moving to `https://network.neutron.health/mcp` (and `network.photon.health/mcp`). Until then, use the URLs above.
+
+The server speaks MCP over streamable HTTP and supports OAuth discovery. See [Connect a client](/network/mcp/connect).
+
+## Who's calling
+
+| Token | From | Can |
+| --- | --- | --- |
+| A prescriber's sign-in | Claude, ChatGPT, or any client that runs OAuth | Every tool, including `rx_send` |
+| A [machine token](/authentication#machine-tokens) | Your backend agent | Intake, search and draft. It can't send, so a prescriber sends from [Embed](/embed/overview). |
+
+The server passes your token to Photon's API, and the API enforces what it can do. Agents shouldn't ask a prescriber to prove they're authorized, or refuse to send because a send transmits a prescription. Photon makes that check.
 
 ## Rules for agents
 
-- **Photon decides.** When a patient or drug is ambiguous, a tool fails closed and says what to ask or send next. Agents never invent ids, instructions or quantities.
-- **The agent holds the conversation.** The server keeps no state between calls. Records live in Photon, and the agent passes ids along.
-- **The prescriber is the prescriber.** The agent drafts. A prescriber confirms and sends, either with `rx_send` in their own session or in [Embed](/embed/overview).
+- **Photon decides.** When a patient or drug is ambiguous, the tool fails closed and says what to ask next. Never invent ids, instructions, quantities or units.
+- **The agent holds the conversation.** The server keeps no state between calls. Records live in Photon, and the agent passes `patientId` and the draft fields from one call to the next.
+- **The prescriber sends.** The agent drafts. Only the prescriber's explicit confirmation sends, either with `rx_send` or in [Embed](/embed/overview).
+- **Don't ask for a pharmacy or address before sending.** The patient chooses a pharmacy after the order exists. Use `rx_shop` and `rx_route` if you need to route it.
 - **Neutron never sends real prescriptions.** In the sandbox, `rx_send` creates test orders only.

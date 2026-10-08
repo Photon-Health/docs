@@ -1,0 +1,55 @@
+---
+title: "Connect a client"
+description: "Add Photon to Claude, ChatGPT, Claude Code or your own agent."
+icon: "plug"
+---
+
+## Before you start
+
+1. [Create a Neutron account](https://photonhealth.com/onboard#developer). It's ready right away, with no approval needed.
+2. Use the server URL `https://ai.neutron.health`.
+
+When your client asks you to sign in, use your Neutron account. The client opens Photon's sign-in page and brings you back afterward.
+
+<Tabs>
+  <Tab title="Claude">
+    1. In [claude.ai](https://claude.ai), open **Customize** in the sidebar, then **Connectors**.
+    2. Click **+**, then **Add custom connector**.
+    3. Enter a name, such as `Photon Neutron`, and the remote MCP server URL `https://ai.neutron.health`.
+    4. Click **Connect** and sign in with your Neutron account. The connector shows as active once you're signed in.
+
+    Connectors you add on claude.ai also work in the Claude desktop and mobile apps.
+  </Tab>
+  <Tab title="ChatGPT">
+    1. In [chatgpt.com](https://chatgpt.com), open **Settings**, then **Apps**.
+    2. Under **Advanced settings**, click **Create app**.
+    3. Enter a name, such as `Photon Neutron`, and the server URL `https://ai.neutron.health`.
+    4. Sign in with your Neutron account.
+    5. In a chat, turn on the app before you ask it to prescribe.
+  </Tab>
+  <Tab title="Claude Code">
+    ```bash
+    claude mcp add --transport http photon https://ai.neutron.health
+    ```
+
+    Then run `/mcp` in Claude Code to sign in with your Neutron account.
+  </Tab>
+  <Tab title="Your own agent">
+    Point any MCP client that supports streamable HTTP at `https://ai.neutron.health`.
+
+    - **To act for a prescriber**, let the client run OAuth. Without a token, the server answers with a `401` challenge that points to its OAuth metadata at `/.well-known/oauth-protected-resource`, so the client can find the sign-in flow from the URL alone.
+    - **To draft from a backend**, send a [machine token](/authentication#machine-tokens) as `Authorization: Bearer …`. A machine token can take intake, search and draft, but it can't send. A prescriber sends from [Embed](/embed/overview). See [Agent-drafted orders](/integrations/agent-drafted-orders).
+  </Tab>
+</Tabs>
+
+## Try it
+
+Ask for a prescription for a test patient:
+
+> Prescribe amlodipine 5 mg, one tablet daily, 30 tablets, for Paige Turner, born 1990-01-01, female.
+
+The agent calls `rx_intake`, `rx_search` and `rx_draft`, then shows you the draft and any screening alerts. It sends only when you confirm.
+
+<Tip>
+  Assistants can be cautious about clinical requests. Tell yours that you're working in Photon's Neutron sandbox with test patients.
+</Tip>
