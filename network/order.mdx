@@ -13,7 +13,7 @@ order(order: OrderInput!, metadata: RequestMetadata!): OrderResult!
 | **Get** | `{ id }` | The order, with its patient, prescriptions and pharmacy. Nothing changes. |
 | **Sync** | `{ patient, prescriptions }` | The patient's draft order with these prescriptions added, or a new draft |
 | **Update** | `{ id, prescriptions?, pharmacy?, state? }` | That order, with only those fields changed |
-| **Send** | `{ id, state: SUBMITTED }` | The order, submitted. Photon texts the patient. |
+| **Send** | `{ id, state: SUBMITTED }` | The order, submitted, and Photon texts the patient. Needs [`write:order`](/authentication#permissions). Drafting needs only `read:order`. |
 
 ## States
 

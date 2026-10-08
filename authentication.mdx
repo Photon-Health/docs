@@ -25,15 +25,17 @@ That's why Photon ships [Embed](/embed/overview). It signs the prescriber in, ho
 | Permission | Lets a token | User token | Machine token |
 | --- | --- | --- | --- |
 | `read:patient` | Read patients | ✓ | ✓ |
-| `write:patient` | Find, add and update patients | ✓ | ✓ |
+| `write:patient` | Add, edit and update patients | ✓ | ✓ |
 | `read:prescription` | Read, look up and **draft** prescriptions | ✓ | ✓ |
 | `write:prescription` | **Sign** prescriptions | Prescribers only | Never |
-| `read:order` | Read orders | ✓ | ✓ |
-| `write:order` | Draft, update and submit orders | ✓ | ✓ |
+| `read:order` | Read and **draft** orders | ✓ | ✓ |
+| `write:order` | **Send** orders | ✓ | ✓ |
+
+`read:` covers drafting. `write:` covers the step that commits: changing a patient, signing a prescription, sending an order.
 
 A user token carries the permissions of the person's role. Prescribers have all of them. Other roles, such as medical operations, have everything except `write:prescription`.
 
-Drafting and editing a prescription doesn't need `write:prescription`. Only signing does. A machine token can submit an order whose prescriptions a prescriber has already signed.
+A machine token can send an order once a prescriber has signed every prescription on it.
 
 ## Credentials
 
