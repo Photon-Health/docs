@@ -1,0 +1,67 @@
+---
+title: "Making requests"
+description: "The endpoint, the metadata every call carries, and the result shape."
+icon: "code"
+---
+
+Every call is a `POST` to one endpoint, with a [bearer token](/authentication):
+
+```text
+https://network.neutron.health/graphql
+```
+
+The endpoint supports introspection, so you can point GraphiQL, Postman or your code generator at it to browse the schema or generate types.
+
+## A first call
+
+```bash
+curl https://network.neutron.health/graphql \
+  --request POST \
+  --header "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "query": "mutation ($patient: PatientInput!, $metadata: RequestMetadata!) { patient(patient: $patient, metadata: $metadata) { __typename ... on PatientPayload { patient { ... on Patient { id } } } } }",
+    "variables": {
+      "patient": { "id": "pat_01M3WQQHRB1T0K1469KD18BAWX" },
+      "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
+    }
+  }'
+```
+
+The [Sync patients](/integrations/sync-patients#1-sync-the-patient) guide has a small Node.js client that caches the machine token.
+
+## Metadata
+
+Every mutation takes a `metadata` argument that says who is calling. Photon uses it for audit logs and support.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `source` | Yes | The kind of caller. Backends use `DIRECT_API`. |
+| `client` | No | Your application's name, such as `"acme-ehr"` |
+| `sourceVersion` | No | Your application's version, such as `"2.4.1"` |
+| `requestId` | No | Your own trace id for this call, to match it with your logs |
+
+`source` is one of `DIRECT_API`, `WEB_APP`, `EMBEDDABLE_COMPONENT`, `MCP_CONNECTOR` or `LLM_AGENT`.
+
+<Tip>
+  Set `client` and `requestId`. When you contact support, they're the fastest way for us to find your calls.
+</Tip>
+
+## The result
+
+Each mutation returns a union, so always select `__typename` and branch on it:
+
+| `__typename` | Meaning |
+| --- | --- |
+| `PatientPayload`, `PrescriptionPayload`, `OrderPayload` | The call ran. Read the record and its [changes](/network/changes). |
+| `AmbiguousPatientMatch`, `AmbiguousPrescriptionMatch`, `AmbiguousOrderMatch` | Photon couldn't tell which existing record you meant, so nothing was saved. Resend with the `id` of one of the `candidates`. |
+| `UnauthorizedError` | The token isn't allowed to do this. |
+| `UpstreamServiceError` | A Photon service failed. Retry if `retryable` is true. |
+
+Both errors implement `OperationError`, so you can select them together:
+
+```graphql
+... on OperationError { code message }
+```
+
+See [Errors](/network/errors) for the full checklist.

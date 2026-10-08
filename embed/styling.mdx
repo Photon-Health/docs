@@ -1,0 +1,67 @@
+---
+title: "Styling"
+description: "Make the React components look like the rest of your app."
+icon: "palette"
+---
+
+The React components ship unbranded. They inherit your page's font and colors, so they look like your app from the start. Use one of three levels of control, depending on how much you want to change.
+
+## 1. Inherit (default)
+
+Import the structural stylesheet once:
+
+```tsx
+import "@photon-rx/react/styles.css";
+```
+
+It sets layout only. Its rules have zero specificity, so your own CSS always wins.
+
+## 2. Tune with CSS variables
+
+```css
+:root {
+  --prx-accent: #4f46e5;
+  --prx-on-accent: #ffffff;
+  --prx-radius: 0.5rem;
+  --prx-surface: #ffffff;
+  --prx-border: #e5e7eb;
+}
+```
+
+The stylesheet also reads `--prx-success`, `--prx-warning`, `--prx-critical` and `--prx-info` for status colors.
+
+## 3. Use your own components
+
+The cards draw everything through a small set of building blocks: `Stack`, `Card`, `Button`, `Input`, `Select`, `Alert`, `Badge` and a few more. Map any of them to your design system's components with `components`. The ones you leave out fall back to the defaults.
+
+```tsx
+import { PhotonProvider } from "@photon-rx/react";
+import { Button, Input } from "./design-system";
+
+<PhotonProvider
+  clientId="YOUR_CLIENT_ID"
+  environment="neutron"
+  components={{
+    Button: ({ variant, loading, ...props }) => <Button kind={variant} busy={loading} {...props} />,
+    Input: (props) => <Input {...props} />,
+  }}
+>
+```
+
+The `PhotonComponents` type lists every building block and its props.
+
+### Tailwind
+
+If your app uses Tailwind, use the stock Tailwind set:
+
+```tsx
+import { tailwindComponents } from "@photon-rx/react/tailwind";
+
+<PhotonProvider clientId="YOUR_CLIENT_ID" environment="neutron" components={tailwindComponents}>
+```
+
+These are class strings only, using the default theme. Add the package to Tailwind's sources so the classes are generated:
+
+```css
+@source "../node_modules/@photon-rx/react/dist";
+```

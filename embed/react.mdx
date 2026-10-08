@@ -1,0 +1,113 @@
+---
+title: "React components"
+description: "PhotonProvider, PhotonOrder, PhotonPatient and PhotonPrescription: every prop and event."
+icon:
+  style: "brands"
+  name: "react"
+  library: "fontawesome"
+---
+
+```bash
+npm install @photon-rx/react @photon-rx/core
+```
+
+{/* TODO(launch): publish to npm, then delete this line. */}
+
+⚠️ Not published to npm yet.
+
+```tsx
+import { PhotonOrder, PhotonProvider } from "@photon-rx/react";
+import "@photon-rx/react/styles.css";
+
+export function Prescribe({ photonPatientId, onDone }) {
+  return (
+    <PhotonProvider clientId="YOUR_CLIENT_ID" environment="neutron">
+      <PhotonOrder patient={photonPatientId} fixed onSent={onDone} />
+    </PhotonProvider>
+  );
+}
+```
+
+The cards have no page chrome: no header, no fixed bars, no viewport breakpoints. They size to their container, so they fit a page, a dialog or a side panel.
+
+## PhotonProvider
+
+Wrap the cards in one provider. It signs the prescriber in and gives every card inside it a client.
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `clientId` | `string` | Your Application `client_id`. Public, not a secret. |
+| `environment` | `"neutron" \| "photon"` | Defaults to `"photon"` (production). Set `"neutron"` while you build. |
+| `organization` | `string` | Sign in straight to this organization (`org_…`), skipping the organization picker. |
+| `client` | `Photon` | Your own [JavaScript client](/embed/javascript) instead of `clientId`, for example when you sign in yourself. |
+| `components` | `Partial<PhotonComponents>` | Your design system's building blocks. See [Styling](/embed/styling). |
+| `onAuth` | `({ ok, error }) => void` | Whether Photon accepted the prescriber's token. |
+
+Providers can nest. A nested provider inherits what it doesn't set, and providers with the same `clientId` share one sign-in.
+
+### Signing in
+
+On load, the provider signs in by itself when it can: it finishes a sign-in returning from Photon, or renews a stored session. It never redirects on its own. Otherwise, the first card on the page shows **Sign in to Photon**, and the prescriber clicks it. Inside an iframe, sign-in opens a popup. The cards don't offer sign-out. Your app can sign out with `usePhoton().session.signOut()`.
+
+`useSession()` gives your own chrome the prescriber's name, email and organization.
+
+<Note>
+  The session is stored in your page's `localStorage`, so treat any script injection on that page as a token leak. Moving it out of `localStorage` is on our roadmap.
+</Note>
+
+## PhotonOrder
+
+The patient, a card for each prescription, then **Send**. Send appears once the patient is found, every prescription is signed, and everything is saved.
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `patient` | `string \| PatientInput \| Patient` | Who a new order is for. Without it, the prescriber finds or adds someone. |
+| `order` | `string \| OrderInput \| Order` | An existing order by id, or a new one with prescriptions: `{ patient, prescriptions: { add: [{ templateId }, { id: "rx_…" }] } }`. |
+| `fixed` | `boolean` | Hides **Change patient**. Use it beside your own view of the patient. |
+| `onPatient` | `(patient \| null) => void` | The patient once Photon has a record, and again when it changes. `null` on **Change patient**. |
+| `onOrder` | `(order) => void` | The order once it, its patient or a prescription has a record, and again when any of them changes. |
+| `onSent` | `(order) => void` | Called once, when the order is sent. For example, close your dialog here. |
+
+Without prescriptions, the order starts with one empty line. **Add another prescription** starts from the same template as the first line.
+
+## PhotonPatient
+
+Find or add a patient, then edit them. Each field the prescriber fills in is synced, and Photon decides whether that's a match, a list of candidates, or a new patient.
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `patient` | `string \| PatientInput \| Patient` | The patient. Without it, someone to find or add. |
+| `locked` | `boolean` | Read-only, with no **Change patient**. |
+| `fixed` | `boolean` | No **Change patient**, but still editable. |
+| `onPatient` | `(patient \| null) => void` | The patient once Photon has a record, and again when it changes. `null` on **Change patient**. |
+
+## PhotonPrescription
+
+One prescription: the drug, sig and dispense, screening, and **Sign**. A signed prescription is final.
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `prescription` | `string \| PrescriptionInput \| Prescription` | The prescription by id, or a new one such as `{ templateId }` or `{ treatment: { name } }`. |
+| `patient` | `string \| PatientInput \| Patient` | Who it's for. Until the patient is known, the card only looks drugs up and creates nothing. |
+| `locked` | `boolean` | Read-only. A signed prescription always is. |
+| `onPrescription` | `(rx) => void` | The prescription once Photon has a record, and again when it's saved or signed. |
+| `onSigned` | `(rx) => void` | Called once, when it's signed on this card. |
+
+## Events
+
+Every event gets the live object. `obj.id` is the record's id, and `obj.state` is the record itself, with the same fields as the [API](/network/overview). Events fire when Photon has a record and when that record changes. They don't fire while a save is in flight.
+
+```tsx
+<PhotonOrder
+  patient={photonPatientId}
+  onOrder={(order) => saveOrderId(order.id)}
+  onSent={(order) => {
+    console.log(order.state.state); // "SUBMITTED"
+    closeDialog();
+  }}
+/>
+```
+
+## Live objects as props
+
+Any record prop also takes a live object from the [JavaScript client](/embed/javascript). The card uses it as is and doesn't fetch it again, and anything else holding the same object sees every change.

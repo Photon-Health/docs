@@ -1,0 +1,80 @@
+---
+title: "Agent-drafted orders"
+description: "An agent takes intake and drafts prescriptions over MCP, and a prescriber sends them from Embed."
+icon: "robot"
+tag: "Preview"
+---
+
+<Note>
+  MCP is in **private preview**. To get access, ask your Photon contact.
+</Note>
+
+The most advanced integrations put an agent in front. It talks to the patient or reads the encounter, records what it learns on the patient, finds the right drug, and drafts the prescriptions. A prescriber then opens the drafts in Embed and signs and sends them.
+
+```mermaid
+sequenceDiagram
+  participant A as Your agent
+  participant M as Photon MCP
+  participant F as Embed
+  A->>M: rx_intake (demographics, allergies, medications)
+  M-->>A: patientId
+  A->>M: rx_search ("semaglutide")
+  M-->>A: templates and catalog matches
+  A->>M: rx_draft (patientId, treatment, sig, quantity)
+  M-->>A: prescriptionId, screening status
+  F->>F: PhotonOrder with the drafts
+  Note over F: prescriber reviews, signs, sends
+```
+
+## 1. Connect the agent
+
+Point your agent's MCP client at the Neutron server:
+
+```text
+https://network.neutron.health/mcp
+```
+
+During the preview, the server runs at `https://ai.neutron.health`. {/* TODO(launch) */}⚠️ `network.neutron.health/mcp` isn't live yet, so use `ai.neutron.health` for now. The agent authenticates like any other caller. A backend agent uses a [machine token](/authentication#machine-tokens). An agent that runs in a prescriber's MCP client, such as Claude or ChatGPT, signs in as that prescriber. See [Connect a client](/network/mcp/connect).
+
+## 2. Intake, search, draft
+
+The agent calls three tools, in order:
+
+| Tool | Does | Returns |
+| --- | --- | --- |
+| `rx_intake` | Finds or adds the patient and records allergies and medications, so drafts are screened against them | `patientId` |
+| `rx_search` | Finds your organization's templates and catalog drugs by name and strength. It doesn't need a patient. | Options, each with a `treatment` |
+| `rx_draft` | Drafts one unsigned prescription from a chosen `treatment`, which needs `instructions`, `dispenseQuantity` and `dispenseUnit`, and screens it | `prescriptionId` and `ready`, `warning` or `blocked` |
+
+Each tool's inputs and outputs are in [Prescribing tools](/network/mcp/prescribing). Photon makes the decisions here as well. When it isn't sure which patient or drug is meant, the tool fails closed and tells the agent what to ask or send next. Agents should never invent ids, sigs or quantities.
+
+If the agent learns something safety-relevant after drafting, such as a new allergy, it calls `rx_intake` again and redrafts.
+
+## 3. Hand the drafts to a prescriber
+
+Pass the patient and the draft prescriptions to Embed. The prescriber sees each draft with its screening, signs, and sends.
+
+<CodeGroup>
+
+```tsx React
+<PhotonOrder
+  order={{
+    patient: { id: patientId },
+    prescriptions: { add: draftIds.map((id) => ({ id })) },
+  }}
+  fixed
+  onSent={onDone}
+/>
+```
+
+```html iframe
+<iframe src="https://rx.neutron.health/order/embed?patient=pat_01M3WQQHRB1T0K1469KD18BAWX&rx=rx_01M3WT4NERS2YVQRF6YTWR4A6C" title="Prescribe" style="width: 100%; border: 0"></iframe>
+```
+
+</CodeGroup>
+
+To hand over a single id instead, put the drafts on a draft order from your backend ([step 2 of One-click orders](/integrations/one-click-orders#2-put-the-prescriptions-on-an-order)) and open `order="ord_…"`.
+
+## Sending from the agent
+
+When the agent runs as the prescriber, it can send without Embed. `rx_send` takes the reviewed drafts and the prescriber's explicit confirmation, and Photon checks on the server that the token belongs to a prescriber. A machine token can't send. See [`rx_send`](/network/mcp/prescribing#rx_send).

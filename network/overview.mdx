@@ -1,0 +1,47 @@
+---
+title: "Network"
+sidebarTitle: "Overview"
+description: "Photon's prescribing API: three upserts, over GraphQL or MCP."
+icon: "diagram-project"
+---
+
+Network is the API underneath everything in Photon. It has three upserts, `patient`, `prescription` and `order`, and two ways to call them:
+
+<CardGroup cols={2}>
+  <Card title="GraphQL" icon="code" href="/network/graphql">
+    For your backend: sync patients and draft prescriptions and orders with a machine token.
+  </Card>
+  <Card title="MCP" icon="robot" href="/network/mcp">
+    For agents: take intake, search drugs and draft prescriptions as tools. In private preview.
+  </Card>
+</CardGroup>
+
+## Three upserts
+
+Network has no queries. Each record has one mutation, and how you call it decides what it does:
+
+| | Send | Photon |
+| --- | --- | --- |
+| **Get** | `{ id }` | Returns the record. Nothing changes. |
+| **Sync** | What you know, with or without an `id` | Finds, matches, creates or updates the record. Photon decides which. |
+| **Update** | `{ id, …fields }` | Changes only the fields you sent. |
+
+| Mutation | Record | Reference |
+| --- | --- | --- |
+| `patient(patient:, metadata:)` | Patient `pat_…` | [Patient](/network/patient) |
+| `prescription(prescription:, metadata:)` | Prescription `rx_…` | [Prescription](/network/prescription) |
+| `order(order:, metadata:)` | Order `ord_…` | [Order](/network/order) |
+
+## Photon decides, then tells you
+
+Send what you know, and Photon does the matching, resolution and screening, so your code doesn't have to. Each response reports what Photon did:
+
+- **The record**, as saved.
+- **`appliedChanges`**: what was written.
+- **`unappliedChanges`**: what wasn't, and why. When Photon isn't sure, this lists the options to pick from.
+
+See [Changes and choices](/network/changes).
+
+## Where Network stops
+
+A machine token can do everything except sign. Signing and sending need a signed-in prescriber, which is what [Embed](/embed/overview) is for. Typically, your backend syncs patients and drafts prescriptions and orders. A prescriber then opens the draft in Embed, signs it and sends it. See [Authentication](/authentication).

@@ -1,27 +1,58 @@
 ---
-title: "Network API"
+title: "Photon"
 sidebarTitle: "Introduction"
-description: "A GraphQL API that covers the full prescription lifecycle – from patient intake through pharmacy fulfillment."
-icon:
-  name: "rocket-launch"
-  style: "regular"
-  library: "fontawesome"
+description: "Prescribing infrastructure for tech-enabled care: fast, safe and secure for prescribers, with price transparency and choice for patients."
+icon: "rocket-launch"
 ---
 
-This API powers every stage of the prescription workflow: **patient** intake, **prescription** drafting, **coverage** checks, **interaction** screening, and **order** routing.
+Photon is prescribing infrastructure for telehealth and virtual-care platforms. It lets prescribers in your product write prescriptions **quickly, safely and securely**. Above all, it gives patients **price transparency and a real choice** of where to fill them.
 
-Whether you're building a telehealth platform, an EHR integration, or an AI-assisted prescribing tool, the API gives you a single, typed interface to the complete prescription lifecycle. 
+## For patients: price transparency and choice
 
-<CardGroup cols={3}>
-  <Card title="Patient" icon="head-side" href="/patient-mutation">
-    Create, retrieve, and update patients.
+Most prescriptions are sent straight to a pharmacy before the patient knows what they'll pay or whether it's in stock. Photon reverses that:
+
+<CardGroup cols={2}>
+  <Card title="Choose before it's sent" icon="hand-pointer">
+    The patient gets a secure text link with pharmacy options in real time. They compare price, hours, delivery and availability, then pick. Nothing is routed until they do.
   </Card>
 
-  <Card title="Prescription" icon="prescription-bottle-pill" href="/prescription-mutation">
-    Draft, modify, and sign prescriptions. 
+  <Card title="See the price up front" icon="tag">
+    Each pharmacy option shows its price, including discount-card and sponsored offers where they apply, so the patient picks knowing what they'll pay.
   </Card>
 
-  <Card title="Order" icon="box-isometric" href="/order-mutation">
-    Submit and manage orders to pharmacies. 
+  <Card title="Stay informed" icon="bell">
+    The patient gets status updates and out-of-stock alerts as their order moves.
+  </Card>
+
+  <Card title="Switch in one tap" icon="arrows-rotate">
+    If a pharmacy can't fill the order, the patient reroutes it themselves. Your care team stays out of the loop.
   </Card>
 </CardGroup>
+
+More prescriptions get filled, more affordably, with less work for your team.
+
+## For prescribers: fast, safe, secure
+
+|  | How |
+| --- | --- |
+| **Fast** | Templates fill in the drug, sig and quantity. Drug names resolve to the catalog as the prescriber types. Your backend or an agent can draft the whole order, so the prescriber only reviews, signs and sends. |
+| **Safe** | Every prescription is screened against the patient's allergies, medications and conditions before it's signed. When Photon isn't sure which patient or drug is meant, it asks rather than guessing. |
+| **Secure** | Only a signed-in prescriber can sign, and the signature covers exactly what they reviewed. Tokens are scoped to one organization, and machine credentials can draft but never sign. |
+
+## Two products
+
+<CardGroup cols={2}>
+  <Card title="Embed" icon="window" href="/embed/overview">
+    The prescribing UI: React components, an iframe or a link. It handles sign-in, drug search, screening, signing and sending, in your app.
+  </Card>
+
+  <Card title="Network" icon="diagram-project" href="/network/overview">
+    The API underneath. Use GraphQL from your backend or MCP from an agent to keep patients in sync and draft prescriptions and orders.
+  </Card>
+</CardGroup>
+
+Most platforms use both: Embed for the prescriber, and Network to fill in what your product already knows.
+
+<Card title="Quickstart" icon="bolt" horizontal href="/quickstart">
+  Prescribe from your own app in Neutron, the sandbox, in a few minutes.
+</Card>

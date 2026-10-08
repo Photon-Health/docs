@@ -1,175 +1,143 @@
 ---
 title: "Authentication"
-icon:
-  name: "lock"
-  style: "regular"
-  library: "fontawesome"
+description: "User tokens for prescribers and machine tokens for your backend, and which one can sign."
+icon: "lock"
 ---
 
-Every request to the Photon Network requires an `Authorization` header with a valid OAuth token. Tokens are scoped to a single account and to the permissions of the authenticated user, with the exception of machine (M2M) tokens, which have limited permissions.
+Every request to Photon carries an OAuth token in the `Authorization` header. A token belongs to one organization. There are two kinds:
+
+|  | **User token** | **Machine token** |
+| --- | --- | --- |
+| Who it acts for | A prescriber who signed in | Your backend |
+| Credential | **Application**: a public `client_id` | **Backend**: a `client_id` and a `client_secret` |
+| Obtained by | Signing in at `auth.neutron.health` in a browser | The client credentials grant, server to server |
+| [Permissions](#permissions) | Whatever the prescriber's role allows | Everything but signing |
+| Can sign prescriptions | Yes | **No** |
+
+<Warning>
+  **Machine tokens can't sign prescriptions.** Signing needs the `write:prescription` permission, which machine tokens can never be given. Your backend can sync patients, draft prescriptions and draft orders, but a signed-in prescriber always signs. That step happens in a browser, with a user token.
+</Warning>
+
+That's why Photon ships [Embed](/embed/overview). It signs the prescriber in, holds their token, and runs the signing and sending, so your frontend never handles a token or calls GraphQL itself. We don't recommend calling the API directly from a frontend. When you need lower-level control in the browser, use the [JavaScript client](/embed/javascript): it handles sign-in, tokens and the workflow rules for you.
+
+## Permissions
+
+| Permission | Lets a token | User token | Machine token |
+| --- | --- | --- | --- |
+| `read:patient` | Read patients | ✓ | ✓ |
+| `write:patient` | Add, edit and update patients | ✓ | ✓ |
+| `read:prescription` | Read, look up and **draft** prescriptions | ✓ | ✓ |
+| `write:prescription` | **Sign** prescriptions | Prescribers only | Never |
+| `read:order` | Read and **draft** orders | ✓ | ✓ |
+| `write:order` | **Send** orders | ✓ | ✓ |
+
+`read:` covers drafting. `write:` covers the step that commits: changing a patient, signing a prescription, sending an order.
+
+A user token carries the permissions of the person's role. Prescribers have all of them. Other roles, such as medical operations, have everything except `write:prescription`.
+
+A machine token can send an order once a prescriber has signed every prescription on it.
 
 ## Credentials
 
-**Application** and **Backend** credentials are used to generate **User** and **Machine** tokens, respectively.
+Find both kinds in your dashboard under [Settings → Developers](https://app.neutron.health/settings/developers).
 
-You can find both in your [dashboard](https://app.neutron.health/settings/developers):
+- **Application** credentials are a public `client_id` and a list of allowed URLs. The list must include every domain your app runs on. Use them with Embed's React components or the JavaScript client.
+- **Backend** credentials are a `client_id` and a `client_secret`. Keep the secret on your server, out of client-side code and version control.
 
-- **Application** credentials consist of a public `client_id` and an allowlist of URLs, which must include your application's domain.
-- **Backend** credentials consist of a `client_id` and a `client_secret`. Keep the secret out of client-side code and version control.
+Credentials come with every Neutron sandbox account. In production they're a paid feature. If you can't see them on a paid account, ask your organization's admin.
 
-Credentials are available in all Sandbox accounts and are a paid feature in production. If you can't access them on a paid account, contact your organization admin.
+<Tip>
+  The [iframe](/embed/iframe) needs no credentials. It signs the prescriber in to Photon on its own.
+</Tip>
 
-## User Token
+## User tokens
 
-If you're calling Network APIs from your frontend, authenticate the user via a redirect to [auth.neutron.health](https://auth.neutron.health/). Pass the resulting token in the header with each request.
+With Embed, you don't handle user tokens:
 
-User Tokens are generated with specific permissions according to the role of a logged in user. 
+| You use | Sign-in |
+| --- | --- |
+| [iframe](/embed/iframe) or [app link](/embed/links) | Photon's own. No credentials needed. |
+| [React components](/embed/react) | `<PhotonProvider clientId="…">` signs the prescriber in with your Application credential. |
+| [JavaScript client](/embed/javascript) | `photon({ auth: { clientId } })` does the same without React. |
+| Your own Auth0 sign-in | Pass `photon({ auth: { getToken } })`, and Photon calls your function before each request. |
 
-## Machine Token
+Behind each of these, the prescriber signs in at `auth.neutron.health` with Auth0's authorization code flow (with PKCE), for the audience `https://api.neutron.health`, and picks their organization. The token they get can do whatever their role allows, including signing.
 
-Backend requests can be made to sync patients, draft prescriptions, and programmatically create orders.
+## Machine tokens
 
-<Info>
-  Machine tokens cannot be assigned the `write:prescription` permission.
-</Info>
+Use a machine token from your backend to sync patients, draft prescriptions and draft orders. Exchange your Backend credentials for one:
 
-A machine token is valid for 24 hours (`expires_in: 86400`). Request one by exchanging your `client_id` and `client_secret`:
+<CodeGroup>
 
-```shellscript
-curl \
-  https://auth.neutron.health/oauth/token \
+```bash cURL
+curl https://auth.neutron.health/oauth/token \
   --request POST \
-  --header "content-type: application/json" \
-  --data @- << EOF
+  --header "Content-Type: application/json" \
+  --data '{
+    "client_id": "YOUR_CLIENT_ID",
+    "client_secret": "YOUR_CLIENT_SECRET",
+    "audience": "https://api.neutron.health",
+    "grant_type": "client_credentials"
+  }'
+```
+
+```ts Node.js
+const response = await fetch("https://auth.neutron.health/oauth/token", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    client_id: process.env.PHOTON_CLIENT_ID,
+    client_secret: process.env.PHOTON_CLIENT_SECRET,
+    audience: "https://api.neutron.health",
+    grant_type: "client_credentials",
+  }),
+});
+const { access_token, expires_in } = await response.json();
+```
+
+</CodeGroup>
+
+```json Response
 {
-  "client_id":"YOUR_CLIENT_ID",
-  "client_secret":"YOUR_CLIENT_SECRET",
-  "audience":"https://api.neutron.health",
-  "grant_type":"client_credentials"
-}
-EOF
-```
-
-{/* TODO: add the remaining steps for creating credentials and requesting an access token. */}
-
-```json
-{
-	"access_token":"YOUR_ACCESS_TOKEN",
-	"scope":"write:patient read:prescription write:order",
-	"expires_in":86400,
-	"token_type":"Bearer"
+  "access_token": "YOUR_ACCESS_TOKEN",
+  "scope": "read:patient write:patient read:prescription read:order write:order",
+  "expires_in": 86400,
+  "token_type": "Bearer"
 }
 ```
 
-## Authenticate Request
+A machine token lasts 24 hours (`expires_in: 86400`). Cache it and request a new one shortly before it expires. Don't request one for every call.
 
-All requests go to the single GraphQL endpoint:
+## Calling the API
 
-```text
-https://network.neutron.health/graphql
-```
+Send either kind of token as a bearer token to the GraphQL endpoint:
 
-```text
-Authorization: Bearer YOUR_ACCESS_TOKEN
-```
-
-Both User and Machine tokens are passed via the `Authorization` header:
-
-```shellscript
-curl --request POST \
-  --url https://network.neutron.health/graphql \
-  --header 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
-  --header 'Content-Type: application/json' \
+```bash
+curl https://network.neutron.health/graphql \
+  --request POST \
+  --header "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  --header "Content-Type: application/json" \
   --data '{ "query": "{ ping }" }'
 ```
 
-The `ping` query is a lightweight health check. You can use it to verify your credentials.
+`ping` is a health check that touches no records. Use it to test a token.
 
----
+## When a token is refused
 
-## The `RequestMetadata` input
-
-Every mutation in the Photon Rx API requires a `metadata` argument of type `RequestMetadata`. 
-
-```graphql
-input RequestMetadata {
-  source: RequestSource!       # Required — identifies the type of caller
-  sourceVersion: String        # Optional — version of your application or component
-  client: String               # Optional — human-readable name of your application
-  requestId: String            # Optional — caller-supplied ID for end-to-end tracing
-}
-
-enum RequestSource {
-  WEB_APP                      # A browser-based web application
-  EMBEDDABLE_COMPONENT         # A Photon embeddable UI widget
-  DIRECT_API                   # A direct server-side API integration
-  MCP_CONNECTOR                # A Model Context Protocol connector
-  LLM_AGENT                    # An LLM or AI agent
-}
-```
-
-<Note>
-  `source` is the only required field. The remaining fields are optional but strongly recommended — `client` and `requestId` in particular make support and debugging significantly easier.
-</Note>
-
-### Field reference
-
-<ParamField body="source" type="RequestSource" required>
-  Identifies the type of system making the call. Choose the value that most accurately describes your integration. This field is used for audit logging and analytics.
-</ParamField>
-
-<ParamField body="sourceVersion" type="String">
-  The version string of your application or component (e.g. `"2.4.1"`). Useful for correlating API behaviour changes with deployment events.
-</ParamField>
-
-<ParamField body="client" type="String">
-  A human-readable name for your application (e.g. `"my-telehealth-app"`).
-</ParamField>
-
-<ParamField body="requestId" type="String">
-  A caller-supplied identifier for this specific request (e.g. a UUID or trace ID from your own system). Use it to correlate API calls with your internal logs.
-</ParamField>
-
-### Example metadata block
-
-```json
-{
-  ...
-  "metadata": {
-    "source": "DIRECT_API",
-    "sourceVersion": "1.0.0",
-    "client": "my-app",
-    "requestId": "req_abc123"
-  }
-}
-```
-
-## Authentication errors
-
-A missing or invalid token fails the whole request and returns a top-level `errors` array, not an `UnauthorizedError`:
+A missing, invalid or expired token fails the whole request. The response has a top-level `errors` array and no `data`:
 
 ```json
 { "errors": [{ "message": "An authentication token is not present", "extensions": { "code": "EMPTY_AUTHORIZATION_HEADER" } }] }
 ```
 
-When the token is valid but not allowed to perform an action, the mutation returns an `UnauthorizedError` in its result union. Always include the `UnauthorizedError` fragment in your mutation selections.
+A valid token that isn't allowed to do something gets an `UnauthorizedError` in the mutation's result. For example, a machine token that tries to sign gets one:
 
-```graphql
-... on UnauthorizedError {
-  code
-  message
-  requiredPermission
+```json
+{
+  "__typename": "UnauthorizedError",
+  "code": "PRESCRIPTION_SIGNING_UNAUTHORIZED",
+  "message": "You are not authorized to sign prescriptions."
 }
 ```
 
-<ResponseField name="code" type="String">
-  A machine-readable error code (e.g. `PRESCRIPTION_SIGNING_UNAUTHORIZED`). Use this field to branch your error-handling logic.
-</ResponseField>
-
-<ResponseField name="message" type="String">
-  A human-readable explanation of why the request was rejected. Suitable for internal logging but not for display to end users.
-</ResponseField>
-
-<ResponseField name="requiredPermission" type="String">
-  When present, indicates the specific permission scope that the calling key lacks. Use this to determine whether you need to request a different key or additional scopes from the dashboard.
-</ResponseField>
+When Photon knows which permission is missing, it names it in `requiredPermission`. Retrying with the same token gets the same error. See [Errors](/network/errors).

@@ -1,0 +1,104 @@
+---
+title: "JavaScript client"
+description: "@photon-rx/core: the client, sign-in and workflow rules under Embed, for any framework or Node."
+icon:
+  style: "brands"
+  name: "js"
+  library: "fontawesome"
+---
+
+`@photon-rx/core` sits underneath Embed. It handles the prescriber's sign-in and tokens, calls the API, and enforces the workflow rules: which drug was meant, when a draft is created, and when an order is ready to send. Use it when you're building your own UI in another framework, or when your backend wants typed calls.
+
+It has no dependencies and runs in browsers and Node.
+
+```bash
+npm install @photon-rx/core
+```
+
+{/* TODO(launch): publish to npm, then delete this line. */}
+
+⚠️ Not published to npm yet.
+
+## Create a client
+
+```ts
+import { photon } from "@photon-rx/core";
+
+// In a browser: Photon signs the prescriber in
+const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
+
+// Or, if you already sign them in with Auth0:
+// photon({ environment: "neutron", auth: { getToken: () => auth0.getTokenSilently() } });
+```
+
+With `clientId`, `ph.session` handles sign-in: `start()` on load, `signIn()` from a click, and `signOut()`. Its `status` and `user` show who is signed in. Create one client per signed-in person. On a server, that means one per request, never one shared module-wide.
+
+## Get, sync, update
+
+`ph.patient`, `ph.prescription` and `ph.order` each have the [same three calls](/architecture#get-sync-and-update):
+
+```ts
+const existing = await ph.patient.get("pat_01M3WQQHRB1T0K1469KD18BAWX"); // read, change nothing
+
+const { patient, candidates, changes } = await ph.patient.sync({
+  demographic: { name: { first: "Paige", last: "Turner" }, dateOfBirth: "1990-01-01", sex: "FEMALE" },
+}); // find, match or add
+
+await ph.patient.update(patient.id, { demographic: { phone: "+13175550142" } }); // just these fields
+```
+
+`sync` and `update` return the live object, any `candidates` when Photon isn't sure which record you meant, and the `changes` it reported. The client never picks a candidate for you. Pick one with `patient.pick(id)`.
+
+## Live objects
+
+Each record is a live object. `state` is the record, and `status` is `idle`, `loading`, `saving` or `error`. `subscribe` calls you on every change, and every method waits for the call it makes. There's one object per record per client, so a patient opened twice is the same object.
+
+```ts
+const { prescription: rx } = await ph.prescription.sync({
+  patient: { id: patient.id },
+  templateId: "YOUR_TEMPLATE_ID",
+});
+
+rx.subscribe(() => render(rx.state)); // re-render on every change
+
+await rx.update({ instructions: "Take 1 tablet by mouth daily", dispense: { quantity: 30, daysSupply: 30 } });
+await rx.sign(); // the prescriber's approval of exactly what they saw
+
+const { order } = await ph.order.sync({ patient: { id: patient.id }, prescriptions: { add: [{ id: rx.id }] } });
+await order.submit(); // the patient chooses a pharmacy
+```
+
+The rules live in the objects, so every UI built on them behaves the same:
+
+- A new prescription without a patient only looks the drug up and never creates anything.
+- The newest response always wins, so a slow early reply can't overwrite a later one.
+- `rx.sign()` waits for saves in flight, then signs only what's stored.
+- `order.readyToSend` is true once the patient is found, every prescription is signed, and nothing is still saving.
+- `order.submit()` refuses until it's ready, and never sets a pharmacy.
+
+## Choices
+
+When Photon offers options, such as which of several drugs a name meant, `choicesIn(obj.changes)` lists them. `obj.choose(option)` applies one.
+
+```ts
+import { choicesIn } from "@photon-rx/core";
+
+const [which] = choicesIn(rx.changes); // e.g. "which lisinopril?"
+if (which) await rx.choose(which.options[0]); // or let the prescriber pick
+```
+
+## Errors
+
+Anything Photon answers about your data comes back as a result. Only failures that different data can't fix throw a `PhotonError`, and its `kind` says which:
+
+| `kind` | Meaning |
+| --- | --- |
+| `network` | Couldn't reach Photon. Retry. |
+| `unauthorized` | The token was refused. Sign in again. |
+| `upstream` | A Photon service failed. `retryable` says whether to retry. |
+| `invalid` | Photon rejected the request's shape. This is a bug. |
+| `refused` | A workflow rule said no, for example sending before everything is signed. |
+
+## Links
+
+`ph.url(…)` and `ph.frame(…)` build [app links](/embed/links) and [iframe](/embed/iframe) URLs. `linkPath(…)` builds the same paths without a client.

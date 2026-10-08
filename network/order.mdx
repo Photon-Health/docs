@@ -1,0 +1,143 @@
+---
+title: "Order"
+description: "Group prescriptions into an order, send it, and optionally choose the pharmacy."
+icon: "box"
+---
+
+```graphql
+order(order: OrderInput!, metadata: RequestMetadata!): OrderResult!
+```
+
+| Call | `order` input | Result |
+| --- | --- | --- |
+| **Get** | `{ id }` | The order, with its patient, prescriptions and pharmacy. Nothing changes. |
+| **Sync** | `{ patient, prescriptions }` | The patient's draft order with these prescriptions added, or a new draft |
+| **Update** | `{ id, prescriptions?, pharmacy?, state? }` | That order, with only those fields changed |
+| **Send** | `{ id, state: SUBMITTED }` | The order, submitted, and Photon texts the patient. Needs [`write:order`](/authentication#permissions). Drafting needs only `read:order`. |
+
+## States
+
+```text
+DRAFT ──▶ SUBMITTED ──▶ CANCELED
+```
+
+| State | Meaning |
+| --- | --- |
+| `DRAFT` | The default. Editable, and nothing goes out. A draft can hold unsigned prescriptions. |
+| `SUBMITTED` | Sent. After this, the only changes allowed are switching the pharmacy or canceling. |
+| `CANCELED` | Canceled. Only a `SUBMITTED` order can be canceled. |
+
+To send an order, set `state: SUBMITTED`. Photon checks first, and if anything is missing it rejects the send with a change in `unappliedChanges`:
+
+- every prescription on the order is signed
+- every prescription belongs to the order's patient
+- the patient has a phone number that can receive texts
+
+## Example
+
+<CodeGroup>
+
+```graphql Mutation
+mutation Order($order: OrderInput!, $metadata: RequestMetadata!) {
+  order(order: $order, metadata: $metadata) {
+    __typename
+    ... on OrderPayload {
+      order {
+        id
+        state
+        patient { ... on Patient { id } }
+        prescriptions { id status signing { state } treatment { name } }
+        pharmacy { id name }
+        exceptions { type message }
+      }
+      unappliedChanges { key status severity reason options { displayName argument value } }
+    }
+    ... on AmbiguousOrderMatch { reason candidates { id prescriptionIds } }
+    ... on OperationError { code message }
+  }
+}
+```
+
+```json Draft
+{
+  "order": {
+    "patient": { "id": "pat_01M3WQQHRB1T0K1469KD18BAWX" },
+    "prescriptions": { "add": [{ "id": "rx_01M3WT4NERS2YVQRF6YTWR4A6C" }] }
+  },
+  "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
+}
+```
+
+```json Add a prescription
+{
+  "order": {
+    "id": "ord_01M3WT5GK51DBRH7ZKBKBV9QWK",
+    "prescriptions": { "add": [{ "id": "rx_01M3WT515TQ3D1348GGS70MV1Z" }] }
+  },
+  "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
+}
+```
+
+```json Send
+{
+  "order": { "id": "ord_01M3WT5GK51DBRH7ZKBKBV9QWK", "state": "SUBMITTED" },
+  "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
+}
+```
+
+</CodeGroup>
+
+If the patient has several draft orders and you didn't send an `id`, you get `AmbiguousOrderMatch`. Resend with the `id` of the one you mean.
+
+## Fields
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id` | `ID` | Leave it out to continue the patient's draft or start a new one |
+| `externalId` | `String` | Your own id for the order, scoped to your organization |
+| `patient` | `PatientReferenceInput` | Usually `{ id }` |
+| `prescriptions` | `{ add, remove, none }` | Each by `id`, or by `externalId`. Removing a prescription takes it off the order but doesn't cancel it. |
+| `pharmacy` | `{ pharmacy }` or `{ none: true }` | Optional. See below. |
+| `state` | `DRAFT`, `SUBMITTED`, `CANCELED` | |
+
+## Pharmacies
+
+You don't need to choose a pharmacy. With none set, the patient chooses one from the link Photon texts them. To choose for them, send `pharmacy: { pharmacy: … }` with a `PharmacyReferenceInput`:
+
+| Field | Matches |
+| --- | --- |
+| `id` | Exactly that pharmacy |
+| `name` | Case-insensitive, partial: `"walgreens"` matches. Typos don't match. |
+| `near` | One of `latLong` (with `radiusMiles` to filter, or without it to sort by distance) or `address` (sorts by distance). `text` isn't supported yet. |
+| `fulfillmentType` | `PICK_UP` or `MAIL_ORDER` |
+
+The fields combine to narrow the results. One match is applied directly. Several come back as an `AMBIGUOUS` change with up to 20 options, each with pricing `offers` where available. Resend with the chosen pharmacy's `id`. To unassign a pharmacy, send `pharmacy: { none: true }`.
+
+```json
+"pharmacy": {
+  "pharmacy": {
+    "name": "CVS",
+    "fulfillmentType": "PICK_UP",
+    "near": { "latLong": { "latitude": "40.7506", "longitude": "-73.9972", "radiusMiles": 1 } }
+  }
+}
+```
+
+## Exceptions
+
+Once an order is sent, `exceptions` lists problems that need attention, such as `PHARMACY_UNREACHABLE`, `PHARMACY_NEEDS_INSURANCE_INFO` or `DOCTOR_NOT_LICENSED_IN_STATE`. A draft never has exceptions. See [Reference](/network/reference#order-exceptions) for every type.
+
+<Accordion title="Full selection set">
+
+```graphql
+fragment OrderFields on Order {
+  id
+  state
+  patient { ... on Patient { id } ... on UpstreamServiceError { code message retryable } }
+  prescriptions { id status treatment { id name } signing { state } }
+  pharmacy { id name address { street1 street2 city state postalCode } fulfillmentType }
+  exceptions { id type message createdAt }
+}
+```
+
+</Accordion>

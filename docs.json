@@ -22,59 +22,78 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
+        "tab": "Get started",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Get started",
             "pages": [
               "introduction",
+              "quickstart",
+              "architecture",
+              "environments",
               "authentication"
             ]
           },
           {
-            "group": "Core Concepts",
+            "group": "Integrations",
             "pages": [
-              "patient-mutation",
-              "prescription-mutation",
-              "order-mutation"
+              "integrations/overview",
+              "integrations/prescribe-embed",
+              "integrations/sync-patients",
+              "integrations/one-click-orders",
+              "integrations/agent-drafted-orders"
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "Embed",
         "groups": [
           {
-            "group": "Mutations",
+            "group": "Embed",
             "pages": [
-              "api/patient",
-              "api/prescription",
-              "api/order"
-            ]
-          },
-          {
-            "group": "Reference",
-            "pages": [
-              "concepts/entity-resolution",
-              "untitled-page",
-              "concepts/clinical-screening",
-              "reference/errors",
-              "reference/enums",
-              "reference/pharmacy-search"
-            ]
-          },
-          {
-            "group": "Types",
-            "pages": [
-              "api/types/patient-types",
-              "api/types/prescription-types",
-              "api/types/order-types",
-              "api/types/change-types",
-              "api/types/pharmacy-types"
+              "embed/overview",
+              "embed/react",
+              "embed/iframe",
+              "embed/links",
+              "embed/javascript",
+              "embed/styling"
             ]
           }
-        ],
-        "hidden": true
+        ]
+      },
+      {
+        "tab": "Network",
+        "groups": [
+          {
+            "group": "Network",
+            "pages": [
+              "network/overview"
+            ]
+          },
+          {
+            "group": "GraphQL",
+            "pages": [
+              "network/graphql",
+              "network/patient",
+              "network/prescription",
+              "network/order",
+              "network/changes",
+              "network/screening",
+              "network/errors",
+              "network/reference"
+            ]
+          },
+          {
+            "group": "MCP",
+            "pages": [
+              "network/mcp",
+              "network/mcp/connect",
+              "network/mcp/prescribing",
+              "network/mcp/fulfillment"
+            ]
+          }
+        ]
       }
     ]
   },
@@ -107,5 +126,68 @@
   },
   "appearance": {
     "strict": false
-  }
+  },
+  "description": "Photon lets prescribers in your product write, sign and send prescriptions. Embed gives you the prescribing UI; Network gives your backend and agents the API.",
+  "redirects": [
+    {
+      "source": "/patient-mutation",
+      "destination": "/network/patient"
+    },
+    {
+      "source": "/prescription-mutation",
+      "destination": "/network/prescription"
+    },
+    {
+      "source": "/order-mutation",
+      "destination": "/network/order"
+    },
+    {
+      "source": "/api/patient",
+      "destination": "/network/patient"
+    },
+    {
+      "source": "/api/prescription",
+      "destination": "/network/prescription"
+    },
+    {
+      "source": "/api/order",
+      "destination": "/network/order"
+    },
+    {
+      "source": "/api/types/:slug*",
+      "destination": "/network/reference"
+    },
+    {
+      "source": "/untitled-page",
+      "destination": "/network/changes"
+    },
+    {
+      "source": "/concepts/entity-resolution",
+      "destination": "/network/changes"
+    },
+    {
+      "source": "/concepts/clinical-screening",
+      "destination": "/network/screening"
+    },
+    {
+      "source": "/reference/errors",
+      "destination": "/network/errors"
+    },
+    {
+      "source": "/reference/enums",
+      "destination": "/network/reference"
+    },
+    {
+      "source": "/reference/pharmacy-search",
+      "destination": "/network/order#pharmacies"
+    },
+    {
+      "source": "/integrations/embed-for-a-patient",
+      "destination": "/integrations/prescribe-embed"
+    },
+    {
+      "source": "/how-photon-works",
+      "destination": "/architecture"
+    }
+  ]
 }

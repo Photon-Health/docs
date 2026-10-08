@@ -1,0 +1,118 @@
+---
+title: "Prescribing tools"
+sidebarTitle: "Prescribing"
+description: "rx_intake, rx_search, rx_draft and rx_send: what each takes and returns."
+icon: "prescription-bottle-medical"
+---
+
+Prescribing takes four calls, and each one's output feeds the next. All four accept an optional `debug` object (see [Errors and tracing](#errors-and-tracing)).
+
+## rx_intake
+
+Finds or adds the patient, and records what's known about them. Call it before drafting, and call it again with the `patientId` whenever something safety-relevant comes up, such as a new allergy.
+
+| Input | Notes |
+| --- | --- |
+| `demographic.patientId` | Send it once you have it |
+| `demographic.patient` | `{ firstName, lastName, dateOfBirth, sex }`, used to find or add the patient |
+| `demographic.email`, `demographic.phone` | Used when adding a patient. US 10-digit phone numbers are normalized. |
+| `demographic.address`, `demographic.benefits` | Updates the patient record |
+| `clinical.allergies` | Each item takes `name` or `rxNormId`, not both. **Saved and screened.** |
+| `clinical.medications` | `{ name, rxNormId?, status }` with `status` set to `active`, `historical` or `unknown`. Active and historical medications are **saved and screened**. |
+| `clinical.diagnoses`, `clinical.notes` | Accepted as context for this encounter, **not saved yet**. Diagnoses for a prescription go on `rx_draft`. |
+
+The call returns `patientResolution.status`:
+
+| `status` | Means | Next |
+| --- | --- | --- |
+| `resolved`, `created` | Found or added. `patientId` is set. | Continue |
+| `ambiguous` | Several patients could match, so `candidates` are listed | Ask which one, then call again with that `patientId` |
+| `insufficient`, `unresolved` | Not enough to find or add the patient | Ask for what `userAction` says |
+| `create_failed` | Photon couldn't add the patient | Read `reason` |
+
+It also returns the `patientRecord` as saved, with its allergies and medications.
+
+## rx_search
+
+Finds what to prescribe. It doesn't need a patient.
+
+| Input | Notes |
+| --- | --- |
+| `treatment.name` | A drug or template name, such as `"amlodipine"` |
+| `treatment.strength` | Optional, such as `"5 mg"` |
+| `maxResults` | 1 to 20. Defaults to 5. |
+
+It searches your organization's templates first, then catalog medications, then the wider drug database. Each item in `options[]` has:
+
+- `title` and `summary` to show the clinician
+- `treatment`, a draft-ready object with `treatmentId` and any sig and dispense fields the template fills in. Pass it to `rx_draft` unchanged.
+- `draftRequirements`, which says whether the option can be drafted as is (`complete`) or `needs_provider_details`, and lists the `missingFields`
+
+## rx_draft
+
+Drafts **one** unsigned prescription and screens it. Nothing is sent.
+
+| Input | Notes |
+| --- | --- |
+| `patientId` | From `rx_intake` |
+| `treatment` | One `options[].treatment` from `rx_search`, or a `treatmentId` from another trusted source. It needs `instructions`, `dispenseQuantity` and `dispenseUnit`. If any are missing, ask the clinician. Don't fill them in yourself. |
+| `treatment.daysSupply`, `refillsAllowed`, `dispenseAsWritten`, `notes` | Optional |
+| `diagnoses` | Optional. `[{ name }]` or `[{ icd10 }]`, for what this prescription treats. |
+| `coverage.enabled` | Defaults to `true`: checks coverage against the patient's benefits |
+| `screeningPolicy` | `{ blockOnMajor, allowModerate }`, both `true` by default |
+
+`dispenseUnit` is one of `Tablet`, `Capsule`, `Milliliter`, `Gram`, `Each`, `Patch`, `Pen Needle`, `Kit` and others. The tool schema lists all of them, and matching ignores case.
+
+The response has:
+
+| Field | Notes |
+| --- | --- |
+| `reviewDigest` | An integrity token for this draft. Pass it to `rx_send`. |
+| `draft.prescriptionId` | The draft, `rx_…` |
+| `draft.status` | `ready`, `warning` or `blocked` |
+| `draft.screeningAlerts` | Drug, allergy and condition alerts, each with `severity` (`MINOR`, `MODERATE`, `MAJOR`) and a `description` |
+| `draft.coverageOptions` | `COVERED`, `COVERED_WITH_RESTRICTIONS` or `NOT_COVERED`, with `paRequired`, `price` and any alternatives |
+| `draft.reviewFields` | The fields the prescriber must review, each with `{ key, label, value }` |
+
+Show the prescriber the review fields, alerts and coverage. To send it from [Embed](/embed/overview) instead, hand over the `patientId` and `prescriptionId`. See [Agent-drafted orders](/integrations/agent-drafted-orders).
+
+## rx_send
+
+Sends reviewed drafts as one order, after the prescriber explicitly confirms. It needs a prescriber's token. A machine token, or a patient's, can't send.
+
+```json
+{
+  "patientId": "pat_01M3WQQHRB1T0K1469KD18BAWX",
+  "prescriptions": [
+    {
+      "prescriptionId": "rx_01M3WT4NERS2YVQRF6YTWR4A6C",
+      "reviewDigest": "<from rx_draft>",
+      "reviewedFields": ["<rx_draft's draft.reviewFields, unchanged>"]
+    }
+  ],
+  "signed": true,
+  "confirmationText": "Yes, send it."
+}
+```
+
+| Input | Notes |
+| --- | --- |
+| `prescriptions[]` | For each draft: `prescriptionId`, `reviewDigest`, and `reviewedFields` (that response's `draft.reviewFields`), all copied unchanged from the same `rx_draft` response |
+| `signed` | Must be `true`. Set it only after the prescriber has reviewed. |
+| `confirmationText` | The prescriber's own words confirming the send, quoted exactly. The agent never writes or summarizes it. |
+
+Photon checks that the digest and fields match what was drafted, so the prescriber sends exactly what they reviewed. It rejects blocked drafts and drafts already sent. The response has the `orderId`, the order's state, and a `status` of `sent` or `failed` for each prescription.
+
+The agent only acts for the prescriber and is never the prescriber of record.
+
+## Errors and tracing
+
+A tool that can't do what was asked returns an error instead of guessing:
+
+```json
+{ "ok": false, "error": { "code": "…", "message": "…", "userAction": "Ask the clinician for the dispense quantity." } }
+```
+
+Follow `userAction`: it tells the agent what to ask or send next.
+
+Every response includes `debug.correlationId`. Pass it back in `debug.correlationId` on later calls in the same conversation, so Photon can trace the session. It's for tracing only, and it never stands in for a `patientId`. `debug` also takes `source`, `model`, `client` and `requestId`.

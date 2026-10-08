@@ -1,0 +1,48 @@
+---
+title: "Fulfillment tools"
+sidebarTitle: "Fulfillment"
+description: "rx_shop and rx_route: an order's status, pharmacy prices, and routing."
+icon: "truck"
+---
+
+After an order is sent, the patient chooses a pharmacy from the link Photon texts them. Your agent doesn't have to do anything. When the agent should help choose or change the pharmacy, use `rx_shop` to look and `rx_route` to decide.
+
+Use them in the order `rx_shop` → `rx_route` → `rx_shop`, ending with a read that confirms the route.
+
+## rx_shop
+
+Read-only. It works for a prescriber, a patient, or an agent acting for either. Send `orderId`, `pharmacySearch`, or both.
+
+| Input | Notes |
+| --- | --- |
+| `orderId` | Returns the order's status, and its offers when it can still be rerouted |
+| `pharmacySearch.name` | Search by pharmacy name |
+| `pharmacySearch.location` | `{ latitude, longitude, radius }`, with `radius` in miles (default 10). Needed to price pharmacies near the patient, so convert their address to coordinates first. |
+| `pharmacySearch.fulfillmentType` | `PICK_UP` or `MAIL_ORDER` |
+| `pharmacySearch.openAt` | An ISO 8601 date and time. Only pharmacies open then are returned. |
+| `pharmacySearch.includePrice` | Defaults to `true` |
+| `pharmacySearch.limit` | 1 to 20. Defaults to 10. |
+
+A pharmacy search needs a `name` or a `location`. The server doesn't convert addresses to coordinates.
+
+With an `orderId`, the response's `status` includes:
+
+- the order's state: `ROUTING`, `PENDING`, `PLACED`, `COMPLETED`, `CANCELED` or `ERROR`
+- `isReroutable`, which says whether the order can still change pharmacy
+- the `patient` (with the address on their record), the `deliveryAddress`, and the `prescribers`
+
+Offers come back only while `isReroutable` is true. Pharmacies include `price` and `retailPrice` when pricing is available.
+
+## rx_route
+
+Sends an order to the chosen pharmacy. For an order that hasn't been routed yet, it sets the pharmacy. After that, it reroutes.
+
+| Input | Notes |
+| --- | --- |
+| `orderId` | The order |
+| `pharmacyId` | From `rx_shop`, or another trusted source |
+| `confirmed` | Must be `true`. Set it only after the patient, prescriber or delegated agent has confirmed the pharmacy. |
+| `reason` | Optional, such as `"closest"` or `"lowest price"` |
+| `selectedBasedOnPrice` | Optional. Set it to `true` when price decided the pharmacy. |
+
+The response's `operation` is `SET_PHARMACY`, `REROUTE` or `UNCHANGED`. It also says whether the change was only accepted or was confirmed by a follow-up read. Call `rx_shop` afterward to check.

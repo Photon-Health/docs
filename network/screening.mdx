@@ -1,0 +1,50 @@
+---
+title: "Screening"
+description: "Every prescription is checked against the patient's allergies, medications and diagnoses."
+icon: "shield-check"
+---
+
+Photon screens a prescription each time its drug resolves or it changes. It checks the drug against the patient's record and returns the result on the prescription:
+
+- **`status`**: `READY`, `WARNING` or `BLOCKED`
+- **`screeningAlerts`**: each conflict found
+
+Screening can only check what's on file. [Sync the patient's](/integrations/sync-patients) allergies, medications and diagnoses before drafting. A patient with an empty record gets no alerts, but that doesn't mean the drug is safe.
+
+## Alerts
+
+| Field | Description |
+| --- | --- |
+| `type` | What it conflicts with: `DRUG` (another medication), `ALLERGEN` (an allergy) or `CONDITION` (a diagnosis) |
+| `severity` | `MINOR` never blocks. `MODERATE` and `MAJOR` block the draft. |
+| `description` | A plain-language explanation, ready to show the prescriber |
+| `involvedEntities` | The drug and the allergen, medication or condition involved |
+| `category` | Usually `SAFETY` |
+| `options` | An alternative drug that avoids the conflict, when there is one |
+
+```json
+{
+  "severity": "MODERATE",
+  "type": "ALLERGEN",
+  "category": "SAFETY",
+  "description": "Amoxicillin is a penicillin-class antibiotic. The patient has a recorded allergy to amoxicillin.",
+  "involvedEntities": [
+    { "id": "med_…", "name": "Amoxicillin 500 MG Oral Capsule" },
+    { "id": "alg_…", "name": "Amoxicillin" }
+  ]
+}
+```
+
+## Status
+
+| `status` | Meaning |
+| --- | --- |
+| `READY` | No blocking or warning alerts |
+| `WARNING` | Alerts to review, none of them blocking |
+| `BLOCKED` | At least one `MODERATE` or `MAJOR` alert |
+
+Show every `WARNING` and `BLOCKED` alert to the prescriber before they sign. Embed does this for you. Explicit acknowledgement of individual alerts when signing is planned.
+
+<Warning>
+  Screening relies on coded entries. An allergy recorded without an RxNorm code, such as a drug-class allergy entered by name, may not be screened. Send allergies by `rxNormId` whenever you can.
+</Warning>
