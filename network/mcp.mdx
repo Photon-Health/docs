@@ -15,8 +15,12 @@ Photon's MCP server gives an agent the same Network as GraphQL, in the form of t
 
 | | URL |
 | --- | --- |
-| Neutron | `https://network.neutron.health/mcp` |
-| Photon | `https://network.photon.health/mcp` |
+| Neutron | `https://network.neutron.health/mcp` ⚠️ |
+| Photon | `https://network.photon.health/mcp` ⚠️ |
+
+{/* TODO(launch): move MCP to network.<env>.health/mcp, then delete the ⚠️ marks and this line. */}
+
+⚠️ Not live yet. Use `ai.<env>.health` until MCP moves.
 
 During the preview, the server runs at `https://ai.neutron.health` (and `https://ai.photon.health` in production).
 

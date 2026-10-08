@@ -14,7 +14,7 @@ prescription(prescription: PrescriptionInput!, metadata: RequestMetadata!): Pres
 | **Sync**, no patient | `{ treatment }` | A drug lookup: the matches come back as options. **Nothing is created.** |
 | **Sync** | `{ patient, templateId }` or `{ patient, treatment, … }` | A new draft, or the patient's draft in progress continued |
 | **Update** | `{ id, …fields }` | That draft, with only those fields changed |
-| **Sign** | `{ id, signing: { signedHash } }` | The prescription, signed. Needs a [user token](/authentication). |
+| **Sign** | `{ id, signing: { signedHash } }` | The prescription, signed. Needs `write:prescription`, which only a prescriber's [user token](/authentication#permissions) has. Drafting doesn't. |
 
 Every call screens the draft and returns its `status` and `screeningAlerts`. See [Screening](/network/screening).
 
