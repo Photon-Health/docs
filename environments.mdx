@@ -24,11 +24,17 @@ Every URL follows from the environment's name, so switching environments means c
 
 | Service | Neutron | Photon |
 | --- | --- | --- |
-| GraphQL | `https://network.neutron.health/graphql` | `https://network.photon.health/graphql` |
-| MCP ([private preview](/network/mcp)) | `https://network.neutron.health/mcp` | `https://network.photon.health/mcp` |
-| Embed app | `https://rx.neutron.health` | `https://rx.photon.health` |
+| GraphQL | `https://network.neutron.health/graphql` | `https://network.photon.health/graphql` ⚠️ |
+| MCP ([private preview](/network/mcp)) | `https://network.neutron.health/mcp` ⚠️ | `https://network.photon.health/mcp` ⚠️ |
+| Embed app | `https://rx.neutron.health` ⚠️ | `https://rx.photon.health` ⚠️ |
 | Sign-in (Auth0) | `auth.neutron.health` | `auth.photon.health` |
 | Token audience | `https://api.neutron.health` | `https://api.photon.health` |
+
+{/* TODO(launch): fix each ⚠️ above, then delete the ⚠️ marks and this Warning. */}
+
+<Warning>
+  ⚠️ **Not live yet.** `network.photon.health/graphql` returns a 403 for POST requests. MCP still runs at `ai.<env>.health`. `rx.neutron.health` and `rx.photon.health` return a 404, and neither environment has a Prescribe Auth0 client yet.
+</Warning>
 
 ## In code
 
