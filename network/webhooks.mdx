@@ -1,0 +1,110 @@
+---
+title: "Webhooks"
+sidebarTitle: "Overview"
+description: "Get notified when orders and prescriptions change after they're sent."
+icon: "webhook"
+---
+
+GraphQL and MCP let you write to Photon. Webhooks tell your backend what happens after an order is sent: when the patient picks a pharmacy, when it's ready or shipped, and when it's picked up or delivered.
+
+Typical uses:
+
+- Email or text the patient when their order ships or is ready
+- Record sent prescriptions in your own chart
+- Follow up on orders that are stuck or canceled
+
+<Note>
+  Drafts don't send webhooks. An order's first event, `photon:order:created`, fires when it's sent (`state: SUBMITTED`). Its id is the same `ord_…` id the draft had.
+</Note>
+
+## Subscribe
+
+In the dashboard, open [Settings](https://app.neutron.health/settings) and add a webhook:
+
+- **URL**: an HTTPS endpoint on your backend
+- **Events**: all events, or only the types you choose
+- **Shared secret**: used to sign every request. Always set one.
+
+## The request
+
+Photon sends a `POST` with a JSON body in the [CloudEvents](https://cloudevents.io) format:
+
+```json
+{
+  "id": "01G6V8S5TYR056ET83M7Y8MKRK",
+  "type": "photon:order:completed",
+  "specversion": "1.0",
+  "datacontenttype": "application/json",
+  "time": "2026-10-08T01:00:00.000Z",
+  "subject": "ord_01M3WT5GK51DBRH7ZKBKBV9QWK",
+  "source": "org:org_KzSVZBQixLRkqj5d",
+  "data": {
+    "id": "ord_01M3WT5GK51DBRH7ZKBKBV9QWK",
+    "externalId": "1234",
+    "patient": { "id": "pat_01M3WQQHRB1T0K1469KD18BAWX", "externalId": "1234" }
+  }
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `id` | A unique id for this event. Use it to skip duplicates. |
+| `type` | The event, such as `photon:order:completed`. See [Events](/network/webhooks/events). |
+| `subject` | The id of the record the event is about |
+| `source` | Your organization |
+| `time` | When the event happened |
+| `data` | The event's details. Their shape depends on `type`. |
+
+Each request also carries two headers:
+
+| Header | Description |
+| --- | --- |
+| `X-Photon-Signature` | A hex-encoded HMAC-SHA256 of the request body, keyed with your shared secret |
+| `X-Photon-Timestamp` | When the request was sent, in Unix seconds |
+
+## Verify the signature
+
+Compute the HMAC of the request body with your shared secret, and compare it with `X-Photon-Signature`. Reject the request if they don't match.
+
+```ts Node.js (Express)
+import crypto from "node:crypto";
+import express from "express";
+
+const app = express();
+
+app.post("/webhooks/photon", express.raw({ type: "application/json" }), (req, res) => {
+  const expected = crypto
+    .createHmac("sha256", process.env.PHOTON_WEBHOOK_SECRET)
+    .update(req.body) // the raw body, exactly as received
+    .digest("hex");
+  const received = req.get("X-Photon-Signature") ?? "";
+  const valid =
+    received.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(received), Buffer.from(expected));
+  if (!valid) return res.sendStatus(401);
+
+  const event = JSON.parse(req.body.toString());
+  // handle event.type …
+  res.sendStatus(200);
+});
+```
+
+Hash the raw body before parsing it. Re-serializing parsed JSON can change the bytes and break the match.
+
+## Handling events
+
+- **Expect duplicates.** The same event can arrive more than once. Make your handler idempotent, for example by recording each event `id` you've processed.
+- **Expect any order.** Events aren't guaranteed to arrive in the order they happened. If you need the current state, read the record with a [get](/network/order).
+- **Respond quickly.** Return a `2xx` as soon as you've stored the event, and do slow work afterward.
+
+## After an order is sent
+
+Once submitted, an order moves through fulfillment. The steps depend on how it's filled:
+
+| Fulfillment | Order status |
+| --- | --- |
+| Local pickup, patient chooses | Routing → Pending → Placed → Received → Ready → Picked up |
+| Local pickup, pharmacy chosen for them | Pending → Placed → Received → Ready → Picked up |
+| Mail order | Pending → Placed → Filling → Shipped → Delivered |
+
+**Routing** means Photon is waiting for the patient to pick a pharmacy from their text. A patient can reroute between pharmacies, so a placed order can return to pending and be placed again. Each step arrives as an [order event](/network/webhooks/events#order-events).

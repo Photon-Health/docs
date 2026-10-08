@@ -92,6 +92,13 @@
               "network/mcp/prescribing",
               "network/mcp/fulfillment"
             ]
+          },
+          {
+            "group": "Webhooks",
+            "pages": [
+              "network/webhooks",
+              "network/webhooks/events"
+            ]
           }
         ]
       }
