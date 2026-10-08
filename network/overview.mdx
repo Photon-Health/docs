@@ -1,18 +1,21 @@
 ---
 title: "Network"
 sidebarTitle: "Overview"
-description: "Photon's prescribing API: three upserts, over GraphQL or MCP."
+description: "Photon's prescribing API: three upserts over GraphQL or MCP, and webhooks for what happens after an order is sent."
 icon: "diagram-project"
 ---
 
-Network is the API underneath everything in Photon. It has three upserts, `patient`, `prescription` and `order`, and two ways to call them:
+Network is the API underneath everything in Photon. It has three upserts, `patient`, `prescription` and `order`, two ways to call them, and webhooks to hear what happens next:
 
-<CardGroup cols={2}>
+<CardGroup cols={3}>
   <Card title="GraphQL" icon="code" href="/network/graphql">
     For your backend: sync patients and draft prescriptions and orders with a machine token.
   </Card>
   <Card title="MCP" icon="robot" href="/network/mcp">
     For agents: take intake, search drugs and draft prescriptions as tools. In private preview.
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/network/webhooks">
+    For your backend: get notified as orders are sent, filled, shipped and picked up.
   </Card>
 </CardGroup>
 

@@ -64,8 +64,7 @@ The iframe takes no client at all. It signs the prescriber in to Photon itself.
 | Elements event | Embed |
 | --- | --- |
 | `photon-order-created` | `onSent(order)`, or the `PhotonOrder.onSent` message from an iframe |
-| `photon-prescriptions-created` | `onPrescription(rx)` on each prescription, or `onOrder(order)` for all of them |
-| `photon-draft-prescription-created` | `onOrder(order)`, which fires as lines are saved |
+| `photon-prescriptions-created`, `photon-draft-prescription-created` | `onOrder(order)`, which fires as each prescription is saved or signed. Read them from `order.prescriptions`. A standalone `PhotonPrescription` has `onPrescription(rx)` and `onSigned(rx)`. |
 | `photon-prescriptions-error`, `photon-order-error` | No event. The card shows the error to the prescriber. |
 
 Embed events pass the live object: `order.id` and `order.state`. They don't pass a raw GraphQL payload. For what happens after sending, use [webhooks](/network/webhooks). They haven't changed.
