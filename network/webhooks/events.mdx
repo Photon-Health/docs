@@ -9,15 +9,15 @@ Every event has the [same envelope](/network/webhooks#the-request). This page li
 
 | Event | When |
 | --- | --- |
-| [`photon:order:created`](#photon-order-created) | An order was sent |
-| [`photon:order:placed`](#photon-order-placed) | The order reached a pharmacy |
-| [`photon:order:fulfillment`](#photon-order-fulfillment) | The pharmacy made progress: received, ready, shipped and so on |
-| [`photon:order:rerouted`](#photon-order-rerouted) | The order moved to a different pharmacy |
-| [`photon:order:completed`](#photon-order-completed) | Picked up or delivered |
-| [`photon:order:canceled`](#photon-order-canceled) | Canceled |
-| [`photon:prescription:created`](#photon-prescription-created) | A prescription was created |
-| [`photon:prescription:depleted`](#photon-prescription-depleted) | All of a prescription's fills have been used |
-| [`photon:prescription:expired`](#photon-prescription-expired) | A prescription expired |
+| `photon:order:created` | An order was sent |
+| `photon:order:placed` | The order reached a pharmacy |
+| `photon:order:fulfillment` | The pharmacy made progress: received, ready, shipped and so on |
+| `photon:order:rerouted` | The order moved to a different pharmacy |
+| `photon:order:completed` | Picked up or delivered |
+| `photon:order:canceled` | Canceled |
+| `photon:prescription:created` | A prescription was created |
+| `photon:prescription:depleted` | All of a prescription's fills have been used |
+| `photon:prescription:expired` | A prescription expired |
 
 Most events include the `patient` as `{ id, externalId }` and the record's own `externalId` when one was set.
 
@@ -39,8 +39,6 @@ An order was sent. Each prescription on it becomes a fill.
   "createdAt": "2026-10-08T01:00:00.000Z"
 }
 ```
-
-`pharmacyId` is empty until a pharmacy is chosen.
 
 ### photon:order:placed
 

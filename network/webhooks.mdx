@@ -94,7 +94,7 @@ Hash the raw body before parsing it. Re-serializing parsed JSON can change the b
 ## Handling events
 
 - **Expect duplicates.** The same event can arrive more than once. Make your handler idempotent, for example by recording each event `id` you've processed.
-- **Expect any order.** Events aren't guaranteed to arrive in the order they happened. If you need the current state, read the record with a [get](/network/order).
+- **Expect any order.** Events aren't guaranteed to arrive in the order they happened. Compare each event's `time` to tell which is latest.
 - **Respond quickly.** Return a `2xx` as soon as you've stored the event, and do slow work afterward.
 
 ## After an order is sent
@@ -103,8 +103,7 @@ Once submitted, an order moves through fulfillment. The steps depend on how it's
 
 | Fulfillment | Order status |
 | --- | --- |
-| Local pickup, patient chooses | Routing → Pending → Placed → Received → Ready → Picked up |
-| Local pickup, pharmacy chosen for them | Pending → Placed → Received → Ready → Picked up |
-| Mail order | Pending → Placed → Filling → Shipped → Delivered |
+| Local pickup | Routing → Pending → Placed → Sent → Received → Ready |
+| Partner mail order | Pending → Placed → Sent → Filling → Shipped → Delivered → Completed |
 
-**Routing** means Photon is waiting for the patient to pick a pharmacy from their text. A patient can reroute between pharmacies, so a placed order can return to pending and be placed again. Each step arrives as an [order event](/network/webhooks/events#order-events).
+**Routing** means Photon is waiting for the patient to pick a pharmacy from their text. It's skipped when the pharmacy was chosen for them. A patient can reroute between local pharmacies, so a placed order can return to pending and be placed again. Each step arrives as an [order event](/network/webhooks/events#order-events).
