@@ -122,5 +122,60 @@
   },
   "appearance": {
     "strict": false
-  }
+  },
+  "description": "Photon lets prescribers in your product write, sign and send prescriptions. Embed gives you the prescribing UI; Network gives your backend and agents the API.",
+  "redirects": [
+    {
+      "source": "/patient-mutation",
+      "destination": "/network/patient"
+    },
+    {
+      "source": "/prescription-mutation",
+      "destination": "/network/prescription"
+    },
+    {
+      "source": "/order-mutation",
+      "destination": "/network/order"
+    },
+    {
+      "source": "/api/patient",
+      "destination": "/network/patient"
+    },
+    {
+      "source": "/api/prescription",
+      "destination": "/network/prescription"
+    },
+    {
+      "source": "/api/order",
+      "destination": "/network/order"
+    },
+    {
+      "source": "/api/types/:slug*",
+      "destination": "/network/reference"
+    },
+    {
+      "source": "/untitled-page",
+      "destination": "/network/changes"
+    },
+    {
+      "source": "/concepts/entity-resolution",
+      "destination": "/network/changes"
+    },
+    {
+      "source": "/concepts/clinical-screening",
+      "destination": "/network/screening"
+    },
+    {
+      "source": "/reference/errors",
+      "destination": "/network/errors"
+    },
+    {
+      "source": "/reference/enums",
+      "destination": "/network/reference"
+    },
+    {
+      "source": "/reference/pharmacy-search",
+      "destination": "/network/order#pharmacies"
+    }
+  ]
 }
