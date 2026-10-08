@@ -9,13 +9,13 @@ Most integrations start in the frontend with one Embed component, then move work
 
 | | Integration | Your frontend | Your backend | The prescriber |
 | --- | --- | --- | --- | --- |
-| 1 | [Embed for a patient](/integrations/embed-for-a-patient) | Renders `PhotonOrder` with your patient | Nothing | Picks drugs, signs, sends |
+| 1 | [Prescribe embed](/integrations/prescribe-embed) | Renders `PhotonOrder` with your patient | Nothing | Picks drugs, signs, sends |
 | 2 | [Sync patients](/integrations/sync-patients) | Passes the patient's Photon id | Keeps patients, allergies and medications up to date | Picks drugs, signs, sends |
 | 3 | [One-click orders](/integrations/one-click-orders) | Opens the drafted order by id | Drafts the order from templates using your own rules | Reviews, signs, sends |
 | 4 | [Agent-drafted orders](/integrations/agent-drafted-orders) | Opens the agent's draft | An agent takes intake and drafts prescriptions over MCP | Reviews, signs, sends |
 
 <CardGroup cols={2}>
-  <Card title="Embed for a patient" icon="window" href="/integrations/embed-for-a-patient">
+  <Card title="Prescribe embed" icon="window" href="/integrations/prescribe-embed">
     Start here. Use one component and no backend work.
   </Card>
   <Card title="Sync patients" icon="arrows-rotate" href="/integrations/sync-patients">

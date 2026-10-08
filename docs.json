@@ -37,7 +37,7 @@
             "group": "Integrations",
             "pages": [
               "integrations/overview",
-              "integrations/embed-for-a-patient",
+              "integrations/prescribe-embed",
               "integrations/sync-patients",
               "integrations/one-click-orders",
               "integrations/agent-drafted-orders"
@@ -179,6 +179,10 @@
     {
       "source": "/reference/pharmacy-search",
       "destination": "/network/order#pharmacies"
+    },
+    {
+      "source": "/integrations/embed-for-a-patient",
+      "destination": "/integrations/prescribe-embed"
     }
   ]
 }
