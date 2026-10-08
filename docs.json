@@ -87,7 +87,9 @@
             "group": "MCP",
             "pages": [
               "network/mcp",
-              "network/mcp/connect"
+              "network/mcp/connect",
+              "network/mcp/prescribing",
+              "network/mcp/fulfillment"
             ]
           }
         ]
