@@ -201,5 +201,10 @@
   "favicon": {
     "light": "/favicon.svg",
     "dark": "/favicon-dark.svg"
+  },
+  "integrations": {
+    "gtm": {
+      "tagId": "GTM-5KGPPZ9"
+    }
   }
 }
