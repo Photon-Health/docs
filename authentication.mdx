@@ -24,10 +24,14 @@ That's why Photon ships [Embed](/embed/overview). It signs the prescriber in, ho
 
 | Permission | Lets a token | User token | Machine token |
 | --- | --- | --- | --- |
+| `read:patient` | Read patients | ✓ | ✓ |
 | `write:patient` | Find, add and update patients | ✓ | ✓ |
 | `read:prescription` | Read, look up and **draft** prescriptions | ✓ | ✓ |
 | `write:prescription` | **Sign** prescriptions | Prescribers only | Never |
+| `read:order` | Read orders | ✓ | ✓ |
 | `write:order` | Draft, update and submit orders | ✓ | ✓ |
+
+A user token carries the permissions of the person's role. Prescribers have all of them. Other roles, such as medical operations, have everything except `write:prescription`.
 
 Drafting and editing a prescription doesn't need `write:prescription`. Only signing does. A machine token can submit an order whose prescriptions a prescriber has already signed.
 
@@ -94,7 +98,7 @@ const { access_token, expires_in } = await response.json();
 ```json Response
 {
   "access_token": "YOUR_ACCESS_TOKEN",
-  "scope": "write:patient read:prescription write:order",
+  "scope": "read:patient write:patient read:prescription read:order write:order",
   "expires_in": 86400,
   "token_type": "Bearer"
 }
