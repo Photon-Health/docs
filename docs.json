@@ -39,7 +39,8 @@
               "integrations/overview",
               "integrations/embed-for-a-patient",
               "integrations/sync-patients",
-              "integrations/one-click-orders"
+              "integrations/one-click-orders",
+              "integrations/agent-drafted-orders"
             ]
           }
         ]
@@ -49,7 +50,9 @@
         "groups": [
           {
             "group": "Embed",
-            "pages": []
+            "pages": [
+              "embed/overview"
+            ]
           }
         ]
       },
