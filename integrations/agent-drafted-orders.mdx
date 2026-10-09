@@ -67,8 +67,12 @@ Pass the patient and the draft prescriptions to Prescribe. The prescriber sees e
 />
 ```
 
-```html iframe
-<iframe src="https://rx.neutron.health/order/embed?patient=pat_01M3WQQHRB1T0K1469KD18BAWX&rx=rx_01M3WT4NERS2YVQRF6YTWR4A6C" title="Prescribe" style="width: 100%; border: 0"></iframe>
+```ts iframe
+// ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } })
+iframe.src = ph.order.frame({
+  patient: { id: patientId },
+  prescriptions: { add: draftIds.map((id) => ({ id })) },
+});
 ```
 
 </CodeGroup>

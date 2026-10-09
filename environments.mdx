@@ -67,7 +67,7 @@ For each job, call this host with this credential. In production, change `neutro
 | Open the app on a patient or order ([deep link](/prescribe/app/deep-links)) | `rx.neutron.health/order/…` | The prescriber's sign-in | Indie |
 | Draft in Claude or ChatGPT ([MCP](/network/mcp/connect)) | `ai.neutron.health` | The prescriber's sign-in, over OAuth | Indie |
 | Manage credentials, team, catalog and templates ([dashboard](/dashboard)) | `app.neutron.health/settings` | An Admin's or Developer's sign-in | Indie |
-| Embed with the [iframe](/prescribe/embed/iframe) | `rx.neutron.health/order/embed` | The prescriber's sign-in. ⚠️ Soon your Application `client_id` too. | Launch |
+| Embed with the [iframe](/prescribe/embed/iframe) | `rx.neutron.health/order/embed` | The prescriber's sign-in, with your Application `client_id` in a URL built by `frame()` | Launch |
 | Embed with [React](/prescribe/embed/react) or the [JavaScript client](/prescribe/embed/javascript) | `environment="neutron"` | Application `client_id` | Launch |
 | Get a [machine token](/authentication#machine-tokens) | `auth.neutron.health/oauth/token` | Backend `client_id` and `client_secret` | Launch |
 | Sync patients, draft prescriptions and orders ([GraphQL](/network/graphql)) | `network.neutron.health/graphql` | Machine token | Launch |
@@ -106,5 +106,5 @@ For GraphQL or MCP, use the URLs above.
 2. Get production credentials from [app.photon.health](https://app.photon.health/settings/developers). Sandbox credentials don't work in production.
 3. Invite your prescribers to the production organization, with their NPI, phone, fax and address. Nothing carries over from Neutron. See [Team](/dashboard#team).
 4. Change the environment from `neutron` to `photon`: the `environment` prop, or the hostnames for GraphQL and MCP.
-5. Add your production domain to your Application credential's allowed URLs.
+5. Add your production domain to your Application credential's allowed URLs. Using the iframe? Add `https://rx.new` too.
 6. Set up your [webhooks](/network/webhooks) in production too.

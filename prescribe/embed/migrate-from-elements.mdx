@@ -17,7 +17,7 @@ Most migrations change one component. Patients you synced before keep their `pat
 | Your frontend | Use |
 | --- | --- |
 | React | Prescribe's [React components](/prescribe/embed/react) |
-| Angular, Vue, or anything else | Prescribe's [iframe](/prescribe/embed/iframe). It needs no package or credentials. |
+| Angular, Vue, or anything else | Prescribe's [iframe](/prescribe/embed/iframe), with its URL built by the [JavaScript client](/prescribe/embed/javascript) |
 | A link from another tool | A [deep link](/prescribe/app/deep-links), which replaces the `/prescriptions/new` link |
 
 ## 2. Replace the client
@@ -46,15 +46,15 @@ Most migrations change one component. Patients you synced before keep their `pat
 | `redirect-uri`, `redirect-path` | Not needed. Sign-in returns to the page it started on. |
 | `auto-login` | Not needed. Prescribe signs in on its own when it can, and otherwise shows **Sign in to Photon**. |
 
-The iframe takes no client at all. It signs the prescriber in to Photon itself.
+The iframe takes the same `client_id` in its URL. Build the URL with `frame()` from `photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" }, organization: "YOUR_ORG_ID" })`, and add `https://rx.neutron.health` to the credential's allowed URLs.
 
 ## 3. Replace the workflow
 
-`<photon-prescribe-workflow>` becomes `<PhotonOrder>`. In an iframe, it becomes `/order/embed`.
+`<photon-prescribe-workflow>` becomes `<PhotonOrder>`. In an iframe, it becomes the URL from `ph.order.frame(…)`, which takes the same records.
 
 | `<photon-prescribe-workflow>` | Prescribe |
 | --- | --- |
-| `patient-id` | `patient="pat_…"`, or `?patient=pat_…` in an iframe. Prescribe takes Photon ids only. To pass your own patient, give their details (`patient={{ demographic: { … } }}`) and Photon matches them. |
+| `patient-id` | `patient="pat_…"`, or `ph.order.frame({ patient: { id: "pat_…" } })` for an iframe. Prescribe takes Photon ids only. To pass your own patient, give their details (`patient={{ demographic: { … } }}`) and Photon matches them. |
 | `template-ids` | `order={{ patient: { id }, prescriptions: { add: [{ templateId: "…" }] } }}` |
 | `prescription-ids` | `order={{ prescriptions: { add: [{ id: "rx_…" }] } }}`. Prescribe puts the draft itself on the order rather than copying it. |
 | `initial-prescriptions`, `template-overrides`, `prescription-overrides` | Draft the prescriptions from your backend with the values you want ([prescription sync](/network/prescription)), then pass their ids. See [One-click orders](/integrations/one-click-orders). |

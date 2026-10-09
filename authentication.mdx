@@ -41,15 +41,15 @@ A machine token can send an order once a prescriber has signed every prescriptio
 
 Find both kinds in your dashboard under [Settings → Developers](https://app.neutron.health/settings/developers).
 
-- **Application** credentials are a public `client_id` and a list of allowed URLs. The list must include every domain your app runs on. Use them with Prescribe's React components or the JavaScript client.
-- **Backend** credentials are a `client_id` and a `client_secret`. Keep the secret on your server, out of client-side code and version control.
+- **Application** credentials are a public `client_id` and a list of allowed URLs. The list must include every domain your app runs on, and the Prescribe app's domain (`rx.neutron.health`, or `rx.new` in production) if you use the iframe. Use them with Prescribe's React components, the iframe or the JavaScript client.
+- **Backend** credentials are a `client_id` and a `client_secret`. Keep the secret on your server, out of client-side code and version control. The JavaScript client refuses a `client_secret` in a browser.
 
 Credentials come with every Neutron sandbox account. In production they come with [Launch and above](/use-cases#plans-at-a-glance). Indie has none, because everything on Indie runs on the prescriber's own sign-in. If you can't see them on a paid account, ask your organization's admin.
 
 Not sure which host and credential a job needs? See [Which host and credential](/environments#which-host-and-credential).
 
 <Tip>
-  [Deep links](/prescribe/app/deep-links) need no credentials. They open the Prescribe app, which signs the prescriber in on its own. ⚠️ The [iframe](/prescribe/embed/iframe) will soon need your Application `client_id`.
+  [Deep links](/prescribe/app/deep-links) need no credentials. They open the Prescribe app, which signs the prescriber in on its own. The [iframe](/prescribe/embed/iframe) needs your Application `client_id`.
 </Tip>
 
 ## User tokens
@@ -59,7 +59,7 @@ With Prescribe, you don't handle user tokens:
 | You use | Sign-in |
 | --- | --- |
 | [Deep link](/prescribe/app/deep-links) | Photon's own. No credentials needed. |
-| [iframe](/prescribe/embed/iframe) | Photon's own. ⚠️ Soon needs your Application `client_id`. |
+| [iframe](/prescribe/embed/iframe) | Your Application `client_id`, which `frame()` puts in the iframe's URL |
 | [React components](/prescribe/embed/react) | `<PhotonProvider clientId="…">` signs the prescriber in with your Application credential. |
 | [JavaScript client](/prescribe/embed/javascript) | `photon({ auth: { clientId } })` does the same without React. |
 | Your own Auth0 sign-in | Pass `photon({ auth: { getToken } })`, and Photon calls your function before each request. |
