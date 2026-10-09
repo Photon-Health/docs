@@ -31,7 +31,7 @@ mutation DraftPrescription($prescription: PrescriptionInput!, $metadata: Request
   prescription(prescription: $prescription, metadata: $metadata) {
     __typename
     ... on PrescriptionPayload {
-      prescription { id status treatment { name } }
+      prescription { id treatment { name } screeningAlerts { severity type description } }
       unappliedChanges { key status reason }
     }
     ... on AmbiguousPrescriptionMatch { reason candidates { id instructions } }
@@ -50,7 +50,7 @@ mutation DraftPrescription($prescription: PrescriptionInput!, $metadata: Request
 }
 ```
 
-The result is an unsigned draft, `rx_…`. Its `status` is `READY`, `WARNING` or `BLOCKED` based on [screening](/network/screening).
+The result is an unsigned draft, `rx_…`, with any conflicts [screening](/network/screening) found in `screeningAlerts`.
 
 <Warning>
   Always send a `templateId` or a `treatment`. If the patient already has drafts in progress, Photon may continue one of them, or return `AmbiguousPrescriptionMatch` so you can say which by sending its `id`.
@@ -66,7 +66,7 @@ mutation DraftOrder($order: OrderInput!, $metadata: RequestMetadata!) {
       order { id state prescriptions { id } }
       unappliedChanges { key status reason }
     }
-    ... on AmbiguousOrderMatch { reason candidates { id prescriptionIds } }
+    ... on AmbiguousOrderMatch { reason candidates { id prescriptions { id } } }
     ... on OperationError { code message }
   }
 }
@@ -100,7 +100,7 @@ The order stays a `DRAFT`, and nothing goes to the patient yet. Store its `ord_�
 
 </CodeGroup>
 
-The prescriber sees the patient and each prescription, with screening alerts. They can adjust a draft, then sign each prescription and click **Send**.
+The prescriber sees the patient and each prescription, with screening alerts. They can adjust a draft, then sign each prescription and click **Send prescription to patient**.
 
 ## Without a backend
 

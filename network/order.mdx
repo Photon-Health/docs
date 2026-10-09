@@ -52,7 +52,7 @@ mutation Order($order: OrderInput!, $metadata: RequestMetadata!) {
       }
       unappliedChanges { key status severity reason options { displayName argument value } }
     }
-    ... on AmbiguousOrderMatch { reason candidates { id prescriptionIds } }
+    ... on AmbiguousOrderMatch { reason candidates { id prescriptions { id } } }
     ... on OperationError { code message }
   }
 }

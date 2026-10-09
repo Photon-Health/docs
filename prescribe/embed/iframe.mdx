@@ -43,7 +43,8 @@ import { photon } from "@photon-rx/core";
 
 const ph = photon({ environment: "neutron", auth: { getToken }, appUrl: "https://rx.neutron.health" });
 
-const src = ph.order.frame({
+const src = ph.frame({
+  flow: "order",
   patient: {
     demographic: {
       name: { first: "Paige", last: "Turner" },
@@ -52,12 +53,12 @@ const src = ph.order.frame({
       phone: "+13175550142",
     },
   },
-  prescriptions: { add: [{ templateId: "YOUR_TEMPLATE_ID" }] },
+  order: { prescriptions: { add: [{ templateId: "YOUR_TEMPLATE_ID" }] } },
 });
 // https://rx.neutron.health/order/embed/AQf3…
 ```
 
-For a patient on their own, use `ph.patient.frame({ demographic: { … } })`. A live object you already have makes its own: `order.frame()`.
+`ph.frame()` takes the flow and each record it opens with. For one record on its own, use that record's call, such as `ph.patient.frame({ demographic: { … } })`. A live object you already have makes its own: `order.frame()`.
 
 <Warning>
   The token is encoded but not encrypted. Anyone who has the URL can read it, so treat a URL with patient details like the details themselves. Pass ids when you can.
@@ -70,10 +71,10 @@ The iframe posts messages to your page. They contain ids and states only, never 
 | `event` | Sent | Other fields |
 | --- | --- | --- |
 | `resize` | Whenever the content's height changes | `height`, in CSS pixels |
-| `PhotonOrder.onPatient` | The order's patient has a record or changed | `detail`: the patient's id |
+| `PhotonOrder.onPatient` | The order's patient has a record or changed | `detail`: the patient's id, or `null (changed)` when the prescriber changes patient |
 | `PhotonOrder.onOrder` | The order or one of its prescriptions changed | `detail`: a summary that starts with the order's id |
-| `PhotonOrder.onSent` | The order was sent | `detail`: the order's id and state |
-| `PhotonPatient.onPatient` | The patient has a record or changed | `detail`: the patient's id |
+| `PhotonOrder.onSent` | The order was sent | `detail`: the order's id and state, such as `ord_… · submitted` |
+| `PhotonPatient.onPatient` | The patient has a record or changed | `detail`: the patient's id, or `null (changed)` when the prescriber changes patient |
 | `PhotonPrescription.onPrescription` | The prescription was saved or signed | `detail`: a summary that starts with its id |
 | `PhotonPrescription.onSigned` | The prescription was signed | `detail`: its id |
 

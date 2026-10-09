@@ -16,7 +16,7 @@ prescription(prescription: PrescriptionInput!, metadata: RequestMetadata!): Pres
 | **Update** | `{ id, …fields }` | That draft, with only those fields changed |
 | **Sign** | `{ id, signing: { signedHash } }` | The prescription, signed. Needs `write:prescription`, which only a prescriber's [user token](/authentication#permissions) has. Drafting doesn't. |
 
-Every call screens the draft and returns its `status` and `screeningAlerts`. See [Screening](/network/screening).
+Every call screens the draft and returns its `screeningAlerts`. See [Screening](/network/screening).
 
 ## Example
 
@@ -29,7 +29,6 @@ mutation Prescription($prescription: PrescriptionInput!, $metadata: RequestMetad
     ... on PrescriptionPayload {
       prescription {
         id
-        status
         treatment { id name }
         instructions
         dispense { quantity unit daysSupply refillsAllowed }
@@ -134,7 +133,6 @@ If the content changed after the prescriber reviewed it, the hashes don't match.
 ```graphql
 fragment PrescriptionFields on Prescription {
   id
-  status
   templateId
   patient { id }
   treatment { id name rxNormId ndc upc }
