@@ -91,6 +91,34 @@ Identify the treatment by exactly one of `id`, `rxNormId`, `ndc`, `upc` or `name
 
 Syncing without a patient is a safe lookup that never creates anything. Use it to resolve the drug before you draft.
 
+Each drug option's `entity` is the `Treatment` it picks, in parts. Use them to show the choices as a prescriber decides (drug, then form, then strength) instead of parsing `displayName`:
+
+```graphql
+unappliedChanges {
+  key
+  options {
+    displayName
+    value
+    entity {
+      ... on Treatment { brandName genericName form route strength schedule medicationType recommendedDispenseUnits }
+    }
+  }
+}
+```
+
+| Field | Example | Notes |
+| --- | --- | --- |
+| `brandName` | `"Lipitor"`, `"Zepbound KwikPen"`, `"Lisinopril"` | The product's name: a brand, or for a generic, the drug |
+| `genericName` | `"Atorvastatin Calcium"` | Its ingredients |
+| `form` | `"Tablet"`, `"Solution Auto-injector"` |  |
+| `route` | `"Oral"`, `"Subcutaneous"` |  |
+| `strength` | `"10 MG"`, `"125 MG/5ML"` |  |
+| `schedule` | `"II"`, `"UNCONTROLLED"` | DEA schedule. On a lookup's options only. |
+| `medicationType` | `"RX"`, `"OTC"` |  |
+| `recommendedDispenseUnits` | `["Bottle", "Tablet"]` | Values for `dispense.unit`. On a lookup's options only. |
+
+These are null for medical equipment and compounds. A prescription's own `treatment` has the same parts. Its `name` may be just the drug (`"Lisinopril"`), and `prescribableName` is the full product name.
+
 <Warning>
   Always send a `templateId` or a `treatment` when you draft. With a patient, a sync may continue a draft the patient already has in progress. If they have several, you get `AmbiguousPrescriptionMatch`. Resend with the `id` of the one you mean.
 </Warning>
@@ -136,7 +164,7 @@ fragment PrescriptionFields on Prescription {
   id
   templateId
   patient { id }
-  treatment { id name rxNormId ndc upc }
+  treatment { id name prescribableName rxNormId ndc upc brandName genericName form route strength medicationType }
   instructions
   dispense { quantity unit daysSupply refillsAllowed dispenseAsWritten }
   clinical { diagnoses { id name icd10Code } notes }

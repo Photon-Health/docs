@@ -91,6 +91,16 @@ const [which] = choicesIn(rx.changes); // e.g. "which lisinopril?"
 if (which) await rx.choose(which.options[0]); // or let the prescriber pick
 ```
 
+A drug option carries its `treatment` in parts, so you can group drugs by `brandName`, then `form`, then `strength` without parsing `displayName`. It also has `genericName`, `route`, `schedule` (the DEA schedule) and `recommendedDispenseUnits`, the values `dispense.unit` takes. Once picked, the same parts are `rx.treatment`:
+
+```ts
+for (const option of which?.options ?? []) {
+  const { brandName, form, strength } = option.treatment ?? {}; // "Lisinopril", "Tablet", "10 MG"
+}
+// After rx.choose(option):
+rx.treatment?.recommendedDispenseUnits; // ["Bottle", "Tablet"]: offer these for dispense.unit
+```
+
 ## Errors
 
 Anything Photon answers about your data comes back as a result. Only failures that different data can't fix throw a `PhotonError`, and its `kind` says which:
