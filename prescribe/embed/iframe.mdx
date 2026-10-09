@@ -78,6 +78,8 @@ The iframe posts messages to your page. They contain ids and states only, never 
 | `PhotonPrescription.onPrescription` | The prescription was saved or signed | `detail`: a summary that starts with its id |
 | `PhotonPrescription.onSigned` | The prescription was signed | `detail`: its id |
 
+`detail` is a summary for logs. Read the id at its start, and don't parse the rest: its wording can change.
+
 Every message has `source: "photon-rx"`. Use the `resize` message to size the iframe, because the iframe has no fixed height:
 
 <CodeGroup>

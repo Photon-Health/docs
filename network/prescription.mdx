@@ -99,7 +99,7 @@ Syncing without a patient is a safe lookup that never creates anything. Use it t
 
 Signing is the prescriber's approval of exactly what they reviewed:
 
-1. Every response includes `signing.contentHash`, a hash of the prescription's current clinical content.
+1. Every response includes `signing.contentHash`, a hash of the prescription's current clinical content: the drug, the sig and the dispense. Notes and diagnoses aren't part of it, so changing them doesn't invalidate a signature.
 2. Show the prescriber the prescription and its screening alerts.
 3. Send that hash back as `signing.signedHash`, and send no other changes in the same call.
 
@@ -120,6 +120,7 @@ If the content changed after the prescriber reviewed it, the hashes don't match.
 | Field | Type | Notes |
 | --- | --- | --- |
 | `id` | `ID` | Leave it out to draft a new prescription |
+| `externalId` | `String` | Your own id for the prescription, scoped to your organization. An [order](/network/order#fields) can add the prescription by it. |
 | `patient` | `PatientReferenceInput` | Usually `{ id }`. Without it, a sync only looks the drug up. |
 | `templateId` | `ID` | Fills in the drug, sig and dispense. Find ids under [Settings → Templates](https://app.neutron.health/settings/templates). |
 | `treatment` | `TreatmentReferenceInput` | Exactly one of `id`, `rxNormId`, `name`, `ndc` or `upc` |

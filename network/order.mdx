@@ -46,13 +46,14 @@ mutation Order($order: OrderInput!, $metadata: RequestMetadata!) {
         id
         state
         patient { ... on Patient { id } }
-        prescriptions { id status signing { state } treatment { name } }
+        prescriptions { id signing { state } treatment { name } }
+        screeningAlerts { severity type description involvedEntities { name } }
         pharmacy { id name }
         exceptions { type message }
       }
       unappliedChanges { key status severity reason options { displayName argument value } }
     }
-    ... on AmbiguousOrderMatch { reason candidates { id prescriptions { id } } }
+    ... on AmbiguousOrderMatch { reason candidates { id prescriptions { id treatment { name } } pharmacy { name } } }
     ... on OperationError { code message }
   }
 }
@@ -87,7 +88,11 @@ mutation Order($order: OrderInput!, $metadata: RequestMetadata!) {
 
 </CodeGroup>
 
-If the patient has several draft orders and you didn't send an `id`, you get `AmbiguousOrderMatch`. Resend with the `id` of the one you mean.
+If the patient has several draft orders and you didn't send an `id`, you get `AmbiguousOrderMatch`. Each candidate carries its prescriptions and pharmacy, so you can show the prescriber what's on each. Resend with the `id` of the one you mean.
+
+## Screening
+
+An order screens its prescriptions together. `screeningAlerts` on the order includes the interactions between them, which each prescription's own [screening](/network/screening) doesn't cover. When you add or remove prescriptions and two of them interact, every add and remove change comes back `APPLIED` with `ADVISORY` severity and a short `reason`. The details are in `screeningAlerts`. Interactions never block the order.
 
 ## Fields
 
@@ -134,7 +139,8 @@ fragment OrderFields on Order {
   id
   state
   patient { ... on Patient { id } ... on UpstreamServiceError { code message retryable } }
-  prescriptions { id status treatment { id name } signing { state } }
+  prescriptions { id treatment { id name } signing { state } }
+  screeningAlerts { severity type category description involvedEntities { id name } }
   pharmacy { id name address { street1 street2 city state postalCode } fulfillmentType }
   exceptions { id type message createdAt }
 }

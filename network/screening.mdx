@@ -6,6 +6,8 @@ icon: "shield-check"
 
 Photon screens a prescription each time its drug resolves or it changes. It checks the drug against the patient's record and returns each conflict it finds in the prescription's `screeningAlerts`.
 
+An [order](/network/order#screening) also screens its prescriptions together. Interactions between them come back in the order's `screeningAlerts`, not on each prescription.
+
 Screening can only check what's on file. [Sync the patient's](/integrations/sync-patients) allergies, medications and diagnoses before drafting. A patient with an empty record gets no alerts, but that doesn't mean the drug is safe.
 
 ## Alerts
@@ -34,7 +36,7 @@ Screening can only check what's on file. [Sync the patient's](/integrations/sync
 
 ## Showing alerts
 
-Alerts are advisory: none of them stops a prescriber from signing. Show every alert to the prescriber before they sign, most severe first. Prescribe does this for you, with a badge that counts the interactions and takes the color of the most severe one. Explicit acknowledgement of individual alerts when signing is planned.
+Alerts are advisory: none of them stops a prescriber from signing or sending. Show every alert to the prescriber before they sign, and the order's alerts before they send. Prescribe shows each prescription's alerts on its card, above the sig, until it's signed. Explicit acknowledgement of individual alerts when signing is planned.
 
 <Warning>
   Screening relies on coded entries. An allergy recorded without an RxNorm code, such as a drug-class allergy entered by name, may not be screened. Send allergies by `rxNormId` whenever you can.

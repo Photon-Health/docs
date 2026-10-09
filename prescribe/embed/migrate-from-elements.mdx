@@ -58,7 +58,7 @@ The iframe takes no client at all. It signs the prescriber in to Photon itself.
 | `template-ids` | `order={{ patient: { id }, prescriptions: { add: [{ templateId: "…" }] } }}` |
 | `prescription-ids` | `order={{ prescriptions: { add: [{ id: "rx_…" }] } }}`. Prescribe puts the draft itself on the order rather than copying it. |
 | `initial-prescriptions`, `template-overrides`, `prescription-overrides` | Draft the prescriptions from your backend with the values you want ([prescription sync](/network/prescription)), then pass their ids. See [One-click orders](/integrations/one-click-orders). |
-| `enable-order`, `enable-send-to-patient` | Always on. **Send prescription to patient** texts the patient, who chooses their pharmacy. |
+| `enable-order`, `enable-send-to-patient` | Always on. Sending texts the patient, who chooses their pharmacy. |
 | `pharmacy-id` | Set the pharmacy on the draft order from your backend ([`pharmacy`](/network/order#pharmacies)), then open the order by id |
 | `external-order-id` | Set `externalId` on the order from your backend |
 | `hide-patient-card` | `fixed` keeps the patient visible but removes **Change patient** |
