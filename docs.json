@@ -1,15 +1,15 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "almond",
-  "name": "Photon Docs",
+  "name": "Photon",
   "colors": {
     "primary": "#1570EF",
     "light": "#53B1FD",
     "dark": "#175CD3"
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg",
+    "light": "https://photonhealth.com/logo/photon-logo-white.svg",
+    "dark": "https://photonhealth.com/logo/photon-logo.svg",
     "href": "https://photonhealth.com/"
   },
   "navbar": {
@@ -167,7 +167,7 @@
   "appearance": {
     "strict": false
   },
-  "description": "Photon lets prescribers in your product write, sign and send prescriptions. Prescribe gives you the prescribing UI; Network gives your backend and agents the API.",
+  "description": "Photon helps prescribers draft, sign and send prescriptions. Prescribe gives you the prescribing interfaces, and Network enables services and agents to interface with prescriptions dynamically.",
   "metadata": {
     "timestamp": true
   },
@@ -278,8 +278,8 @@
     }
   ],
   "favicon": {
-    "light": "/favicon.svg",
-    "dark": "/favicon-dark.svg"
+    "light": "https://photonhealth.com/logo/photon-icon-white.svg",
+    "dark": "https://photonhealth.com/logo/photon-icon.svg"
   },
   "integrations": {
     "gtm": {
