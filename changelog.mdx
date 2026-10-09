@@ -28,7 +28,7 @@ Durable concepts, such as [records and the send](/architecture), [permissions](/
 ## Changes
 
 <Update label="October 9, 2026" tags={["Prescribe"]}>
-  - The [iframe](/prescribe/embed/iframe) needs your Application `client_id`. Build its URL with `frame()` from the [JavaScript client](/prescribe/embed/javascript), which puts it in. A URL written by hand shows **This link can't be embedded**. Add the Prescribe app's domain to your credential's allowed URLs.
+  - The [iframe](/prescribe/embed/iframe) needs your Application `client_id`. Build its URL with `frame()` from the [JavaScript client](/prescribe/embed/javascript), which puts it in. A URL written by hand shows **This link can't be embedded**. Add every domain that shows the iframe, and the Prescribe app's domain, to your credential's allowed URLs.
   - Only the iframe's `/embed` pages load in another site's frame. The Prescribe app's other pages refuse.
   - [Deep links](/prescribe/app/deep-links) never carry a `client_id`, so you can share them with any prescriber.
   - Links point to the environment's Prescribe app by default, so `appUrl` is optional. `photon({ organization })` puts your organization on every link, so prescribers skip the organization picker.

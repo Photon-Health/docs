@@ -46,7 +46,7 @@ Most migrations change one component. Patients you synced before keep their `pat
 | `redirect-uri`, `redirect-path` | Not needed. Sign-in returns to the page it started on. |
 | `auto-login` | Not needed. Prescribe signs in on its own when it can, and otherwise shows **Sign in to Photon**. |
 
-The iframe takes the same `client_id` in its URL. Build the URL with `frame()` from `photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" }, organization: "YOUR_ORG_ID" })`, and add `https://rx.neutron.health` to the credential's allowed URLs.
+The iframe takes the same `client_id` in its URL. Build the URL with `frame()` from `photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" }, organization: "YOUR_ORG_ID" })`, and add `https://rx.neutron.health` to the credential's allowed URLs, beside every domain that shows the iframe.
 
 ## 3. Replace the workflow
 

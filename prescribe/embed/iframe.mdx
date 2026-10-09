@@ -22,7 +22,9 @@ Use it as your iframe's `src`, as in [Height and events](#height-and-events). Th
 ## What you need
 
 - An **Application** `client_id` from the [Neutron dashboard](https://app.neutron.health/settings/developers). Embedding needs API credentials, which come with [Launch and above](/use-cases#plans-at-a-glance).
-- The Prescribe app's domain in that credential's allowed URLs: `https://rx.neutron.health` in the sandbox, or `https://rx.new` in production. The iframe signs the prescriber in from there.
+- In that credential's allowed URLs:
+  - Every domain where your pages show the iframe. The iframe loads only on the domains listed there.
+  - The Prescribe app's domain, where the iframe signs the prescriber in: `https://rx.neutron.health` in the sandbox, or `https://rx.new` in production.
 
 ## Building the URL
 
@@ -62,10 +64,8 @@ When the URL names the patient by id, the iframe stays on that patient, with no 
 
 A URL written by hand, or one without your `client_id`, shows **This link can't be embedded** and does nothing else.
 
-{/* TODO(launch): links are encrypted before the iframe runs in production. Then rewrite this Warning. */}
-
 <Warning>
-  The URL's token is encoded but not encrypted. Anyone who has the URL can read it, so treat a URL with patient details like the details themselves. Pass ids when you can.
+  Treat a URL with patient details like the details themselves. Pass ids when you can.
 </Warning>
 
 ## Height and events
@@ -142,4 +142,4 @@ The popup needs your page to allow it:
 
 ## Only the iframe can be framed
 
-Photon allows only the `/embed` pages in another site's iframe. The Prescribe app's other pages refuse to load in a frame anywhere else. To send a prescriber to the full app, use a [deep link](/prescribe/app/deep-links).
+Photon allows only the `/embed` pages in another site's iframe, on the domains in your credential's allowed URLs. The Prescribe app's other pages refuse to load in a frame anywhere else. To send a prescriber to the full app, use a [deep link](/prescribe/app/deep-links).
