@@ -40,6 +40,34 @@ A **template** is a saved prescription your organization sets up, with the drug,
   </Step>
 </Steps>
 
+## From draft to pharmacy
+
+Creating a record never sends anything. Drafts stay inside Photon until a prescriber signs them and someone sends the order. **Sending the order is the commit point.**
+
+| Step | What it means | You'll see |
+| --- | --- | --- |
+| **Drafted** | A proposal. Photon screens it, and nothing leaves Photon. You can edit it or throw it away. | Prescription `signing.state: UNSIGNED`, on an order in `DRAFT` |
+| **Signed** | The prescriber approved exactly this prescription. It can't change, and it still hasn't gone anywhere. | `signing.state: SIGNED` |
+| **Sent** | **The send.** Photon texts the patient a link to choose a pharmacy, and webhooks start. Now only the pharmacy can change, or the order can be canceled. | Order `state: SUBMITTED` |
+| **Placed** | A pharmacy was chosen, and Photon transmitted the prescriptions to it. It can still be rerouted. | `photon:order:placed` |
+| **Filled** | The pharmacy filled it, and the patient picked it up or got it delivered. | `photon:order:fulfillment`, then `photon:order:completed` |
+
+Sending and transmitting are separate steps. You send the order to the patient, and Photon transmits it to a pharmacy once one is chosen. If you choose the pharmacy before sending, Photon places it there right after the send.
+
+The send has a different name on each surface, but it's always the same operation:
+
+| Surface | The send |
+| --- | --- |
+| Prescribe app | **Send prescription to patient**, or **Send to** a pharmacy |
+| React components | `PhotonOrder`'s **Send**, then `onSent` |
+| iframe | The `PhotonOrder.onSent` message |
+| JavaScript client | `order.submit()` |
+| GraphQL | `order` with `state: SUBMITTED` |
+| MCP | `rx_send` |
+| Webhooks | `photon:order:created` |
+
+Anyone can draft. Signing needs a prescriber, and sending needs the `write:order` permission. See [Authentication](/authentication#permissions).
+
 ## Get, sync and update
 
 Each record has one upsert. You call it in one of three ways, and they work the same for patients, prescriptions and orders:

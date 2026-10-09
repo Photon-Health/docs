@@ -1,0 +1,102 @@
+---
+title: "What you can build"
+sidebarTitle: "Use cases"
+description: "Common Photon integrations by company type, where to start, and what each plan unlocks."
+icon: "map"
+---
+
+Photon's customers fall into three groups. Find yours to see where prescribers work, what you can build, and which plan it needs. The plans match [pricing](https://photonhealth.com/pricing).
+
+<CardGroup cols={3}>
+  <Card title="Providers and small clinics" icon="user-doctor" href="#providers-and-small-clinics">
+    Prescribe in Photon's app. Draft with links, Claude or your scribe. Plan: **Indie**.
+  </Card>
+  <Card title="Tech-enabled clinics" icon="laptop-medical" href="#tech-enabled-clinics">
+    Build workflows that help many agents and clinicians treat patients faster and safely. Plan: **Launch**.
+  </Card>
+  <Card title="Platforms and marketplaces" icon="network-wired" href="#platforms-and-marketplaces">
+    Offer AI-enabled workflows to healthcare companies, or run a care marketplace. Plan: **Grow**.
+  </Card>
+</CardGroup>
+
+Your company type and your plan are separate choices. Most companies pick the plan made for them, but any company can choose a bigger one. For example, a clinic on Grow can run several organizations or build its own prescribing UI.
+
+<Tip>
+  Every account starts with a free [Neutron sandbox](/environments), including API credentials, so you can build any of this before you pay.
+</Tip>
+
+## Providers and small clinics
+
+**Plan: Indie.** Prescribers use the [Prescribe app](/prescribe/app) at [rx.new](https://rx.new). There's nothing to build or host.
+
+- **Prescribe in the app.** Find the patient, pick the drug, sign and send. Photon texts the patient their pharmacy options.
+- **Start from a link.** A [deep link](/prescribe/app/deep-links) in your calendar, notes or an email opens the app on the right patient or order.
+- **Draft with AI.** Connect [Photon's MCP server](/network/mcp/connect) to Claude, or to an AI scribe that supports MCP. It drafts the prescription from the visit, and you review, sign and send. MCP is in private preview.
+- **Save time with templates.** Save common prescriptions as [templates](/dashboard#templates), and [invite](/dashboard#team) the other clinicians in your practice.
+
+Indie doesn't include API credentials. Everything above runs on the prescriber's own sign-in, so there's no client id or secret to manage.
+
+## Tech-enabled clinics
+
+**Plan: Launch.** You run your own care model, with your own product, clinicians and, more and more, agents that take intake and chart. Launch adds API credentials, so you can build workflows that let many agents and clinicians treat patients faster and safely.
+
+| Build | So that | Guide |
+| --- | --- | --- |
+| Prescribe inside your clinician app | Clinicians never leave your product | [Prescribe embed](/integrations/prescribe-embed) |
+| Patient sync from your records | Screening sees every allergy, medication and condition | [Sync patients](/integrations/sync-patients) |
+| Orders drafted by your protocols | Clinicians only review, sign and send | [One-click orders](/integrations/one-click-orders) |
+| Intake agents that draft over MCP | Agents do the typing, and a clinician signs | [Agent-drafted orders](/integrations/agent-drafted-orders) |
+| Webhooks into your care team's tools | You follow each order to pickup or delivery | [Webhooks](/network/webhooks) |
+
+Launch covers one organization. Your clinicians and agents all work in it.
+
+## Platforms and marketplaces
+
+**Plan: Grow.** You sell AI-enabled workflow products to healthcare companies, or you run a marketplace that connects patients with many clinicians and practices. Grow includes everything in Launch, plus:
+
+- **Many organizations.** Give each customer or practice its own organization, with its own team, catalog, templates and credentials. Provision new ones automatically as customers sign up. Provisioning is documented privately: [talk to sales](https://photonhealth.com/onboard?type=platform&tier=grow) for access.
+- **Custom prescribing workflows.** Build your own prescribing UI directly on the [JavaScript client](/prescribe/embed/javascript), the same client Prescribe is built on. It keeps the same rules, so Photon still screens every draft and only a signed-in prescriber can sign. Clinics on Grow can do this too.
+- **Custom SSO.** Sign prescribers in with your own identity provider.
+
+## Enterprise
+
+For larger volumes and custom terms: custom marketplace offers, white-label access, and support in a shared Slack or Teams channel. [Talk to sales](https://photonhealth.com/onboard?type=enterprise).
+
+## Plans at a glance
+
+| | Indie | Launch | Grow |
+| --- | --- | --- | --- |
+| [Prescribe app](/prescribe/app) and [deep links](/prescribe/app/deep-links) | ✓ | ✓ | ✓ |
+| [Templates](/dashboard#templates) and [team invites](/dashboard#team) | ✓ | ✓ | ✓ |
+| [MCP](/network/mcp) with a prescriber's sign-in (Claude, a scribe) | ✓ | ✓ | ✓ |
+| [API credentials](/authentication#credentials) | | ✓ | ✓ |
+| [Embed Prescribe](/prescribe/embed) in your product | | ✓ | ✓ |
+| [GraphQL](/network/graphql) and MCP with a machine token | | ✓ | ✓ |
+| [Webhooks](/network/webhooks) | | ✓ | ✓ |
+| Many organizations, provisioned automatically | | | ✓ |
+| Custom prescribing UI on the [JavaScript client](/prescribe/embed/javascript) | | | ✓ |
+| Custom SSO | | | ✓ |
+
+[Enterprise](#enterprise) includes everything in Grow. Prices and included orders are on the [pricing page](https://photonhealth.com/pricing).
+
+## Where prescribers work
+
+Every integration ends with a prescriber signing in Prescribe, or in your own UI on Grow. Choose the surface first, then add the API for what your product already knows.
+
+| Surface | You gain | You take on | Plan |
+| --- | --- | --- | --- |
+| [Prescribe app](/prescribe/app) and [deep links](/prescribe/app/deep-links) | Nothing to build or host. New features arrive automatically. | Prescribers switch to a Photon tab. | Indie |
+| [Embedded Prescribe](/prescribe/embed) | Prescribing inside your product. The React components use your styles. | An Application credential, its allowed URLs, and a frontend change. | Launch |
+| [Your own UI](/prescribe/embed/javascript) on the JavaScript client | Your own screens and flow, with Photon's rules underneath. | Building and maintaining the UI. | Grow |
+| [Network](/network/overview): GraphQL, MCP and webhooks | Your backend and agents draft, sync patients and follow orders. | A machine token, reading [changes](/network/changes), and a webhook endpoint. It can't sign, so pair it with one of the surfaces above. | Launch |
+
+Start with the app to see the workflow, then embed it or add the API when you're ready. The records are the same everywhere, so nothing you draft is lost when you switch.
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="bolt" href="/quickstart">
+    Prescribe from your own app in the sandbox in a few minutes.
+  </Card>
+  <Card title="From draft to pharmacy" icon="route" href="/architecture#from-draft-to-pharmacy">
+    What happens after you create something, and which step sends it.
+  </Card>
+</CardGroup>

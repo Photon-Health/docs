@@ -16,8 +16,14 @@
     "primary": {
       "type": "button",
       "label": "Get Sandbox",
-      "href": "https://photonhealth.com/onboard#developer"
-    }
+      "href": "https://photonhealth.com/onboard?type=developer"
+    },
+    "links": [
+      {
+        "label": "Pricing",
+        "href": "https://photonhealth.com/pricing"
+      }
+    ]
   },
   "navigation": {
     "products": [
@@ -30,11 +36,13 @@
             "group": "Get started",
             "pages": [
               "introduction",
+              "use-cases",
               "quickstart",
               "architecture",
               "environments",
               "authentication",
-              "dashboard"
+              "dashboard",
+              "changelog"
             ]
           },
           {
@@ -155,6 +163,9 @@
     "strict": false
   },
   "description": "Photon lets prescribers in your product write, sign and send prescriptions. Prescribe gives you the prescribing UI; Network gives your backend and agents the API.",
+  "metadata": {
+    "timestamp": true
+  },
   "redirects": [
     {
       "source": "/embed",

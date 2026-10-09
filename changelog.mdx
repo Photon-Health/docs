@@ -1,0 +1,47 @@
+---
+title: "Changelog"
+description: "What's stable, what's in preview, and what changed in Photon's docs and APIs."
+icon: "clock-rotate-left"
+rss: true
+---
+
+Every page shows when it was last updated. This page says what's stable, and lists the changes that matter to integrators.
+
+## What's stable
+
+| | Status | Notes |
+| --- | --- | --- |
+| [Prescribe app](/prescribe/app) | Stable | `rx.new` in production. ⚠️ The sandbox app, `rx.neutron.health`, isn't live yet. |
+| [iframe](/prescribe/embed/iframe) and [deep links](/prescribe/app/deep-links) | Stable | URLs use the same paths as the app. |
+| [React components](/prescribe/embed/react) | Coming soon | ⚠️ `@photon-rx/react` isn't published to npm yet. |
+| [JavaScript client](/prescribe/embed/javascript) | Coming soon | ⚠️ `@photon-rx/core` isn't published to npm yet. |
+| [GraphQL](/network/graphql) | Stable in Neutron | ⚠️ Production, `network.photon.health/graphql`, isn't live yet. |
+| [Webhooks](/network/webhooks) | Stable | Signed with HMAC-SHA256. |
+| [MCP](/network/mcp) | Private preview | Tools will change when MCP moves to `network.<env>.health/mcp`. |
+| Elements | Deprecated | Removed on January 1, 2027. See [Migrate from Elements](/prescribe/embed/migrate-from-elements). |
+
+{/* TODO(launch): update each ⚠️ row as it goes live, and add an entry below. */}
+
+Durable concepts, such as [records and the send](/architecture), [permissions](/authentication#permissions) and [plans](/use-cases), change rarely. Anything marked ⚠️ or **Preview** is still moving.
+
+## Changes
+
+<Update label="October 9, 2026" tags={["Get started"]}>
+  - New [Use cases](/use-cases) page: what providers, clinics and platforms build, and what each plan unlocks.
+  - [From draft to pharmacy](/architecture#from-draft-to-pharmacy) explains each step after you create a record, and which one sends.
+  - [Which host and credential](/environments#which-host-and-credential) maps each job to its host, credential and plan.
+  - [What's different in Neutron](/environments#whats-different-in-neutron) lists how the sandbox differs from production.
+  - Pages now show when they were last updated.
+</Update>
+
+<Update label="October 8, 2026" tags={["Prescribe"]}>
+  - Prescribe has two sections: [App](/prescribe/app), for Photon's own web app and deep links, and [Embed](/prescribe/embed), for putting Prescribe in your product.
+  - Production prescribing moved to `rx.new`.
+  - New [Dashboard](/dashboard) page for credentials, team, catalog and templates.
+  - Elements will be removed on January 1, 2027. See [Migrate from Elements](/prescribe/embed/migrate-from-elements).
+</Update>
+
+<Update label="October 8, 2026" tags={["Network"]}>
+  - Docs rebuilt around two products: Prescribe for the prescribing UI, and [Network](/network/overview) for GraphQL, MCP and webhooks.
+  - [Webhooks](/network/webhooks) documented, with signature verification and every [event](/network/webhooks/events).
+</Update>

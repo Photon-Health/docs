@@ -11,7 +11,7 @@ Photon has two environments. They run the same API but keep separate data, accou
 | Use it for | Building and testing | Real patients and real prescriptions |
 | Prescriptions | Never sent to a real pharmacy | Sent to pharmacies |
 | Patients | Fake ones only | Real |
-| Credentials | Free with every sandbox account | A paid feature |
+| API credentials | Free with every sandbox account | [Launch and above](/use-cases#plans-at-a-glance) |
 | Prescribe app | [rx.neutron.health](https://rx.neutron.health) ⚠️ | [rx.new](https://rx.new) |
 | [Dashboard](/dashboard) | [app.neutron.health/settings](https://app.neutron.health/settings) | [app.photon.health/settings](https://app.photon.health/settings) |
 
@@ -37,6 +37,47 @@ Every URL follows from the environment's name, so switching environments means c
   ⚠️ **Not live yet.** `network.photon.health/graphql` returns a 403 for POST requests. MCP still runs at `ai.<env>.health`. `rx.neutron.health` returns a 404.
 </Warning>
 
+## What's different in Neutron
+
+Neutron runs the same API, schema, permissions and workflow rules as production, so code that works in Neutron works in Photon. What differs is everything that touches the real world:
+
+| | Neutron | Photon |
+| --- | --- | --- |
+| Pharmacies | Nothing is transmitted to a real pharmacy | Prescriptions go to the chosen pharmacy |
+| MCP `rx_send` | Creates test orders only | Sends real orders |
+| Patients | Use fake patients only | Real patients |
+| Accounts, teams, catalog, templates | Separate. Nothing carries over. | Separate |
+| Credentials and webhooks | Separate. Set them up again for production. | Separate |
+| Patient links | `*.neutron.health` domains | `*.photon.health` domains |
+
+{/* TODO: confirm with the fulfillment team, then add rows for each:
+  - Are test patients texted when an order is sent in Neutron? To the real number?
+  - Do Neutron orders ever reach placed/fulfillment/completed, and emit those webhooks? Can customers simulate them?
+  - Are pharmacy prices and discount-card offers real or mocked in Neutron?
+  - Is screening (Medi-Span) the same data as production? */}
+
+Rehearse everything up to the send in Neutron: sign-in, drafting, screening, signing, sending, and handling `changes` and errors. Then plan a small production pilot for what happens after the send.
+
+## Which host and credential
+
+For each job, call this host with this credential. In production, change `neutron` to `photon`, and use `rx.new` for the Prescribe app.
+
+| Job | Host | Credential | Plan |
+| --- | --- | --- | --- |
+| Prescribe | `rx.neutron.health` | The prescriber's sign-in | Indie |
+| Open the app on a patient or order ([deep link](/prescribe/app/deep-links)) | `rx.neutron.health/order/…` | The prescriber's sign-in | Indie |
+| Draft from Claude or a scribe ([MCP](/network/mcp/connect)) | `ai.neutron.health` | The prescriber's sign-in, over OAuth | Indie |
+| Manage credentials, team, catalog and templates ([dashboard](/dashboard)) | `app.neutron.health/settings` | An Admin's or Developer's sign-in | Indie |
+| Embed with the [iframe](/prescribe/embed/iframe) | `rx.neutron.health/order/embed` | The prescriber's sign-in. No credentials. | Launch |
+| Embed with [React](/prescribe/embed/react) or the [JavaScript client](/prescribe/embed/javascript) | `environment="neutron"` | Application `client_id` | Launch |
+| Get a [machine token](/authentication#machine-tokens) | `auth.neutron.health/oauth/token` | Backend `client_id` and `client_secret` | Launch |
+| Sync patients, draft prescriptions and orders ([GraphQL](/network/graphql)) | `network.neutron.health/graphql` | Machine token | Launch |
+| Send a signed order from your backend | `network.neutron.health/graphql` | Machine token. A prescriber must have signed every prescription. | Launch |
+| Draft from your own agent ([MCP](/integrations/agent-drafted-orders)) | `ai.neutron.health` | Machine token | Launch |
+| Receive order updates ([webhooks](/network/webhooks)) | Your own HTTPS endpoint | The shared secret you set | Launch |
+
+The plan is the smallest one that includes the job. In the sandbox, every account can do all of them. See [Use cases](/use-cases#plans-at-a-glance).
+
 ## In code
 
 Prescribe and the JavaScript client take the environment's name:
@@ -61,8 +102,9 @@ For GraphQL or MCP, use the URLs above.
 
 ## Going live
 
-1. [Request a production account](https://photonhealth.com/onboard#clinic), or email [sales@photon.health](mailto:sales@photon.health) to talk through your use case.
-1. Get production credentials from [app.photon.health](https://app.photon.health/settings/developers). Sandbox credentials don't work in production.
-2. Change the environment from `neutron` to `photon`: the `environment` prop, or the hostnames for GraphQL and MCP.
-3. Add your production domain to your Application credential's allowed URLs.
-5. Set up your [webhooks](/network/webhooks) in production too.
+1. Choose a plan. API credentials need [Launch or above](/use-cases#plans-at-a-glance). [Start a production account](https://photonhealth.com/pricing), or email [sales@photon.health](mailto:sales@photon.health) to talk through your use case.
+2. Get production credentials from [app.photon.health](https://app.photon.health/settings/developers). Sandbox credentials don't work in production.
+3. Invite your prescribers to the production organization, with their NPI, phone, fax and address. Nothing carries over from Neutron. See [Team](/dashboard#team).
+4. Change the environment from `neutron` to `photon`: the `environment` prop, or the hostnames for GraphQL and MCP.
+5. Add your production domain to your Application credential's allowed URLs.
+6. Set up your [webhooks](/network/webhooks) in production too.
