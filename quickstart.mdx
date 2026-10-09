@@ -51,17 +51,36 @@ In a few minutes you'll render Photon's order card in your app, prescribe for a 
     2. Search for a drug, such as `amlodipine`, and fill in the sig and quantity. Screening runs as you go.
     3. Click **Sign**, then **Send**.
 
-    In production, the patient would now get a text with their pharmacy options and prices. In Neutron, the order is created but never sent to a real pharmacy.
+    Photon now texts the patient a link to choose a pharmacy, in Neutron too. To get the text yourself, use your own mobile number as the patient's `phone`. In Neutron, the order stops there: it's never sent to a pharmacy.
+  </Step>
+  <Step title="Check it worked">
+    Your console logs `Sent ord_…`. That id is the order you just sent: its `state` is now `SUBMITTED`. Open it in the Prescribe app at `https://rx.neutron.health/order/ord_…`, or read it with the [`order` mutation](/network/order).
   </Step>
 </Steps>
 
+## What you just did
+
+| You | Photon |
+| --- | --- |
+| Passed a patient | Found or added the patient record (`pat_…`) |
+| Searched for a drug and filled in the sig | Created a draft prescription (`rx_…`) on a draft order (`ord_…`), and screened it |
+| Clicked **Sign** | Recorded the prescriber's approval. The prescription can't change now. |
+| Clicked **Send** | Submitted the order and texted the patient. **This is the send.** In production, Photon transmits it to a pharmacy once one is chosen. |
+
+See [From draft to pharmacy](/architecture#from-draft-to-pharmacy) for every step after the send.
+
 <Tip>
-  Not using React? The [iframe](/prescribe/embed/iframe) does the same with a URL and needs no credentials.
+  Not using React? The [iframe](/prescribe/embed/iframe) does the same with a URL. Want to try Photon without code? [Connect Claude](/network/mcp/connect) to the sandbox and ask it to prescribe.
 </Tip>
+
+Building from your backend instead? The smallest backend path is four calls and a link: get a machine token, sync the patient, draft a prescription from a template, draft the order, then send the prescriber a [deep link](/prescribe/app/deep-links) to sign and send it. Follow [One-click orders](/integrations/one-click-orders).
 
 ## Next
 
 <CardGroup cols={2}>
+  <Card title="Use cases" icon="map" href="/use-cases">
+    What you can build on each plan, and where prescribers work.
+  </Card>
   <Card title="Architecture" icon="sitemap" href="/architecture">
     Patients, prescriptions and orders, and how Photon decides.
   </Card>

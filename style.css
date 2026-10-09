@@ -1,0 +1,12 @@
+/* Widen the main column on large screens. Almond defaults to 36rem. */
+@media (min-width: 1280px) {
+  :root {
+    --content-width: 44rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  :root {
+    --content-width: 52rem;
+  }
+}

@@ -1,10 +1,16 @@
 ---
 title: "iframe"
-description: "Add Prescribe to any frontend with a URL. No credentials needed."
+description: "Add Prescribe to any frontend with a URL."
 icon: "browser"
 ---
 
-The iframe is the full prescribing flow in a URL. It works with any frontend framework, needs no credentials, and signs the prescriber in to Photon by itself.
+The iframe is the full prescribing flow in a URL. It works with any frontend framework and signs the prescriber in to Photon by itself.
+
+{/* TODO(launch): document how to pass the client_id once the iframe requires it, then remove this Warning. */}
+
+<Warning>
+  ⚠️ **Coming soon:** the iframe will need your Application `client_id` to sign prescribers in, like the React components. Embedding needs API credentials, which come with [Launch and above](/use-cases#plans-at-a-glance). Plan for it now.
+</Warning>
 
 ```html
 <iframe
@@ -114,4 +120,4 @@ export function PrescribeFrame({ src, onSent }) {
 
 ## Sign-in
 
-The first time, the iframe shows **Sign in to Photon**. Clicking it opens a popup. The prescriber signs in and picks their organization, and the iframe continues. Later loads stay signed in.
+The first time, the iframe shows **Sign in to Photon**. ⚠️ Soon, it'll show only for a valid Application `client_id`. Clicking it opens a popup. The prescriber signs in and picks their organization, and the iframe continues. Later loads stay signed in.
