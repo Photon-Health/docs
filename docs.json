@@ -8,8 +8,8 @@
     "dark": "#175CD3"
   },
   "logo": {
-    "light": "https://photonhealth.com/logo/photon-logo-white.svg",
-    "dark": "https://photonhealth.com/logo/photon-logo.svg",
+    "light": "https://photonhealth.com/logo/photon-logo.svg",
+    "dark": "https://photonhealth.com/logo/photon-logo-white.svg",
     "href": "https://photonhealth.com/"
   },
   "navbar": {
@@ -278,8 +278,8 @@
     }
   ],
   "favicon": {
-    "light": "https://photonhealth.com/logo/photon-icon-white.svg",
-    "dark": "https://photonhealth.com/logo/photon-icon.svg"
+    "light": "https://photonhealth.com/logo/photon-icon.svg",
+    "dark": "https://photonhealth.com/logo/photon-icon-white.svg"
   },
   "integrations": {
     "gtm": {

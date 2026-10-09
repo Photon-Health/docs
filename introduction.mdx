@@ -5,67 +5,47 @@ description: "Prescribing infrastructure for AI-enabled care: fast, safe and sec
 icon: "rocket-launch"
 ---
 
-Photon is prescribing infrastructure for AI-enabled care. Platforms and agents use it to draft prescriptions, and prescribers use it to review, sign and send them **quickly, safely and securely**. Above all, Photon gives patients **price transparency and a real choice** of where to fill them.
-
-## For patients: price transparency and choice
-
-Most prescriptions are sent straight to a pharmacy before the patient knows what they'll pay or whether it's in stock. Photon reverses that:
-
-<CardGroup cols={2}>
-  <Card title="Choose before it's sent" icon="hand-pointer">
-    The patient gets a secure text link with pharmacy options in real time. They compare price, hours, delivery and availability, then pick. Nothing is routed until they do.
-  </Card>
-
-  <Card title="See the price up front" icon="tag">
-    Each pharmacy option shows its price, including discount-card and sponsored offers where they apply, so the patient picks knowing what they'll pay.
-  </Card>
-
-  <Card title="Stay informed" icon="bell">
-    The patient gets status updates and out-of-stock alerts as their order moves.
-  </Card>
-
-  <Card title="Switch in one tap" icon="arrows-rotate">
-    If a pharmacy can't fill the order, the patient reroutes it themselves. Your care team stays out of the loop.
-  </Card>
-</CardGroup>
-
-More prescriptions get filled, more affordably, with less work for your team.
+Photon is prescribing infrastructure for AI-enabled care. Your product or agent drafts the prescription. A prescriber reviews, signs and sends it. Photon then texts the patient their pharmacy options with prices, and the patient chooses where to fill it.
 
 ## For prescribers: fast, safe, secure
 
 |  | How |
 | --- | --- |
-| **Fast** | Templates fill in the drug, sig and quantity. Drug names resolve to the catalog as the prescriber types. Your backend or an agent can draft the whole order, so the prescriber only reviews, signs and sends. |
-| **Safe** | Every prescription is screened against the patient's allergies, medications and conditions before it's signed. When Photon isn't sure which patient or drug is meant, it asks rather than guessing. |
+| **Fast** | Your backend or an agent can draft the whole order, so the prescriber only reviews, signs and sends. Templates fill in the drug, sig and quantity. Drug search lists each drug by form and strength, and offers its dispense units. |
+| **Safe** | Every prescription is screened against the patient's allergies, medications and conditions before it's signed. When Photon isn't sure which patient or drug is meant, it asks instead of guessing. |
 | **Secure** | Only a signed-in prescriber can sign, and the signature covers exactly what they reviewed. Tokens are scoped to one organization, and machine credentials can draft but never sign. |
+
+## For patients: price transparency and choice
+
+Nothing goes to a pharmacy until the patient picks one. The text Photon sends lists their options with price, hours, delivery and stock. Discount-card and sponsored offers are included where they apply. The patient gets status updates, and if a pharmacy can't fill the order, they switch in one tap. More prescriptions get filled, for less, with less work for your team.
 
 ## Two products
 
 <CardGroup cols={2}>
   <Card title="Prescribe" icon="window" href="/prescribe/overview">
-    The prescribing UI: React components, an iframe or a link. It handles sign-in, drug search, screening, signing and sending, in your app.
+    The prescribing UI as an app, React components, an iframe or a link. It handles sign-in, drug search, screening, signing and sending.
   </Card>
 
   <Card title="Network" icon="diagram-project" href="/network/overview">
-    The API underneath. Use GraphQL from your backend or MCP from an agent to keep patients in sync and draft prescriptions and orders.
+    The API underneath. Use GraphQL from your backend or MCP from an agent to sync patients and draft prescriptions and orders.
   </Card>
 </CardGroup>
 
-Most platforms use both: Prescribe for the prescriber, and Network to fill in what your product already knows.
+Most platforms use both: Network drafts from what your product already knows, and Prescribe is where the prescriber signs.
 
 ## Where to start
 
-Start from what kind of company you are. Each path matches a plan on the [pricing page](https://photonhealth.com/pricing).
+| You are | Prescribers work in | Plan |
+| --- | --- | --- |
+| An individual provider or small clinic | The [Prescribe app](/prescribe/app), opened from [deep links](/prescribe/app/deep-links) or drafted over [MCP](/network/mcp) | Indie |
+| A tech-enabled clinic | Prescribe, [embedded](/prescribe/embed) in your product | Launch |
+| A platform or care marketplace | Prescribe, or your own UI on the [JavaScript client](/prescribe/embed/javascript) | Grow |
 
-| You are | Prescribers work in | You build | Plan |
-| --- | --- | --- | --- |
-| An individual provider or small clinic | The [Prescribe app](/prescribe/app) | Nothing. Use [deep links](/prescribe/app/deep-links), or draft in Claude or ChatGPT over [MCP](/network/mcp). | Indie |
-| A tech-enabled clinic | Prescribe, [embedded](/prescribe/embed) in your product | Workflows that let many agents and clinicians treat patients faster and safely | Launch |
-| A platform or care marketplace | Prescribe, or your own UI on the [JavaScript client](/prescribe/embed/javascript) | AI-enabled workflows for many organizations, provisioned automatically | Grow |
+Plans match the [pricing page](https://photonhealth.com/pricing).
 
 <CardGroup cols={2}>
   <Card title="Use cases" icon="map" href="/use-cases">
-    What you can build on each plan, and what you gain or take on with each surface.
+    What you can build on each plan.
   </Card>
   <Card title="Quickstart" icon="bolt" href="/quickstart">
     Prescribe from your own app in Neutron, the sandbox, in a few minutes.

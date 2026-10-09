@@ -55,6 +55,8 @@ When a name fits several things (a drug, an allergen, a pharmacy), Photon doesn'
 }
 ```
 
+An option can also carry `entity`, the record it picks. For a drug, that's a `Treatment` with its brand, form and strength in separate fields (see [Choosing the drug](/network/prescription#choosing-the-drug)).
+
 Each option says exactly what to do: in the input of the `operation` mutation, set the `argument` path to `value`, then resend. Here that means resending with `treatment: { id: "med_01M3D93NFGCZJPQ3XW3AF7578G" }` in place of the name.
 
 **Who picks:** pick automatically only when there's a single option that matched exactly (`EXACT_NAME_MATCH` or `RXNORM_CODE_MATCH`). Otherwise, show the options to a person, or apply your own deterministic rule. Prescribe and the [JavaScript client](/prescribe/embed/javascript) follow this same rule.
