@@ -94,8 +94,14 @@ The order stays a `DRAFT`, and nothing goes to the patient yet. Store its `ord_â
 </PhotonProvider>
 ```
 
-```html iframe
-<iframe src="https://rx.neutron.health/order/embed/ord_01M3WT5GK51DBRH7ZKBKBV9QWK" title="Prescribe" style="width: 100%; border: 0"></iframe>
+```ts iframe
+// ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } })
+iframe.src = ph.order.frame("ord_01M3WT5GK51DBRH7ZKBKBV9QWK");
+```
+
+```ts Deep link
+// From your backend, to send the prescriber: no client_id needed
+ph.order.url("ord_01M3WT5GK51DBRH7ZKBKBV9QWK"); // https://rx.neutron.health/order/ord_01M3WT5GK51DBRH7ZKBKBV9QWK
 ```
 
 </CodeGroup>

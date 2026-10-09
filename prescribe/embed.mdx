@@ -13,7 +13,7 @@ Embed Prescribe and prescribers never leave your product. You place it on your p
 | --- | --- | --- | --- |
 | What it is | `<PhotonOrder />` and friends, rendered in your page | The Prescribe app's page inside yours | `@photon-rx/core`, the client both are built on |
 | Looks like | Your app: it uses your styles and components | Photon, on a transparent background | Whatever you render |
-| Sign-in | Your Application `client_id` | Photon's own. ⚠️ Soon needs your Application `client_id`. | Your Application `client_id`, or your own tokens |
+| Sign-in | Your Application `client_id` | Your Application `client_id`, in a URL built by `frame()` | Your Application `client_id`, or your own tokens |
 | Events | Callbacks with live objects | `postMessage` with ids | Live objects you subscribe to |
 | Best for | React apps | Other frameworks, or the fastest start | Other frameworks, Node, and building links |
 
@@ -29,7 +29,7 @@ All of them show the same cards and follow the same rules. To start with a compl
 
 ## Giving it records
 
-Each card takes its records (`patient`, `prescription`, `order`) the same way, and so do the iframe and [deep links](/prescribe/app/deep-links). Pass whatever you have:
+Each card takes its records (`patient`, `prescription`, `order`) the same way, and so do `frame()` for the iframe and `url()` for [deep links](/prescribe/app/deep-links). Pass whatever you have:
 
 | You pass | Example | Prescribe |
 | --- | --- | --- |

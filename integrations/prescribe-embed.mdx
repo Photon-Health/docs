@@ -75,11 +75,16 @@ If your details changed, pass the id together with them, and Photon updates only
 
 ## Not using React?
 
-The [iframe](/prescribe/embed/iframe) does the same with a URL:
+The [iframe](/prescribe/embed/iframe) does the same with a URL. Build it with the [JavaScript client](/prescribe/embed/javascript), which puts your `client_id` in it:
 
-```html
-<iframe src="https://rx.neutron.health/order/embed?patient=pat_01M3WQQHRB1T0K1469KD18BAWX" title="Prescribe" style="width: 100%; border: 0"></iframe>
+```ts
+import { photon } from "@photon-rx/core";
+
+const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
+iframe.src = ph.order.frame({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" } });
 ```
+
+Add `https://rx.neutron.health` to your Application credential's allowed URLs too, beside your app's domain.
 
 ## Next
 

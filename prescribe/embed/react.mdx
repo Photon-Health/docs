@@ -40,7 +40,7 @@ Wrap the cards in one provider. It signs the prescriber in and gives every card 
 | --- | --- | --- |
 | `clientId` | `string` | Your Application `client_id`. Public, not a secret. |
 | `environment` | `"neutron" \| "photon"` | Defaults to `"photon"` (production). Set `"neutron"` while you build. |
-| `organization` | `string` | Sign in straight to this organization (`org_…`), skipping the organization picker. |
+| `organization` | `string` | Sign in straight to this organization (`org_…`), skipping the organization picker. Links from `usePhoton()` carry it too. |
 | `client` | `Photon` | Your own [JavaScript client](/prescribe/embed/javascript) instead of `clientId`, for example when you sign in yourself. |
 | `components` | `Partial<PhotonComponents>` | Your design system's building blocks. See [Styling](/prescribe/embed/styling). |
 | `onAuth` | `({ ok, error }) => void` | Whether Photon accepted the prescriber's token. |

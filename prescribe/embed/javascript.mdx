@@ -115,4 +115,20 @@ Anything Photon answers about your data comes back as a result. Only failures th
 
 ## Links
 
-`ph.url(…)` and `ph.frame(…)` build [deep links](/prescribe/app/deep-links) and [iframe](/prescribe/embed/iframe) URLs. `linkPath(…)` builds the same paths without a client.
+`url()` builds a [deep link](/prescribe/app/deep-links) and `frame()` builds an [iframe](/prescribe/embed/iframe) URL. Each record's calls have both, and so does every live object:
+
+```ts
+ph.patient.url("pat_01M3WQQHRB1T0K1469KD18BAWX"); // https://rx.neutron.health/patient/pat_01M3WQQHRB1T0K1469KD18BAWX
+ph.order.frame({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" } }); // https://rx.neutron.health/order/embed/AQf3…
+order.url(); // a live order you already have
+ph.url.parse(href); // what a link opens, read back
+```
+
+- Links point to the environment's Prescribe app: `rx.neutron.health` in the sandbox, or `rx.new` in production. Pass `appUrl` to `photon()` to point them somewhere else.
+- `url()` is for sharing, so it never carries a `client_id`. The Prescribe app signs the prescriber in on its own.
+- `frame()` puts your Application `client_id` in the URL, from `auth: { clientId }`, and throws without one. With `auth: { getToken }`, pass it in the link: `ph.frame({ flow, …, auth: { clientId } })`.
+- Pass `organization` to `photon()`, and every link carries it, so the prescriber signs straight in to that organization.
+
+## Secrets
+
+A client secret never belongs in a browser. If you pass a `clientSecret` to `photon()` in a page, it throws before doing anything else. Treat that secret as leaked and rotate it. Links never carry a secret.

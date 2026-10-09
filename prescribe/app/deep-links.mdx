@@ -6,7 +6,7 @@ icon: "link"
 
 A deep link opens the [Prescribe app](/prescribe/app) in its own tab, with the app's navigation, on the record you name. Use one when embedding doesn't fit: a link in an email or text, or a **Prescribe in Photon** button in an internal tool.
 
-Deep links use the same URLs as the [iframe](/prescribe/embed/iframe) without `/embed`. {/* TODO(launch) */}⚠️ `rx.neutron.health` isn't live yet.
+Deep links use the same paths as the [iframe](/prescribe/embed/iframe) without `/embed`. {/* TODO(launch) */}⚠️ `rx.neutron.health` isn't live yet.
 
 | URL | Opens |
 | --- | --- |
@@ -24,7 +24,7 @@ Ids alone are fine to write by hand. For anything more, use the [JavaScript clie
 ```ts
 import { photon } from "@photon-rx/core";
 
-const ph = photon({ environment: "neutron", auth: { getToken }, appUrl: "https://rx.neutron.health" });
+const ph = photon({ environment: "neutron", auth: { getToken } });
 
 ph.order.url({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" }, prescriptions: { add: [{ templateId: "YOUR_TEMPLATE_ID" }] } });
 // https://rx.neutron.health/order/AQf3…
@@ -32,8 +32,12 @@ ph.order.url({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" }, prescriptions:
 order.url(); // a live order you already have
 ```
 
-For the iframe, use `frame()` in place of `url()`.
+Links point to the environment's Prescribe app (`rx.neutron.health`, or `rx.new` in production). A deep link never carries a `client_id`, so you can share it with any prescriber: the app signs them in on its own. Give `photon()` your `organization`, and the link signs them straight in to it.
+
+For the iframe, use `frame()` in place of `url()`, from a client with your Application `client_id`.
+
+An address that isn't a Prescribe page, such as an old or mistyped link, opens a new order.
 
 <Warning>
-  A link with patient details carries them in its token. The token is encoded but not encrypted, so anyone with the link can read it. Prefer ids in links you send by email or text.
+  A link with patient details carries them in its token, so treat it like the details themselves. Prefer ids in links you send by email or text.
 </Warning>

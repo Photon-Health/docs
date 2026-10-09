@@ -4,51 +4,46 @@ description: "Add Prescribe to any frontend with a URL."
 icon: "browser"
 ---
 
-The iframe is the full prescribing flow in a URL. It works with any frontend framework and signs the prescriber in to Photon by itself.
+The iframe is the full prescribing flow in a URL. It works with any frontend framework and signs the prescriber in to Photon with your Application `client_id`.
 
-{/* TODO(launch): document how to pass the client_id once the iframe requires it, then remove this Warning. */}
-
-<Warning>
-  ⚠️ **Coming soon:** the iframe will need your Application `client_id` to sign prescribers in, like the React components. Embedding needs API credentials, which come with [Launch and above](/use-cases#plans-at-a-glance). Plan for it now.
-</Warning>
-
-```html
-<iframe
-  src="https://rx.neutron.health/order/embed?patient=pat_01M3WQQHRB1T0K1469KD18BAWX"
-  title="Prescribe"
-  style="width: 100%; border: 0"
-></iframe>
-```
-
-The page has no chrome and a transparent background, so your page shows through.
-
-## URLs
-
-The flow goes in the path. Ids go in the clear: the flow's own record in the path, and any others in the query.
-
-| URL | Opens |
-| --- | --- |
-| `/order/embed` | A new order. The prescriber finds or adds the patient. |
-| `/order/embed?patient=pat_…` | A new order for this patient |
-| `/order/embed?patient=pat_…&rx=rx_…` | A new order for this patient, with this draft on it |
-| `/order/embed/ord_…` | This order |
-| `/patient/embed/pat_…` | This patient |
-| `/prescription/embed/rx_…` | This prescription |
-| `/prescription/embed?patient=pat_…` | A new prescription for this patient |
-
-Prefix each URL with `https://rx.neutron.health` in the sandbox, or `https://rx.new` in production. {/* TODO(launch) */}⚠️ The sandbox isn't live yet.
-
-When the URL names the patient by id, the iframe stays on that patient, with no **Change patient**.
-
-## Passing more than ids
-
-To pass patient details, templates or several prescriptions, build the URL with `frame()` from the [JavaScript client](/prescribe/embed/javascript). It takes a record the same way the React components do, reads and writes nothing, and packs the record into one short token after the path.
+Build the URL with `frame()` from the [JavaScript client](/prescribe/embed/javascript), created with your Application `client_id`. `frame()` puts the `client_id` in the URL, and the iframe opens only from a URL that has one.
 
 ```ts
 import { photon } from "@photon-rx/core";
 
-const ph = photon({ environment: "neutron", auth: { getToken }, appUrl: "https://rx.neutron.health" });
+const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
 
+const src = ph.order.frame({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" } });
+// https://rx.neutron.health/order/embed/AQf3…
+```
+
+Use it as your iframe's `src`, as in [Height and events](#height-and-events). The page has no chrome and a transparent background, so your page shows through.
+
+## What you need
+
+- An **Application** `client_id` from the [Neutron dashboard](https://app.neutron.health/settings/developers). Embedding needs API credentials, which come with [Launch and above](/use-cases#plans-at-a-glance).
+- In that credential's allowed URLs:
+  - Every domain where your pages show the iframe. The iframe loads only on the domains listed there.
+  - The Prescribe app's domain, where the iframe signs the prescriber in: `https://rx.neutron.health` in the sandbox, or `https://rx.new` in production.
+
+## Building the URL
+
+Each record's `frame()` takes the record the same way the React components do: an id, fields, or an id with fields. It reads and writes nothing.
+
+| Call | Opens |
+| --- | --- |
+| `ph.order.frame()` | A new order. The prescriber finds or adds the patient. |
+| `ph.order.frame({ patient: { id: "pat_…" } })` | A new order for this patient |
+| `ph.order.frame({ patient: { id: "pat_…" }, prescriptions: { add: [{ id: "rx_…" }] } })` | A new order for this patient, with this draft on it |
+| `ph.order.frame("ord_…")` | This order |
+| `ph.patient.frame("pat_…")` | This patient |
+| `ph.prescription.frame("rx_…")` | This prescription |
+
+URLs start with `https://rx.neutron.health` in the sandbox, or `https://rx.new` in production. {/* TODO(launch) */}⚠️ The sandbox isn't live yet.
+
+To give a flow more than one record, such as patient details with a template, pass the whole link to `ph.frame()`:
+
+```ts
 const src = ph.frame({
   flow: "order",
   patient: {
@@ -61,13 +56,16 @@ const src = ph.frame({
   },
   order: { prescriptions: { add: [{ templateId: "YOUR_TEMPLATE_ID" }] } },
 });
-// https://rx.neutron.health/order/embed/AQf3…
 ```
 
-`ph.frame()` takes the flow and each record it opens with. For one record on its own, use that record's call, such as `ph.patient.frame({ demographic: { … } })`. A live object you already have makes its own: `order.frame()`.
+A live object you already have makes its own: `order.frame()`.
+
+When the URL names the patient by id, the iframe stays on that patient, with no **Change patient**.
+
+A URL written by hand, or one without your `client_id`, shows **This link can't be embedded** and does nothing else.
 
 <Warning>
-  The token is encoded but not encrypted. Anyone who has the URL can read it, so treat a URL with patient details like the details themselves. Pass ids when you can.
+  Treat a URL with patient details like the details themselves. Pass ids when you can.
 </Warning>
 
 ## Height and events
@@ -109,11 +107,17 @@ export function PrescribeFrame({ src, onSent }) {
 ```
 
 ```html HTML
-<iframe id="photon" src="https://rx.neutron.health/order/embed?patient=pat_01M3WQQHRB1T0K1469KD18BAWX" title="Prescribe" style="width: 100%; border: 0"></iframe>
-<script>
+<iframe id="photon" title="Prescribe" style="width: 100%; border: 0"></iframe>
+<script type="module">
+  import { photon } from "@photon-rx/core";
+
+  const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
+  const frame = document.getElementById("photon");
+  frame.src = ph.order.frame({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" } });
+
   window.addEventListener("message", ({ origin, data }) => {
     if (origin !== "https://rx.neutron.health" || data?.source !== "photon-rx") return;
-    if (data.event === "resize") document.getElementById("photon").style.height = `${data.height}px`;
+    if (data.event === "resize") frame.style.height = `${data.height}px`;
     if (data.event === "PhotonOrder.onSent") closeDialog();
   });
 </script>
@@ -123,4 +127,19 @@ export function PrescribeFrame({ src, onSent }) {
 
 ## Sign-in
 
-The first time, the iframe shows **Sign in to Photon**. ⚠️ Soon, it'll show only for a valid Application `client_id`. Clicking it opens a popup. The prescriber signs in and picks their organization, and the iframe continues. Later loads stay signed in.
+The first time, the iframe shows **Sign in to Photon**. Clicking it opens a popup, where the prescriber signs in with your Application `client_id` and picks their organization. Then the iframe continues, and later loads stay signed in.
+
+To skip the organization picker, give the client your organization, and every URL it makes carries it:
+
+```ts
+const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" }, organization: "org_…" });
+```
+
+The popup needs your page to allow it:
+
+- If your iframe has a `sandbox` attribute, include `allow-popups allow-scripts allow-same-origin`.
+- If your page sends a `Cross-Origin-Opener-Policy` header, use `same-origin-allow-popups`, not `same-origin`.
+
+## Only the iframe can be framed
+
+Photon allows only the `/embed` pages in another site's iframe, on the domains in your credential's allowed URLs. The Prescribe app's other pages refuse to load in a frame anywhere else. To send a prescriber to the full app, use a [deep link](/prescribe/app/deep-links).

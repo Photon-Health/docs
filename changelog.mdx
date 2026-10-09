@@ -13,7 +13,7 @@ Every page shows when it was last updated. This page says what's stable, and lis
 | --- | --- | --- |
 | [Prescribe app](/prescribe/app) | Stable | `rx.new` in production. ⚠️ The sandbox app, `rx.neutron.health`, isn't live yet. |
 | [Deep links](/prescribe/app/deep-links) | Stable | No credentials needed. |
-| [iframe](/prescribe/embed/iframe) | Stable | ⚠️ Will soon need your Application `client_id`. |
+| [iframe](/prescribe/embed/iframe) | Stable | Needs your Application `client_id`, in a URL built by `frame()`. |
 | [React components](/prescribe/embed/react) | Coming soon | ⚠️ `@photon-rx/react` isn't published to npm yet. |
 | [JavaScript client](/prescribe/embed/javascript) | Coming soon | ⚠️ `@photon-rx/core` isn't published to npm yet. |
 | [GraphQL](/network/graphql) | Stable in Neutron | ⚠️ Production, `network.photon.health/graphql`, isn't live yet. |
@@ -26,6 +26,14 @@ Every page shows when it was last updated. This page says what's stable, and lis
 Durable concepts, such as [records and the send](/architecture), [permissions](/authentication#permissions) and [plans](/use-cases), change rarely. Anything marked ⚠️ or **Preview** is still moving.
 
 ## Changes
+
+<Update label="October 9, 2026" tags={["Prescribe"]}>
+  - The [iframe](/prescribe/embed/iframe) needs your Application `client_id`. Build its URL with `frame()` from the [JavaScript client](/prescribe/embed/javascript), which puts it in. A URL written by hand shows **This link can't be embedded**. Add every domain that shows the iframe, and the Prescribe app's domain, to your credential's allowed URLs.
+  - Only the iframe's `/embed` pages load in another site's frame. The Prescribe app's other pages refuse.
+  - [Deep links](/prescribe/app/deep-links) never carry a `client_id`, so you can share them with any prescriber.
+  - Links point to the environment's Prescribe app by default, so `appUrl` is optional. `photon({ organization })` puts your organization on every link, so prescribers skip the organization picker.
+  - The JavaScript client refuses a `client_secret` in a browser.
+</Update>
 
 <Update label="October 9, 2026" tags={["Get started"]}>
   - New [Use cases](/use-cases) page: what providers, clinics and platforms build, and what each plan unlocks.
