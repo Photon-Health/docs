@@ -36,13 +36,8 @@
             "group": "Get started",
             "pages": [
               "introduction",
-              "use-cases",
               "quickstart",
-              "architecture",
-              "environments",
-              "authentication",
-              "dashboard",
-              "changelog"
+              "use-cases"
             ]
           },
           {
@@ -53,6 +48,16 @@
               "integrations/sync-patients",
               "integrations/one-click-orders",
               "integrations/agent-drafted-orders"
+            ]
+          },
+          {
+            "group": "Fundamentals",
+            "pages": [
+              "architecture",
+              "environments",
+              "authentication",
+              "dashboard",
+              "changelog"
             ]
           }
         ]
