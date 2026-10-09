@@ -16,7 +16,7 @@ prescription(prescription: PrescriptionInput!, metadata: RequestMetadata!): Pres
 | **Update** | `{ id, …fields }` | That draft, with only those fields changed |
 | **Sign** | `{ id, signing: { signedHash } }` | The prescription, signed. Needs `write:prescription`, which only a prescriber's [user token](/authentication#permissions) has. Drafting doesn't. |
 
-Every call screens the draft and returns its `status` and `screeningAlerts`. See [Screening](/network/screening).
+Every call screens the draft and returns its `screeningAlerts`. See [Screening](/network/screening).
 
 ## Example
 
@@ -29,7 +29,6 @@ mutation Prescription($prescription: PrescriptionInput!, $metadata: RequestMetad
     ... on PrescriptionPayload {
       prescription {
         id
-        status
         treatment { id name }
         instructions
         dispense { quantity unit daysSupply refillsAllowed }
@@ -100,7 +99,7 @@ Syncing without a patient is a safe lookup that never creates anything. Use it t
 
 Signing is the prescriber's approval of exactly what they reviewed:
 
-1. Every response includes `signing.contentHash`, a hash of the prescription's current clinical content.
+1. Every response includes `signing.contentHash`, a hash of the prescription's current clinical content: the drug, the sig and the dispense. Notes and diagnoses aren't part of it, so changing them doesn't invalidate a signature.
 2. Show the prescriber the prescription and its screening alerts.
 3. Send that hash back as `signing.signedHash`, and send no other changes in the same call.
 
@@ -121,6 +120,7 @@ If the content changed after the prescriber reviewed it, the hashes don't match.
 | Field | Type | Notes |
 | --- | --- | --- |
 | `id` | `ID` | Leave it out to draft a new prescription |
+| `externalId` | `String` | Your own id for the prescription, scoped to your organization. An [order](/network/order#fields) can add the prescription by it. |
 | `patient` | `PatientReferenceInput` | Usually `{ id }`. Without it, a sync only looks the drug up. |
 | `templateId` | `ID` | Fills in the drug, sig and dispense. Find ids under [Settings → Templates](https://app.neutron.health/settings/templates). |
 | `treatment` | `TreatmentReferenceInput` | Exactly one of `id`, `rxNormId`, `name`, `ndc` or `upc` |
@@ -134,7 +134,6 @@ If the content changed after the prescriber reviewed it, the hashes don't match.
 ```graphql
 fragment PrescriptionFields on Prescription {
   id
-  status
   templateId
   patient { id }
   treatment { id name rxNormId ndc upc }
