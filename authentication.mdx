@@ -49,7 +49,7 @@ Credentials come with every Neutron sandbox account. In production they come wit
 Not sure which host and credential a job needs? See [Which host and credential](/environments#which-host-and-credential).
 
 <Tip>
-  The [iframe](/prescribe/embed/iframe) needs no credentials. It signs the prescriber in to Photon on its own.
+  [Deep links](/prescribe/app/deep-links) need no credentials. They open the Prescribe app, which signs the prescriber in on its own. ⚠️ The [iframe](/prescribe/embed/iframe) will soon need your Application `client_id`.
 </Tip>
 
 ## User tokens
@@ -58,7 +58,8 @@ With Prescribe, you don't handle user tokens:
 
 | You use | Sign-in |
 | --- | --- |
-| [iframe](/prescribe/embed/iframe) or [deep link](/prescribe/app/deep-links) | Photon's own. No credentials needed. |
+| [Deep link](/prescribe/app/deep-links) | Photon's own. No credentials needed. |
+| [iframe](/prescribe/embed/iframe) | Photon's own. ⚠️ Soon needs your Application `client_id`. |
 | [React components](/prescribe/embed/react) | `<PhotonProvider clientId="…">` signs the prescriber in with your Application credential. |
 | [JavaScript client](/prescribe/embed/javascript) | `photon({ auth: { clientId } })` does the same without React. |
 | Your own Auth0 sign-in | Pass `photon({ auth: { getToken } })`, and Photon calls your function before each request. |

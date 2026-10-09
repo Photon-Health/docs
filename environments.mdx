@@ -43,20 +43,19 @@ Neutron runs the same API, schema, permissions and workflow rules as production,
 
 | | Neutron | Photon |
 | --- | --- | --- |
-| Pharmacies | Nothing is transmitted to a real pharmacy | Prescriptions go to the chosen pharmacy |
+| Patient texts | **Sent**, to the phone number on the patient. Use a number you control. | Sent |
+| Pharmacies | Nothing is transmitted. Orders stay `SUBMITTED` and are never placed or filled. | Sent to the chosen pharmacy, then filled |
+| Webhooks | No `order:placed`, `order:fulfillment` or `order:completed`, because orders never reach a pharmacy | Every event |
+| Prices | Real when a pharmacy returns one, but many options have none | Real |
+| Screening | The same as production | |
 | MCP `rx_send` | Creates test orders only | Sends real orders |
 | Patients | Use fake patients only | Real patients |
 | Accounts, teams, catalog, templates | Separate. Nothing carries over. | Separate |
-| Credentials and webhooks | Separate. Set them up again for production. | Separate |
-| Patient links | `*.neutron.health` domains | `*.photon.health` domains |
+| Credentials and webhook subscriptions | Separate. Set them up again for production. | Separate |
 
-{/* TODO: confirm with the fulfillment team, then add rows for each:
-  - Are test patients texted when an order is sent in Neutron? To the real number?
-  - Do Neutron orders ever reach placed/fulfillment/completed, and emit those webhooks? Can customers simulate them?
-  - Are pharmacy prices and discount-card offers real or mocked in Neutron?
-  - Is screening (Medi-Span) the same data as production? */}
+{/* TODO: when Neutron gets mock fulfillment (placed, filled and their webhooks) and better price mocks, update the rows above. */}
 
-Rehearse everything up to the send in Neutron: sign-in, drafting, screening, signing, sending, and handling `changes` and errors. Then plan a small production pilot for what happens after the send.
+Rehearse everything up to the send in Neutron: sign-in, drafting, screening, signing, sending, the patient's text, and handling `changes` and errors. You can't rehearse fulfillment there yet. Build your webhook handlers from the [example events](/network/webhooks/events), then confirm them with a small production pilot.
 
 ## Which host and credential
 
@@ -66,14 +65,15 @@ For each job, call this host with this credential. In production, change `neutro
 | --- | --- | --- | --- |
 | Prescribe | `rx.neutron.health` | The prescriber's sign-in | Indie |
 | Open the app on a patient or order ([deep link](/prescribe/app/deep-links)) | `rx.neutron.health/order/…` | The prescriber's sign-in | Indie |
-| Draft from Claude or a scribe ([MCP](/network/mcp/connect)) | `ai.neutron.health` | The prescriber's sign-in, over OAuth | Indie |
+| Draft in Claude or ChatGPT ([MCP](/network/mcp/connect)) | `ai.neutron.health` | The prescriber's sign-in, over OAuth | Indie |
 | Manage credentials, team, catalog and templates ([dashboard](/dashboard)) | `app.neutron.health/settings` | An Admin's or Developer's sign-in | Indie |
-| Embed with the [iframe](/prescribe/embed/iframe) | `rx.neutron.health/order/embed` | The prescriber's sign-in. No credentials. | Launch |
+| Embed with the [iframe](/prescribe/embed/iframe) | `rx.neutron.health/order/embed` | The prescriber's sign-in. ⚠️ Soon your Application `client_id` too. | Launch |
 | Embed with [React](/prescribe/embed/react) or the [JavaScript client](/prescribe/embed/javascript) | `environment="neutron"` | Application `client_id` | Launch |
 | Get a [machine token](/authentication#machine-tokens) | `auth.neutron.health/oauth/token` | Backend `client_id` and `client_secret` | Launch |
 | Sync patients, draft prescriptions and orders ([GraphQL](/network/graphql)) | `network.neutron.health/graphql` | Machine token | Launch |
 | Send a signed order from your backend | `network.neutron.health/graphql` | Machine token. A prescriber must have signed every prescription. | Launch |
-| Draft from your own agent ([MCP](/integrations/agent-drafted-orders)) | `ai.neutron.health` | Machine token | Launch |
+| Draft from another MCP client, such as a scribe, for a prescriber | `ai.neutron.health` | The prescriber's sign-in, from a client allowlisted on your Application credential | Launch |
+| Draft from your own agent ([MCP](/integrations/agent-drafted-orders)) | `ai.neutron.health` | Machine token. It can't sign. | Launch |
 | Receive order updates ([webhooks](/network/webhooks)) | Your own HTTPS endpoint | The shared secret you set | Launch |
 
 The plan is the smallest one that includes the job. In the sandbox, every account can do all of them. See [Use cases](/use-cases#plans-at-a-glance).

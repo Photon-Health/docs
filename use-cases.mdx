@@ -9,7 +9,7 @@ Photon's customers fall into three groups. Find yours to see where prescribers w
 
 <CardGroup cols={3}>
   <Card title="Providers and small clinics" icon="user-doctor" href="#providers-and-small-clinics">
-    Prescribe in Photon's app. Draft with links, Claude or your scribe. Plan: **Indie**.
+    Prescribe in Photon's app. Draft with links, or in Claude or ChatGPT. Plan: **Indie**.
   </Card>
   <Card title="Tech-enabled clinics" icon="laptop-medical" href="#tech-enabled-clinics">
     Build workflows that help many agents and clinicians treat patients faster and safely. Plan: **Launch**.
@@ -31,7 +31,7 @@ Your company type and your plan are separate choices. Most companies pick the pl
 
 - **Prescribe in the app.** Find the patient, pick the drug, sign and send. Photon texts the patient their pharmacy options.
 - **Start from a link.** A [deep link](/prescribe/app/deep-links) in your calendar, notes or an email opens the app on the right patient or order.
-- **Draft with AI.** Connect [Photon's MCP server](/network/mcp/connect) to Claude, or to an AI scribe that supports MCP. It drafts the prescription from the visit, and you review, sign and send. MCP is in private preview.
+- **Draft with AI.** Add [Photon's MCP server](/network/mcp/connect) to Claude or ChatGPT as a custom connector. Describe the visit, and it drafts the prescription for you to review, sign and send. MCP is in private preview.
 - **Save time with templates.** Save common prescriptions as [templates](/dashboard#templates), and [invite](/dashboard#team) the other clinicians in your practice.
 
 Indie doesn't include API credentials. Everything above runs on the prescriber's own sign-in, so there's no client id or secret to manage.
@@ -46,6 +46,7 @@ Indie doesn't include API credentials. Everything above runs on the prescriber's
 | Patient sync from your records | Screening sees every allergy, medication and condition | [Sync patients](/integrations/sync-patients) |
 | Orders drafted by your protocols | Clinicians only review, sign and send | [One-click orders](/integrations/one-click-orders) |
 | Intake agents that draft over MCP | Agents do the typing, and a clinician signs | [Agent-drafted orders](/integrations/agent-drafted-orders) |
+| Your scribe or other tools, connected to MCP | Clinicians draft from the tools they already use | [Connect a client](/network/mcp/connect) |
 | Webhooks into your care team's tools | You follow each order to pickup or delivery | [Webhooks](/network/webhooks) |
 
 Launch covers one organization. Your clinicians and agents all work in it.
@@ -68,10 +69,11 @@ For larger volumes and custom terms: custom marketplace offers, white-label acce
 | --- | --- | --- | --- |
 | [Prescribe app](/prescribe/app) and [deep links](/prescribe/app/deep-links) | ✓ | ✓ | ✓ |
 | [Templates](/dashboard#templates) and [team invites](/dashboard#team) | ✓ | ✓ | ✓ |
-| [MCP](/network/mcp) with a prescriber's sign-in (Claude, a scribe) | ✓ | ✓ | ✓ |
+| [MCP](/network/mcp/connect) in Claude or ChatGPT | ✓ | ✓ | ✓ |
 | [API credentials](/authentication#credentials) | | ✓ | ✓ |
 | [Embed Prescribe](/prescribe/embed) in your product | | ✓ | ✓ |
-| [GraphQL](/network/graphql) and MCP with a machine token | | ✓ | ✓ |
+| [GraphQL](/network/graphql) | | ✓ | ✓ |
+| [MCP](/network/mcp) from other clients: a scribe or your own agent | | ✓ | ✓ |
 | [Webhooks](/network/webhooks) | | ✓ | ✓ |
 | Many organizations, provisioned automatically | | | ✓ |
 | Custom prescribing UI on the [JavaScript client](/prescribe/embed/javascript) | | | ✓ |

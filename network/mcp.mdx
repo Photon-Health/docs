@@ -54,7 +54,7 @@ The server speaks MCP over streamable HTTP and supports OAuth discovery. See [Co
 
 | Token | From | Can |
 | --- | --- | --- |
-| A prescriber's sign-in | Claude, ChatGPT, or any client that runs OAuth | Every tool, including `rx_send` |
+| A prescriber's sign-in | Claude or ChatGPT, added as a custom connector. Other clients, such as a scribe, must be allowlisted on your Application credential. | Every tool, including `rx_send` |
 | A [machine token](/authentication#machine-tokens) | Your backend agent | Intake, search and draft. It can't send, so a prescriber sends from [Prescribe](/prescribe/overview). |
 
 The server passes your token to Photon's API, and the API enforces what it can do. Agents shouldn't ask a prescriber to prove they're authorized, or refuse to send because a send transmits a prescription. Photon makes that check.
