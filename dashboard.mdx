@@ -29,13 +29,22 @@ Everyone who uses Photon needs an invite to your organization, including prescri
 2. Enter their email and choose one or more roles.
 3. Click **Send invitation**. They get an email, and they join your organization the first time they sign in.
 
-| Role | For |
-| --- | --- |
-| **Admin** | People who manage the organization, its team, catalog and templates |
-| **Developer** | People who manage API credentials and webhooks |
-| **Prescriber** | Clinicians who write, sign and send prescriptions |
+Choose the least-privileged role that fits each person's work. You can assign more than one role when someone needs capabilities from both.
+
+| Role | Best for | Key permissions |
+| --- | --- | --- |
+| **Administrator** | Organization owners and team administrators | Manage the organization, team, catalog and templates. View orders and prescriptions, and create or edit patients. Cannot sign, send, reroute or resend orders. |
+| **Developer** | Engineers integrating Photon | Manage API credentials and webhooks. Cannot access patients, orders or prescriptions. |
+| **Prescriber** | Clinicians who prescribe | Create and update patients, create and send orders, and write and sign prescriptions. Can reroute an order. Cannot resend an order unless they also have a role with `reroute:order`. |
+| **Medical Operations** | Clinical operations teams | Create and update patients, create and send orders, and manage shared templates. Can reroute and resend orders. Cannot sign prescriptions. |
+| **Staff** | Non-clinical organization operators | Manage the organization, team and shared templates. Can reroute and resend orders. Cannot create or edit patients, orders or prescriptions. |
+| **Support** | Teams handling patient and fulfillment questions | View patients, prescriptions and orders. Can reroute and resend orders. Cannot create or edit clinical records. |
 
 A prescriber also needs their NPI, phone, fax and address. Pharmacies use them to identify the prescriber, so enter them when you give someone the Prescriber role.
+
+<Note>
+  **Reroute Order** is available with `reroute:order`, `write:order`, or `update:order`. **Resend Order** requires `reroute:order`. In the standard roles, Medical Operations, Staff and Support have `reroute:order`; Prescribers can reroute through their order-write permissions.
+</Note>
 
 Invites wait under **Pending invitations** until they're accepted. Resend one if the email was missed, or delete it to cancel. Removing someone from the team takes effect immediately.
 
