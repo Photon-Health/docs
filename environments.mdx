@@ -12,7 +12,7 @@ Photon has two environments. They run the same API but keep separate data, accou
 | Prescriptions | Never sent to a real pharmacy | Sent to pharmacies |
 | Patients | Fake ones only | Real |
 | API credentials | Free with every sandbox account | [Launch and above](/use-cases#plans-at-a-glance) |
-| Prescribe app | [rx.neutron.health](https://rx.neutron.health) ⚠️ | [rx.new](https://rx.new) |
+| Prescribe app | [rx.neutron.health](https://rx.neutron.health) | [rx.new](https://rx.new) (private preview) |
 | [Dashboard](/dashboard) | [app.neutron.health/settings](https://app.neutron.health/settings) | [app.photon.health/settings](https://app.photon.health/settings) |
 
 <Tip>
@@ -23,18 +23,20 @@ Photon has two environments. They run the same API but keep separate data, accou
 
 Every URL follows from the environment's name, so switching environments means changing one word. The one exception is the Prescribe app, which is `rx.new` in production.
 
+The production Prescribe app and production MCP are in private preview. To get access, ask your Photon contact.
+
 | Service | Neutron | Photon |
 | --- | --- | --- |
 | GraphQL | `https://network.neutron.health/graphql` | `https://network.photon.health/graphql` ⚠️ |
-| MCP ([private preview](/network/mcp)) | `https://network.neutron.health/mcp` ⚠️ | `https://network.photon.health/mcp` ⚠️ |
-| Prescribe app | `https://rx.neutron.health` ⚠️ | `https://rx.new` |
+| [MCP](/network/mcp) | `https://ai.neutron.health` | `https://ai.photon.health` (private preview) |
+| Prescribe app | `https://rx.neutron.health` | `https://rx.new` (private preview) |
 | Sign-in (Auth0) | `auth.neutron.health` | `auth.photon.health` |
 | Token audience | `https://api.neutron.health` | `https://api.photon.health` |
 
 {/* TODO(launch): fix each ⚠️ above, then delete the ⚠️ marks and this Warning. */}
 
 <Warning>
-  ⚠️ **Not live yet.** `network.photon.health/graphql` returns a 403 for POST requests. MCP still runs at `ai.<env>.health`. `rx.neutron.health` returns a 404.
+  ⚠️ **Not live yet.** `network.photon.health/graphql` returns a 403 for POST requests. MCP will move to `network.<env>.health/mcp`, which isn't live yet.
 </Warning>
 
 ## What's different in Neutron
@@ -102,7 +104,7 @@ For GraphQL or MCP, use the URLs above.
 
 ## Going live
 
-1. Choose a plan. API credentials need [Launch or above](/use-cases#plans-at-a-glance). [Start a production account](https://photonhealth.com/pricing), or email [sales@photon.health](mailto:sales@photon.health) to talk through your use case.
+1. Choose a plan. API credentials need [Launch or above](/use-cases#plans-at-a-glance). [Start a production account](https://photonhealth.com/pricing), or email [sales@photon.health](mailto:sales@photon.health) to talk through your use case. The production Prescribe app and MCP are in private preview, so ask your Photon contact for access.
 2. Get production credentials from [app.photon.health](https://app.photon.health/settings/developers). Sandbox credentials don't work in production.
 3. Invite your prescribers to the production organization, with their NPI, phone, fax and address. Nothing carries over from Neutron. See [Team](/dashboard#team).
 4. Change the environment from `neutron` to `photon`: the `environment` prop, or the hostnames for GraphQL and MCP.

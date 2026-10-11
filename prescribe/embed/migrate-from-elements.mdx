@@ -80,9 +80,6 @@ Prescribe events pass the live object: `order.id` and `order.state`. They don't 
 | `app.neutron.health/prescriptions/new?patientId=pat_…` | `rx.neutron.health/order?patient=pat_…` |
 | `…&templateIds=tmp_…` | Build the link with `ph.order.url({ patient: { id }, prescriptions: { add: [{ templateId }] } })`. See [Deep links](/prescribe/app/deep-links). |
 
-{/* TODO(launch) */}
-⚠️ `rx.neutron.health` isn't live yet.
-
 ## Not in Prescribe yet
 
 These Elements features don't have a Prescribe equivalent yet. If you rely on one, talk to your Photon contact before you migrate.

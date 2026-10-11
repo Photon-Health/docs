@@ -3,7 +3,7 @@
 ## About this project
 
 - Public documentation for Photon, built on [Mintlify](https://mintlify.com). It covers two products: **Prescribe** (the web app and deep links, plus embedding with React components, an iframe or the JavaScript client) and **Network** (GraphQL, MCP and webhooks).
-- The prescribing UI is always **Prescribe**, whatever the mechanism (React, iframe, link, or anything added later). Its docs have two sections: **App** (the Prescribe app and deep links) and **Embed** (putting Prescribe in your product). "Embed" names that section and the act of embedding, never the product. Link prescribing to the Prescribe app: `rx.neutron.health` in the sandbox and `rx.new` in production (not `rx.photon.health`); link `app.<env>.health` only for dashboard settings (API credentials, team, catalog, templates). Elements is deprecated. Mention it only in the migration guide.
+- The prescribing UI is always **Prescribe**, whatever the mechanism (React, iframe, link, or anything added later). Its docs have two sections: **App** (the Prescribe app and deep links) and **Embed** (putting Prescribe in your product). "Embed" names that section and the act of embedding, never the product. Link prescribing to the Prescribe app: `rx.neutron.health` in the sandbox and `rx.new` in production (not `rx.photon.health`, which `rx.new` aliases). The sandbox app is live. Production Prescribe is in private preview: label it that way, with access through a Photon contact. Link `app.<env>.health` only for dashboard settings (API credentials, team, catalog, templates). Elements is deprecated. Mention it only in the migration guide.
 - Don't document the previous APIs (`api.<env>.health`, `clinical-api.<env>.health`) or vendor-specific migrations (DoseSpot, MDToolbox).
 - Benefits and coverage checks aren't documented yet beyond a high-level mention in the prescribing workflow (the Draft step). Benefits will arrive as offers on prescriptions and orders.
 - Pages are MDX files with YAML frontmatter
@@ -19,7 +19,7 @@
 - Photon's service makes the decisions (matching, drug resolution, screening). Docs describe what to send and how to read `changes`, not client-side rules.
 - Call Photon a **service**, never a backend. "Backend" always means the customer's own service ("your backend").
 - Validate GraphQL examples against the live schema at `https://network.neutron.health/graphql` (introspection is open).
-- MCP is in private preview. Label it that way. Its tools are documented as they are today and will change when MCP moves to `network.<env>.health/mcp`.
+- MCP runs at `ai.<env>.health` in both environments. It's open to every Neutron account. Production MCP is in private preview: label it that way, with access through a Photon contact. Its tools are documented as they are today and will change when MCP moves to `network.<env>.health/mcp`, which isn't live yet.
 - Mark anything documented ahead of launch (a URL that isn't live, a package that isn't published) with ⚠️ and a `{/* TODO(launch): … */}` comment. Search for `TODO(launch)` before going public, and remove each marker as it's fixed. Inline components inside table cells don't survive the editor, so use the plain ⚠️ there.
 - Permissions: `read:` lets a token read and draft. `write:` commits: `write:patient` adds and edits patients, `write:prescription` signs (machine tokens never have it), and `write:order` sends.
 
