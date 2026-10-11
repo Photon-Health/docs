@@ -7,10 +7,14 @@ icon: "server"
 Photon has two environments. They run the same API but keep separate data, accounts and credentials.
 
 <CardGroup cols={2}>
-  <Card title="Neutron" icon="https://photonhealth.com/logo/neutron-icon.svg">
+  <Card>
+    <img noZoom src="https://photonhealth.com/logo/neutron.svg" alt="Neutron" className="block dark:hidden" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
+    <img noZoom src="https://photonhealth.com/logo/neutron-light.svg" alt="Neutron" className="hidden dark:block" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
     The sandbox, at `*.neutron.health`. Build and test here.
   </Card>
-  <Card title="Photon" icon="https://photonhealth.com/logo/photon-icon.svg">
+  <Card>
+    <img noZoom src="https://photonhealth.com/logo/photon.svg" alt="Photon" className="block dark:hidden" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
+    <img noZoom src="https://photonhealth.com/logo/photon-light.svg" alt="Photon" className="hidden dark:block" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
     Production, at `*.photon.health`. Real patients and pharmacies.
   </Card>
 </CardGroup>

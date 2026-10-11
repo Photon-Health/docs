@@ -8,10 +8,14 @@ icon: "browser"
 The Prescribe app is Photon's own web app for prescribers. Sign in and prescribe, with no integration. Later, a [deep link](/prescribe/app/deep-links) from your product can open it on the right patient or order.
 
 <CardGroup cols={2}>
-  <Card title="Open Neutron" icon="https://photonhealth.com/logo/neutron-icon.svg" href="https://rx.neutron.health" cta="Sign in to the sandbox">
+  <Card href="https://rx.neutron.health" cta="Sign in to the sandbox">
+    <img noZoom src="https://photonhealth.com/logo/neutron.svg" alt="Neutron" className="block dark:hidden" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
+    <img noZoom src="https://photonhealth.com/logo/neutron-light.svg" alt="Neutron" className="hidden dark:block" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
     The sandbox. Prescribe for test patients. Nothing is sent to a real pharmacy.
   </Card>
-  <Card title="Open Photon" icon="https://photonhealth.com/logo/photon-icon.svg" href="https://rx.new" cta="Sign in">
+  <Card href="https://rx.new" cta="Sign in">
+    <img noZoom src="https://photonhealth.com/logo/photon.svg" alt="Photon" className="block dark:hidden" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
+    <img noZoom src="https://photonhealth.com/logo/photon-light.svg" alt="Photon" className="hidden dark:block" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
     Production, in private preview. Prescribe for real patients and send to their pharmacies.
   </Card>
 </CardGroup>

@@ -36,11 +36,15 @@ Most platforms use both: Network drafts from what your product already knows, an
 ## Two environments
 
 <CardGroup cols={2}>
-  <Card title="Neutron" icon="https://photonhealth.com/logo/neutron-icon.svg" href="/environments">
+  <Card href="/environments">
+    <img noZoom src="https://photonhealth.com/logo/neutron.svg" alt="Neutron" className="block dark:hidden" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
+    <img noZoom src="https://photonhealth.com/logo/neutron-light.svg" alt="Neutron" className="hidden dark:block" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
     The sandbox. Build and test with fake patients. Nothing is sent to a real pharmacy, and every account gets free API credentials.
   </Card>
 
-  <Card title="Photon" icon="https://photonhealth.com/logo/photon-icon.svg" href="/environments#going-live">
+  <Card href="/environments#going-live">
+    <img noZoom src="https://photonhealth.com/logo/photon.svg" alt="Photon" className="block dark:hidden" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
+    <img noZoom src="https://photonhealth.com/logo/photon-light.svg" alt="Photon" className="hidden dark:block" style={{ height: "28px", width: "auto", margin: "4px 0 16px" }} />
     Production. Real patients, real prescriptions and real pharmacies. The same API, with separate accounts and credentials.
   </Card>
 </CardGroup>
