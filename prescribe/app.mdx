@@ -8,15 +8,21 @@ icon: "browser"
 The Prescribe app is Photon's own web app for prescribers. Sign in and prescribe, with no integration. Later, a [deep link](/prescribe/app/deep-links) from your product can open it on the right patient or order.
 
 <CardGroup cols={2}>
-  <Card title="Open Neutron" icon="flask" href="https://rx.neutron.health" cta="Sign in to the sandbox">
+  <Card href="https://rx.neutron.health" cta="Sign in to the sandbox">
+    <img noZoom src="https://photonhealth.com/logo/neutron-logo.svg" alt="Neutron" className="env-mark env-mark-light" />
+    <img noZoom src="https://photonhealth.com/logo/neutron-logo-light.svg" alt="Neutron" className="env-mark env-mark-dark" />
+    <p className="font-semibold text-base text-gray-800 dark:text-white" style={{ margin: "0 0 4px" }}>Open Neutron</p>
     The sandbox. Prescribe for test patients. Nothing is sent to a real pharmacy.
   </Card>
-  <Card title="Open Photon" icon="prescription" href="https://rx.new" cta="Sign in">
-    Production. Prescribe for real patients and send to their pharmacies.
+  <Card href="https://rx.new" cta="Sign in">
+    <img noZoom src="https://photonhealth.com/logo/photon-logo.svg" alt="Photon" className="env-mark env-mark-light" />
+    <img noZoom src="https://photonhealth.com/logo/photon-logo-light.svg" alt="Photon" className="env-mark env-mark-dark" />
+    <p className="font-semibold text-base text-gray-800 dark:text-white" style={{ margin: "0 0 4px" }}>Open Photon</p>
+    Production, in private preview. Prescribe for real patients and send to their pharmacies.
   </Card>
 </CardGroup>
 
-{/* TODO(launch) */}⚠️ The sandbox, `rx.neutron.health`, isn't live yet.
+Production is in private preview. To get access, ask your Photon contact.
 
 Prescribers sign in with their Photon account, which needs an [invite](#invites) with the **Prescriber** role. Someone in more than one organization picks one when they sign in.
 
@@ -52,14 +58,14 @@ After you send, the order shows **The patient will choose a pharmacy**. If the o
 
 ## Invites
 
-Everyone who uses the app needs an invite to your organization. An admin invites them by email and gives them roles: **Prescriber** to prescribe, plus **Admin** or **Developer** for setup. A prescriber's invite also needs their NPI, phone, fax and address. See [Team](/dashboard#team).
+Everyone who uses the app needs an invite to your organization. An administrator invites them by email and gives them [roles](/admin/team#roles): **Prescriber** to prescribe, plus **Administrator** or **Developer** for setup. A prescriber's invite also needs their NPI, phone, fax and address. See [Team](/admin/team).
 
 {/* TODO: link to Prescribe once it manages the team. */}
 For now, manage invites in the dashboard: [Neutron](https://app.neutron.health/settings/team) · [Photon](https://app.photon.health/settings/team).
 
 ## Templates
 
-A template is a saved prescription with the drug, directions and quantity filled in. Admins build them from treatments in your organization's catalog. A [deep link](/prescribe/app/deep-links) or your backend can start a prescription from a template (`templateId`), so the prescriber only reviews and signs. See [Templates](/dashboard#templates).
+A template is a saved prescription with the drug, directions and quantity filled in. Admins build them from treatments in your organization's catalog. A [deep link](/prescribe/app/deep-links) or your backend can start a prescription from a template (`templateId`), so the prescriber only reviews and signs. See [Templates](/admin/catalog#templates).
 
 {/* TODO: link to Prescribe once it manages templates. */}
 For now, create and edit templates in the dashboard: [Neutron](https://app.neutron.health/settings/templates) · [Photon](https://app.photon.health/settings/templates).

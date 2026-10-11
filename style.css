@@ -10,3 +10,19 @@
     --content-width: 52rem;
   }
 }
+
+/* Environment marks on cards: one image per theme. */
+img.env-mark {
+  height: 64px;
+  width: auto;
+  margin: -8px 0 8px -8px;
+}
+
+img.env-mark-dark,
+.dark img.env-mark-light {
+  display: none !important;
+}
+
+.dark img.env-mark-dark {
+  display: block !important;
+}

@@ -8,8 +8,8 @@
     "dark": "#175CD3"
   },
   "logo": {
-    "light": "https://photonhealth.com/logo/photon-logo.svg",
-    "dark": "https://photonhealth.com/logo/photon-logo-white.svg",
+    "light": "https://photonhealth.com/logo/photon.svg",
+    "dark": "https://photonhealth.com/logo/photon-light.svg",
     "href": "https://photonhealth.com/"
   },
   "navbar": {
@@ -55,8 +55,21 @@
             "pages": [
               "architecture",
               "environments",
-              "authentication",
-              "dashboard",
+              "authentication"
+            ]
+          },
+          {
+            "group": "Admin",
+            "pages": [
+              "admin",
+              "admin/credentials",
+              "admin/team",
+              "admin/catalog"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
               "changelog"
             ]
           }
@@ -275,11 +288,15 @@
     {
       "source": "/how-photon-works",
       "destination": "/architecture"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/admin"
     }
   ],
   "favicon": {
-    "light": "https://photonhealth.com/logo/photon-icon.svg",
-    "dark": "https://photonhealth.com/logo/photon-icon-white.svg"
+    "light": "https://photonhealth.com/logo/photon-logo.svg",
+    "dark": "https://photonhealth.com/logo/photon-logo-light.svg"
   },
   "integrations": {
     "gtm": {

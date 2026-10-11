@@ -6,14 +6,29 @@ icon: "server"
 
 Photon has two environments. They run the same API but keep separate data, accounts and credentials.
 
+<CardGroup cols={2}>
+  <Card>
+    <img noZoom src="https://photonhealth.com/logo/neutron-logo.svg" alt="Neutron" className="env-mark env-mark-light" />
+    <img noZoom src="https://photonhealth.com/logo/neutron-logo-light.svg" alt="Neutron" className="env-mark env-mark-dark" />
+    <p className="font-semibold text-base text-gray-800 dark:text-white" style={{ margin: "0 0 4px" }}>Neutron</p>
+    The sandbox, at `*.neutron.health`. Build and test here.
+  </Card>
+  <Card>
+    <img noZoom src="https://photonhealth.com/logo/photon-logo.svg" alt="Photon" className="env-mark env-mark-light" />
+    <img noZoom src="https://photonhealth.com/logo/photon-logo-light.svg" alt="Photon" className="env-mark env-mark-dark" />
+    <p className="font-semibold text-base text-gray-800 dark:text-white" style={{ margin: "0 0 4px" }}>Photon</p>
+    Production, at `*.photon.health`. Real patients and pharmacies.
+  </Card>
+</CardGroup>
+
 | | **Neutron** (sandbox) | **Photon** (production) |
 | --- | --- | --- |
 | Use it for | Building and testing | Real patients and real prescriptions |
 | Prescriptions | Never sent to a real pharmacy | Sent to pharmacies |
 | Patients | Fake ones only | Real |
 | API credentials | Free with every sandbox account | [Launch and above](/use-cases#plans-at-a-glance) |
-| Prescribe app | [rx.neutron.health](https://rx.neutron.health) ⚠️ | [rx.new](https://rx.new) |
-| [Dashboard](/dashboard) | [app.neutron.health/settings](https://app.neutron.health/settings) | [app.photon.health/settings](https://app.photon.health/settings) |
+| Prescribe app | [rx.neutron.health](https://rx.neutron.health) | [rx.new](https://rx.new) (private preview) |
+| [Dashboard](/admin) | [app.neutron.health/settings](https://app.neutron.health/settings) | [app.photon.health/settings](https://app.photon.health/settings) |
 
 <Tip>
   Build everything against Neutron. Every link and example in these docs points there unless it says otherwise.
@@ -23,18 +38,20 @@ Photon has two environments. They run the same API but keep separate data, accou
 
 Every URL follows from the environment's name, so switching environments means changing one word. The one exception is the Prescribe app, which is `rx.new` in production.
 
+The production Prescribe app and production MCP are in private preview. To get access, ask your Photon contact.
+
 | Service | Neutron | Photon |
 | --- | --- | --- |
 | GraphQL | `https://network.neutron.health/graphql` | `https://network.photon.health/graphql` ⚠️ |
-| MCP ([private preview](/network/mcp)) | `https://network.neutron.health/mcp` ⚠️ | `https://network.photon.health/mcp` ⚠️ |
-| Prescribe app | `https://rx.neutron.health` ⚠️ | `https://rx.new` |
+| [MCP](/network/mcp) | `https://ai.neutron.health` | `https://ai.photon.health` (private preview) |
+| Prescribe app | `https://rx.neutron.health` | `https://rx.new` (private preview) |
 | Sign-in (Auth0) | `auth.neutron.health` | `auth.photon.health` |
 | Token audience | `https://api.neutron.health` | `https://api.photon.health` |
 
 {/* TODO(launch): fix each ⚠️ above, then delete the ⚠️ marks and this Warning. */}
 
 <Warning>
-  ⚠️ **Not live yet.** `network.photon.health/graphql` returns a 403 for POST requests. MCP still runs at `ai.<env>.health`. `rx.neutron.health` returns a 404.
+  ⚠️ **Not live yet.** `network.photon.health/graphql` returns a 403 for POST requests. MCP will move to `network.<env>.health/mcp`, which isn't live yet.
 </Warning>
 
 ## What's different in Neutron
@@ -66,7 +83,7 @@ For each job, call this host with this credential. In production, change `neutro
 | Prescribe | `rx.neutron.health` | The prescriber's sign-in | Indie |
 | Open the app on a patient or order ([deep link](/prescribe/app/deep-links)) | `rx.neutron.health/order/…` | The prescriber's sign-in | Indie |
 | Draft in Claude or ChatGPT ([MCP](/network/mcp/connect)) | `ai.neutron.health` | The prescriber's sign-in, over OAuth | Indie |
-| Manage credentials, team, catalog and templates ([dashboard](/dashboard)) | `app.neutron.health/settings` | An Admin's or Developer's sign-in | Indie |
+| Manage credentials, team, catalog and templates ([dashboard](/admin)) | `app.neutron.health/settings` | An Administrator's or Developer's sign-in | Indie |
 | Embed with the [iframe](/prescribe/embed/iframe) | `rx.neutron.health/order/embed` | The prescriber's sign-in, with your Application `client_id` in a URL built by `frame()` | Launch |
 | Embed with [React](/prescribe/embed/react) or the [JavaScript client](/prescribe/embed/javascript) | `environment="neutron"` | Application `client_id` | Launch |
 | Get a [machine token](/authentication#machine-tokens) | `auth.neutron.health/oauth/token` | Backend `client_id` and `client_secret` | Launch |
@@ -102,9 +119,9 @@ For GraphQL or MCP, use the URLs above.
 
 ## Going live
 
-1. Choose a plan. API credentials need [Launch or above](/use-cases#plans-at-a-glance). [Start a production account](https://photonhealth.com/pricing), or email [sales@photon.health](mailto:sales@photon.health) to talk through your use case.
+1. Choose a plan. API credentials need [Launch or above](/use-cases#plans-at-a-glance). [Start a production account](https://photonhealth.com/pricing), or email [sales@photon.health](mailto:sales@photon.health) to talk through your use case. The production Prescribe app and MCP are in private preview, so ask your Photon contact for access.
 2. Get production credentials from [app.photon.health](https://app.photon.health/settings/developers). Sandbox credentials don't work in production.
-3. Invite your prescribers to the production organization, with their NPI, phone, fax and address. Nothing carries over from Neutron. See [Team](/dashboard#team).
+3. Invite your prescribers to the production organization, with their NPI, phone, fax and address. Nothing carries over from Neutron. See [Team](/admin/team).
 4. Change the environment from `neutron` to `photon`: the `environment` prop, or the hostnames for GraphQL and MCP.
 5. Add your production domain to your Application credential's allowed URLs. Using the iframe? Add `https://rx.new` too.
 6. Set up your [webhooks](/network/webhooks) in production too.

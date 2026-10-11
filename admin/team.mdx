@@ -1,0 +1,44 @@
+---
+title: "Team"
+description: "Invite people to your organization and choose their roles."
+icon: "users"
+---
+
+Everyone who uses Photon needs an invite to your organization, including prescribers who only use Prescribe inside your app. Administrators manage the team under **Settings → Team**: [Neutron](https://app.neutron.health/settings/team) · [Photon](https://app.photon.health/settings/team).
+
+## Invite someone
+
+1. Open **Team** and click **Invite user**.
+2. Enter their email and choose one or more [roles](#roles).
+3. Click **Send invitation**. They get an email, and they join your organization the first time they sign in.
+
+A prescriber also needs their NPI, phone, fax and address. Pharmacies use them to identify the prescriber, so enter them when you give someone the Prescriber role.
+
+Invites wait under **Pending invitations** until they're accepted. Resend one if the email was missed, or delete it to cancel. Removing someone from the team takes effect immediately.
+
+<Tip>
+  Someone who signs in without an accepted invite sees "not associated with any organizations". Send them an invite, or ask them to accept the one in their email.
+</Tip>
+
+## Roles
+
+A role decides what someone can do, in the dashboard and in Prescribe. Choose the smallest role that fits each person's work. Give someone more than one role when they need both, for example **Administrator** and **Prescriber** for a clinician who runs their own practice.
+
+| Role | For | Can | Can't |
+| --- | --- | --- | --- |
+| **Administrator** | Owners and team admins | Manage the organization, team, catalog and templates. View prescriptions and orders. Add and edit patients. | Sign prescriptions, or send, reroute or resend orders |
+| **Developer** | Engineers integrating Photon | Manage [credentials and webhooks](/admin/credentials) | See patients, prescriptions or orders |
+| **Prescriber** | Clinicians | Add and edit patients. Write and **sign** prescriptions. Send and reroute orders. | Resend orders, unless another role allows it |
+| **Medical Operations** | Clinical operations teams | Add and edit patients. Draft, send, reroute and resend orders. Manage shared templates. | Sign prescriptions |
+| **Staff** | Non-clinical operators | Manage the organization, team and shared templates. Reroute and resend orders. | Add or edit patients, prescriptions or orders |
+| **Support** | Patient and fulfillment questions | View patients, prescriptions and orders. Reroute and resend orders. | Add or edit patients, prescriptions or orders |
+
+Only Prescribers can sign. Each role maps to the [permissions](/authentication#permissions) on the person's user token, and signing needs `write:prescription`.
+
+When you sign up, your first user gets these roles:
+
+| Account | Roles |
+| --- | --- |
+| Neutron sandbox | Administrator, Developer and Prescriber |
+| Clinic | Administrator and Developer |
+| Prescriber | Administrator and Prescriber |
