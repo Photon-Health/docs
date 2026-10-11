@@ -11,6 +11,15 @@
   }
 }
 
+/* Size the wordmark to the search bar below it. At Almond's fixed 24px
+   height it runs about 30px wider than the sidebar. */
+@media (min-width: 1024px) {
+  img.nav-logo {
+    width: 215px;
+    height: auto;
+  }
+}
+
 /* Environment marks on cards: one image per theme. */
 img.env-mark {
   height: 64px;
