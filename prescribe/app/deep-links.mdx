@@ -27,7 +27,8 @@ A link carries Photon ids only: `pat_`, `rx_`, `ord_`, `med_`, `tmp_` and `org_`
 - On an order, `rx`, `template` and `med` repeat: each one adds a card. The same `rx` twice is one card.
 - A prescription takes one of `rx`, `template` or `med`. If a link has more, the first one counts.
 - The record's own id can also go in the query (`/order?order=ord_…`, `/patient?patient=pat_…`, `/prescription?rx=rx_…`). Beside it, ids that would conflict are ignored: an existing order or prescription keeps its own patient.
-- An id Photon doesn't have in the prescriber's organization opens as **not found** on its card, and the rest of the link still opens. So does a template that doesn't exist.
+- An id Photon doesn't have in the prescriber's organization opens as **not found** on its card, and the rest of the link still opens.
+- A `template` becomes a prescription once there's a patient (`patient=`, or the one the prescriber finds). Until then, its card is empty.
 
 ## Building a link
 
