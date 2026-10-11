@@ -1,0 +1,32 @@
+---
+title: "Catalog and templates"
+sidebarTitle: "Catalog"
+description: "Choose the treatments your organization prescribes, and save prescriptions as templates."
+icon: "book-medical"
+---
+
+The catalog and templates save prescribers time. The **catalog** is the short list of treatments your organization prescribes. A **template** is a prescription built from one of them, with the sig and dispense filled in.
+
+## Catalog
+
+Administrators manage the catalog under **Settings → Catalog**: [Neutron](https://app.neutron.health/settings/catalog) · [Photon](https://app.photon.health/settings/catalog).
+
+Drug search marks treatments that are in your catalog. Prescribers can still choose one that isn't.
+
+To add one, open **Catalog**, click **Add treatment to catalog** and search for it. Removing a treatment can't be undone, but you can add it again.
+
+## Templates
+
+A template is a saved prescription with the drug, sig and dispense filled in, so prescribers don't type the same prescription twice. There are two kinds:
+
+- **Organization templates** are shared by everyone in your organization. Administrators create them under **Settings → Templates** ([Neutron](https://app.neutron.health/settings/templates) · [Photon](https://app.photon.health/settings/templates)) from a treatment in the catalog. Medical Operations and Staff can manage them too.
+- **Personal templates** belong to one prescriber, who saves them while prescribing.
+
+Add a treatment to the catalog before you make an organization template for it.
+
+### Start a prescription from a template
+
+Each template has an id (`tmp_…`), shown under **Templates**. Pass it as `templateId` to draft a prescription from it. The prescriber only reviews and signs.
+
+- From your backend: see [Prescriptions](/network/prescription) and [One-click orders](/integrations/one-click-orders).
+- From a link: see [Deep links](/prescribe/app/deep-links).
