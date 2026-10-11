@@ -11,6 +11,15 @@
   }
 }
 
+/* Size the wordmark to the search bar below it. At Almond's fixed 24px
+   height it runs about 30px wider than the sidebar. */
+@media (min-width: 1024px) {
+  img.nav-logo {
+    width: 215px;
+    height: auto;
+  }
+}
+
 /* Environment marks on cards: one image per theme. */
 img.env-mark {
   height: 64px;
@@ -25,4 +34,13 @@ img.env-mark-dark,
 
 .dark img.env-mark-dark {
   display: block !important;
+}
+
+/* Almond bleeds tables 32px past the column on each side, but phones only
+   pad the column by 16px, so the whole page scrolls sideways. Match the
+   bleed to the phone padding. */
+@media (max-width: 639px) {
+  #content-container [class*="--page-padding:32px"] {
+    --page-padding: 1rem;
+  }
 }

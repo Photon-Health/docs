@@ -12,6 +12,10 @@
     "dark": "https://photonhealth.com/logo/photon-light.svg",
     "href": "https://photonhealth.com/"
   },
+  "banner": {
+    "content": "The previous App, Embed and API are documented at [docs.photon.health](https://docs.photon.health) and will be sunset in 2027.",
+    "dismissible": true
+  },
   "navbar": {
     "primary": {
       "type": "button",
