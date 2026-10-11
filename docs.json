@@ -173,13 +173,13 @@
   },
   "contextual": {
     "options": [
-      "view",
       "chatgpt",
       "claude",
       "grok",
-      "copy"
+      "copy",
+      "view"
     ],
-    "display": "header"
+    "display": "toc"
   },
   "styling": {
     "codeblocks": "dark"
