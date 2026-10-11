@@ -173,8 +173,11 @@
   },
   "contextual": {
     "options": [
+      "view",
+      "chatgpt",
       "claude",
-      "chatgpt"
+      "grok",
+      "copy"
     ],
     "display": "header"
   },
