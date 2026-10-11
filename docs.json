@@ -55,8 +55,21 @@
             "pages": [
               "architecture",
               "environments",
-              "authentication",
-              "dashboard",
+              "authentication"
+            ]
+          },
+          {
+            "group": "Admin",
+            "pages": [
+              "admin",
+              "admin/credentials",
+              "admin/team",
+              "admin/catalog"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
               "changelog"
             ]
           }
@@ -275,6 +288,10 @@
     {
       "source": "/how-photon-works",
       "destination": "/architecture"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/admin"
     }
   ],
   "favicon": {
