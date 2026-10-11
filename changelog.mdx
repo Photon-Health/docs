@@ -19,7 +19,7 @@ Every page shows when it was last updated. This page says what's stable, and lis
 | [GraphQL](/network/graphql) | Stable in Neutron | ⚠️ Production, `network.photon.health/graphql`, isn't live yet. |
 | [Webhooks](/network/webhooks) | Stable | Signed with HMAC-SHA256. |
 | [MCP](/network/mcp) | Available in Neutron | `ai.neutron.health` in the sandbox. Production, `ai.photon.health`, is in private preview: ask your Photon contact for access. Tools will change when MCP moves to `network.<env>.health/mcp`. |
-| Elements | Deprecated | Removed on January 1, 2027. See [Migrate from Elements](/prescribe/embed/migrate-from-elements). |
+| Elements | Deprecated | Deprecated on January 1, 2027, and fully sunset by mid-2027. See [Migrate from Elements](/prescribe/embed/migrate-from-elements). |
 
 {/* TODO(launch): update each ⚠️ row as it goes live, and add an entry below. */}
 
@@ -31,6 +31,7 @@ Durable concepts, such as [records and the send](/architecture), [permissions](/
   - The sandbox [Prescribe app](/prescribe/app), `rx.neutron.health`, is live. Deep links and the iframe work there too.
   - Production Prescribe, at `rx.new`, is in private preview. To get access, ask your Photon contact.
   - [MCP](/network/mcp) is open to every Neutron account at `ai.neutron.health`. Production MCP, at `ai.photon.health`, is in private preview.
+  - Corrected the Elements dates: it's deprecated on January 1, 2027, and fully sunset by mid-2027. See [Migrate from Elements](/prescribe/embed/migrate-from-elements).
 </Update>
 
 <Update label="October 9, 2026" tags={["Prescribe"]}>
@@ -53,7 +54,7 @@ Durable concepts, such as [records and the send](/architecture), [permissions](/
   - Prescribe has two sections: [App](/prescribe/app), for Photon's own web app and deep links, and [Embed](/prescribe/embed), for putting Prescribe in your product.
   - Production prescribing moved to `rx.new`.
   - New [Dashboard](/dashboard) page for credentials, team, catalog and templates.
-  - Elements will be removed on January 1, 2027. See [Migrate from Elements](/prescribe/embed/migrate-from-elements).
+  - Elements will be deprecated on January 1, 2027, and fully sunset by mid-2027. See [Migrate from Elements](/prescribe/embed/migrate-from-elements).
 </Update>
 
 <Update label="October 8, 2026" tags={["Network"]}>
