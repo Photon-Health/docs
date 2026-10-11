@@ -6,7 +6,7 @@ tag: "Preview"
 ---
 
 <Note>
-  MCP is in **private preview**. To get access, ask your Photon contact.
+  MCP is open to every Neutron account. In production, it's in **private preview**: to get access, ask your Photon contact.
 </Note>
 
 The most advanced integrations put an agent in front. It talks to the patient or reads the encounter, records what it learns on the patient, finds the right drug, and drafts the prescriptions. A prescriber then opens the drafts in Prescribe and signs and sends them.
@@ -31,10 +31,10 @@ sequenceDiagram
 Point your agent's MCP client at the Neutron server:
 
 ```text
-https://network.neutron.health/mcp
+https://ai.neutron.health
 ```
 
-During the preview, the server runs at `https://ai.neutron.health`. {/* TODO(launch) */}⚠️ `network.neutron.health/mcp` isn't live yet, so use `ai.neutron.health` for now. The agent authenticates like any other caller. A backend agent uses a [machine token](/authentication#machine-tokens). An agent that runs in a prescriber's MCP client, such as Claude or ChatGPT, signs in as that prescriber. See [Connect a client](/network/mcp/connect).
+{/* TODO(launch): switch to network.<env>.health/mcp once MCP moves. */}⚠️ MCP will move to `https://network.neutron.health/mcp`, which isn't live yet. The agent authenticates like any other caller. A backend agent uses a [machine token](/authentication#machine-tokens). An agent that runs in a prescriber's MCP client, such as Claude or ChatGPT, signs in as that prescriber. See [Connect a client](/network/mcp/connect).
 
 ## 2. Intake, search, draft
 

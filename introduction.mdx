@@ -33,6 +33,26 @@ Nothing goes to a pharmacy until the patient picks one. The text Photon sends li
 
 Most platforms use both: Network drafts from what your product already knows, and Prescribe is where the prescriber signs.
 
+## Two environments
+
+<CardGroup cols={2}>
+  <Card href="/environments">
+    <img noZoom src="https://photonhealth.com/logo/neutron-logo.svg" alt="Neutron" className="env-mark env-mark-light" />
+    <img noZoom src="https://photonhealth.com/logo/neutron-logo-light.svg" alt="Neutron" className="env-mark env-mark-dark" />
+    <p className="font-semibold text-base text-gray-800 dark:text-white" style={{ margin: "0 0 4px" }}>Neutron</p>
+    The sandbox. Build and test with fake patients. Nothing is sent to a real pharmacy, and every account gets free API credentials.
+  </Card>
+
+  <Card href="/environments#going-live">
+    <img noZoom src="https://photonhealth.com/logo/photon-logo.svg" alt="Photon" className="env-mark env-mark-light" />
+    <img noZoom src="https://photonhealth.com/logo/photon-logo-light.svg" alt="Photon" className="env-mark env-mark-dark" />
+    <p className="font-semibold text-base text-gray-800 dark:text-white" style={{ margin: "0 0 4px" }}>Photon</p>
+    Production. Real patients, real prescriptions and real pharmacies. The same API, with separate accounts and credentials.
+  </Card>
+</CardGroup>
+
+Both products run in both environments. Build against Neutron, then change one word to go live.
+
 ## Where to start
 
 | You are | Prescribers work in | Plan |
