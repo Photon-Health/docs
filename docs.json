@@ -12,6 +12,10 @@
     "dark": "https://photonhealth.com/logo/photon-light.svg",
     "href": "https://photonhealth.com/"
   },
+  "banner": {
+    "content": "**Prescribe** and **Network** are in private preview. Looking for the previous API? Its docs are still at [docs.photon.health](https://docs.photon.health).",
+    "dismissible": true
+  },
   "navbar": {
     "primary": {
       "type": "button",

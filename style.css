@@ -26,3 +26,12 @@ img.env-mark-dark,
 .dark img.env-mark-dark {
   display: block !important;
 }
+
+/* Almond bleeds tables 32px past the column on each side, but phones only
+   pad the column by 16px, so the whole page scrolls sideways. Match the
+   bleed to the phone padding. */
+@media (max-width: 639px) {
+  #content-container [class*="--page-padding:32px"] {
+    --page-padding: 1rem;
+  }
+}
