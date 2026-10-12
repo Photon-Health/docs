@@ -35,6 +35,10 @@ const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" }
 // photon({ environment: "neutron", auth: { getToken: () => auth0.getTokenSilently() } });
 ```
 
+<Card title="Try it" icon="play" href="https://rx.neutron.health/integrate/order/js" horizontal arrow>
+  The live objects in /integrate, drawn with no framework: sync, sign and send, beside their code.
+</Card>
+
 With `clientId`, `ph.session` handles sign-in: `start()` on load, `signIn()` from a click, and `signOut()`. Its `status` and `user` show who is signed in. Create one client per signed-in person. On a server, that means one per request, never one shared module-wide.
 
 ## Get, sync, update
