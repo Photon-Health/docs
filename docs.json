@@ -87,7 +87,8 @@
           {
             "group": "Prescribe",
             "pages": [
-              "prescribe/overview"
+              "prescribe/overview",
+              "prescribe/architecture"
             ]
           },
           {

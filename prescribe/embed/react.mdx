@@ -32,6 +32,10 @@ export function Prescribe({ photonPatientId, onDone }) {
 
 The cards have no page chrome: no header, no fixed bars, no viewport breakpoints. They size to their container, so they fit a page, a dialog or a side panel.
 
+<Card title="Try it" icon="play" href="https://rx.neutron.health/integrate/order" horizontal arrow>
+  `<PhotonOrder />` in /integrate, with the events it fires, the live objects behind it and the requests they make.
+</Card>
+
 ## PhotonProvider
 
 Wrap the cards in one provider. It signs the prescriber in and gives every card inside it a client.
@@ -74,7 +78,7 @@ Without prescriptions, the order starts with one empty line. **Add another presc
 
 ## PhotonPatient
 
-Find or add a patient, then edit them. Each field the prescriber fills in is synced, and Photon decides whether that's a match, a list of candidates, or a new patient.
+Find or add a patient, then edit them. Each field the prescriber fills in is synced, and Photon decides whether that's a match, a list of candidates, or a new patient. [Try it](https://rx.neutron.health/integrate/patient).
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -85,7 +89,7 @@ Find or add a patient, then edit them. Each field the prescriber fills in is syn
 
 ## PhotonPrescription
 
-One prescription: the drug, sig and dispense, screening, and **Sign**. A signed prescription is final.
+One prescription: the drug, sig and dispense, screening, and **Sign**. A signed prescription is final. [Try it](https://rx.neutron.health/integrate/prescription).
 
 | Prop | Type | Description |
 | --- | --- | --- |
