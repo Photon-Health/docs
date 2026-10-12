@@ -41,6 +41,10 @@ const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" }
 
 With `clientId`, `ph.session` handles sign-in: `start()` on load, `signIn()` from a click, and `signOut()`. Its `status` and `user` show who is signed in. Create one client per signed-in person. On a server, that means one per request, never one shared module-wide.
 
+<Note>
+  With `clientId`, the access token stays in memory and the refresh token is kept in the page's `localStorage`, so a reload signs back in. Any script on the page can read it, so treat script injection there as a token leak, and set a Content-Security-Policy. Auth0 rotates the refresh token on every use and revokes it as soon as an old one is reused. [How Prescribe is built](/prescribe/architecture#sign-in) has the details.
+</Note>
+
 ## Get, sync, update
 
 `ph.patient`, `ph.prescription` and `ph.order` each have the [same three calls](/architecture#get-sync-and-update):
