@@ -44,3 +44,34 @@ img.env-mark-dark,
     --page-padding: 1rem;
   }
 }
+
+/* Almond gives every table cell a 150px minimum width, so a short first
+   column (a field name, a step number) is as wide as the prose beside it,
+   and on phones every table with three or more columns scrolls sideways.
+   Size columns to their content instead. */
+#content-container table td {
+  min-width: 0;
+}
+
+/* Almond lets inline code break between any two letters, so a squeezed
+   column splits even short names like `SUBMITTED`. Give columns with code
+   or links room for about 10 characters (three still fit across a phone),
+   wrap at spaces first, and break only names and URLs longer than that. */
+#content-container table td:has(code, a) {
+  min-width: 6.5rem;
+}
+
+#content-container table code,
+#content-container table a {
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Above phone width, reference tables (a field, enum or event name in the
+   first column) have room to keep every name whole. Tables of hosts and
+   URLs still wrap. */
+@media (min-width: 640px) {
+  #content-container table:has(td:first-child code) code {
+    overflow-wrap: normal;
+  }
+}
