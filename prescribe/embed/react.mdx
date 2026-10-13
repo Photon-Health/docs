@@ -58,7 +58,7 @@ On load, the provider signs in by itself when it can: it finishes a sign-in retu
 `useSession()` gives your own chrome the prescriber's name, email and organization.
 
 <Note>
-  The session is stored in your page's `localStorage`, so treat any script injection on that page as a token leak. Moving it out of `localStorage` is on our roadmap.
+  The access token stays in memory, but your page's `localStorage` keeps the refresh token, so any script on your page can read it. Treat script injection there as a token leak, and set a Content-Security-Policy. Auth0 rotates the refresh token on every use and revokes it as soon as an old one is reused, which cuts off a stolen one. To manage tokens yourself, sign in with your own Auth0 setup and pass a [client](/prescribe/embed/javascript) with `auth: { getToken }`.
 </Note>
 
 ## PhotonOrder

@@ -72,6 +72,8 @@ The client signs the prescriber in by itself. Give it an Application `client_id`
 
 Sign-in never redirects on its own. On load, the client finishes a sign-in returning from Photon or renews a stored session. Otherwise, the first card shows **Sign in to Photon**, and the prescriber clicks it.
 
+The access token stays in the page's memory. The page's `localStorage` keeps only the refresh token and the prescriber's name, email and organization, so a reload or a new tab signs back in with a refresh. Auth0 rotates the refresh token on every use and revokes it as soon as an old one is used again. The page's tabs take turns refreshing, so they never trip that. Without a refresh token, nothing is stored, and the prescriber signs in again after a reload.
+
 Machine tokens can draft but can't sign. That's why signing always happens in a browser, with a prescriber's token. See [Authentication](/authentication).
 
 ## The same Network API
