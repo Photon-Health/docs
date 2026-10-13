@@ -54,7 +54,7 @@ The iframe takes the same `client_id` in its URL. Build the URL with `frame()` f
 
 | `<photon-prescribe-workflow>` | Prescribe |
 | --- | --- |
-| `patient-id` | `patient="pat_…"`, or `ph.order.frame({ patient: { id: "pat_…" } })` for an iframe. Prescribe takes Photon ids only. To pass your own patient, give their details (`patient={{ demographic: { … } }}`) and Photon matches them. |
+| `patient-id` | `patient="pat_…"`, or `ph.order.frame({ patient: { id: "pat_…" } })` for an iframe. Prescribe takes Photon ids only. To pass your own patient to the React component, give their details (`patient={{ demographic: { … } }}`) and Photon matches them. An iframe URL carries ids only, so sync the patient from your backend first and pass the id. |
 | `template-ids` | `order={{ patient: { id }, prescriptions: { add: [{ templateId: "…" }] } }}` |
 | `prescription-ids` | `order={{ prescriptions: { add: [{ id: "rx_…" }] } }}`. Prescribe puts the draft itself on the order rather than copying it. |
 | `initial-prescriptions`, `template-overrides`, `prescription-overrides` | Draft the prescriptions from your backend with the values you want ([prescription sync](/network/prescription)), then pass their ids. See [One-click orders](/integrations/one-click-orders). |

@@ -119,6 +119,9 @@ unappliedChanges {
 
 These are null for medical equipment and compounds. A prescription's own `treatment` has the same parts. Its `name` may be just the drug (`"Lisinopril"`), and `prescribableName` is the full product name.
 
+{/* TODO(launch): remove once network-api applies templateId (Photon-Health/prescribe docs/api-gaps.md, "Templates aren't applied"). */}
+⚠️ Templates aren't applied yet: a sync with a `templateId` and no `treatment` comes back with `treatment` rejected (`MISSING_INPUT`). Send a `treatment` for now.
+
 <Warning>
   Always send a `templateId` or a `treatment` when you draft. With a patient, a sync may continue a draft the patient already has in progress. If they have several, you get `AmbiguousPrescriptionMatch`. Resend with the `id` of the one you mean.
 </Warning>

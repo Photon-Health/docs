@@ -27,6 +27,14 @@ Durable concepts, such as [records and the send](/architecture), [permissions](/
 
 ## Changes
 
+<Update label="October 11, 2026" tags={["Prescribe"]}>
+  - [Deep links](/prescribe/app/deep-links) and [iframe](/prescribe/embed/iframe) URLs carry Photon ids only, in plain query parameters: `patient`, `rx`, `template`, `med`, `order` and `org`. They never carry patient details. `url()` and `frame()` refuse anything that isn't an id, so sync details first and link by id.
+  - Orders take a card per `rx`, `template` and `med`. A prescription takes one of them. An existing order also takes new lines: `/order/ord_…?rx=rx_…`.
+  - An id Photon doesn't have in the prescriber's organization shows **not found** on its own card. The rest of the link still opens.
+  - A template becomes a prescription once the order or prescription has a patient. Until then, its card is empty.
+  - Links from before this change no longer open.
+</Update>
+
 <Update label="October 11, 2026" tags={["Get started"]}>
   - The dashboard page is now an [Admin](/admin) section, with a page each for [Credentials](/admin/credentials), [Team](/admin/team) and [Catalog and templates](/admin/catalog).
   - [Team](/admin/team#roles) describes every role: what it's for, what it can do and what it can't.

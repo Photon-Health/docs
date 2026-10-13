@@ -10,12 +10,25 @@ Deep links use the same paths as the [iframe](/prescribe/embed/iframe) without `
 
 | URL | Opens |
 | --- | --- |
+| `https://rx.neutron.health/order` | A new order. The prescriber finds or adds the patient. |
 | `https://rx.neutron.health/order?patient=pat_…` | A new order for this patient |
+| `https://rx.neutron.health/order?patient=pat_…&template=tmp_…&template=tmp_…` | A new order for this patient, with a prescription from each template |
+| `https://rx.neutron.health/order?patient=pat_…&rx=rx_…&med=med_…` | A new order for this patient, with this draft and a new prescription for this drug |
 | `https://rx.neutron.health/order/ord_…` | This order, such as one [your backend drafted](/integrations/one-click-orders) |
+| `https://rx.neutron.health/order/ord_…?rx=rx_…` | This order, with this draft added |
 | `https://rx.neutron.health/patient/pat_…` | This patient |
 | `https://rx.neutron.health/prescription/rx_…` | This prescription |
+| `https://rx.neutron.health/prescription?patient=pat_…&template=tmp_…` | A new prescription for this patient from this template (or `med=med_…` for a drug) |
 
-The prescriber signs in to Photon if they haven't already, and lands on the record.
+The prescriber signs in to Photon if they haven't already, and lands on the record. Add `org=org_…` to sign them straight in to your organization.
+
+A link carries Photon ids only: `pat_`, `rx_`, `ord_`, `med_`, `tmp_` and `org_`. It never carries patient details, drug names or instructions, so it's safe in an email, a text or a log. Each id opens its own card:
+
+- On an order, `rx`, `template` and `med` repeat: each one adds a card. The same `rx` twice is one card.
+- A prescription takes one of `rx`, `template` or `med`. If a link has more, the first one counts.
+- The record's own id can also go in the query (`/order?order=ord_…`, `/patient?patient=pat_…`, `/prescription?rx=rx_…`). Beside it, ids that would conflict are ignored: an existing order or prescription keeps its own patient.
+- An id Photon doesn't have in the prescriber's organization opens as **not found** on its card, and the rest of the link still opens.
+- A `template` becomes a prescription once there's a patient (`patient=`, or the one the prescriber finds). Until then, its card is empty. {/* TODO(launch): remove once network-api applies templates */}⚠️ Templates aren't applied yet, so a template card shows "A treatment … is required" instead.
 
 <Card title="Try it" icon="play" href="https://rx.neutron.health/integrate/order/link" horizontal arrow>
   Build a deep link in /integrate from the records you give it, with the code that makes it.
@@ -23,7 +36,7 @@ The prescriber signs in to Photon if they haven't already, and lands on the reco
 
 ## Building a link
 
-Ids alone are fine to write by hand. For anything more, use the [JavaScript client](/prescribe/embed/javascript):
+Links are just ids, so you can write them by hand. The [JavaScript client](/prescribe/embed/javascript) builds them too:
 
 ```ts
 import { photon } from "@photon-rx/core";
@@ -31,7 +44,7 @@ import { photon } from "@photon-rx/core";
 const ph = photon({ environment: "neutron", auth: { getToken } });
 
 ph.order.url({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" }, prescriptions: { add: [{ templateId: "YOUR_TEMPLATE_ID" }] } });
-// https://rx.neutron.health/order/AQf3…
+// https://rx.neutron.health/order?patient=pat_01M3WQQHRB1T0K1469KD18BAWX&template=YOUR_TEMPLATE_ID
 
 order.url(); // a live order you already have
 ```
@@ -42,6 +55,4 @@ For the iframe, use `frame()` in place of `url()`, from a client with your Appli
 
 An address that isn't a Prescribe page, such as an old or mistyped link, opens a new order.
 
-<Warning>
-  A link with patient details carries them in its token, so treat it like the details themselves. Prefer ids in links you send by email or text.
-</Warning>
+To start from details you hold, such as a patient Photon hasn't matched yet, sync them from your backend first ([patient sync](/network/patient)) and link the id Photon returns. `url()` refuses anything that isn't an id.
