@@ -34,7 +34,7 @@ Point your agent's MCP client at the Neutron server:
 https://ai.neutron.health
 ```
 
-{/* TODO(launch): switch to network.<env>.health/mcp once MCP moves. */}⚠️ MCP will move to `https://network.neutron.health/mcp`, which isn't live yet. The agent authenticates like any other caller. A backend agent uses a [machine token](/authentication#machine-tokens). An agent that runs in a prescriber's MCP client, such as Claude or ChatGPT, signs in as that prescriber. See [Connect a client](/network/mcp/connect).
+The agent authenticates like any other caller. A backend agent uses a [machine token](/authentication#machine-tokens). An agent that runs in a prescriber's MCP client, such as Claude or ChatGPT, signs in as that prescriber. See [Connect a client](/network/mcp/connect).
 
 ## 2. Intake, search, draft
 

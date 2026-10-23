@@ -7,7 +7,7 @@ sidebarTitle: "Overview"
 ---
 
 <Note>
-  MCP is open to every Neutron account. In production, it's in **private preview**: to get access, ask your Photon contact. These pages describe the tools as they are today, and they'll change as MCP moves onto the rebuilt Network API.
+  MCP is open to every Neutron account. In production, it's in **private preview**: to get access, ask your Photon contact. These pages describe the tools as they are today, and they'll change as MCP is rebuilt on the new Network API.
 </Note>
 
 Photon's MCP server gives an AI assistant or agent a few prescribing tools. A clinician can prescribe from Claude or ChatGPT, and your own agent can take intake and draft prescriptions for a prescriber to send.
@@ -43,10 +43,6 @@ flowchart LR
 | --- | --- | --- |
 | Neutron | `https://ai.neutron.health` | Every sandbox account |
 | Photon | `https://ai.photon.health` | Private preview. Ask your Photon contact. |
-
-{/* TODO(launch): switch to network.<env>.health/mcp once MCP moves. */}
-
-⚠️ MCP is moving to `https://network.neutron.health/mcp` (and `network.photon.health/mcp`). Until then, use the URLs above.
 
 The server speaks MCP over streamable HTTP and supports OAuth discovery. See [Connect a client](/network/mcp/connect).
 
