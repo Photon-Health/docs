@@ -19,7 +19,7 @@
 - Photon's service makes the decisions (matching, drug resolution, screening). Docs describe what to send and how to read `changes`, not client-side rules.
 - Call Photon a **service**, never a backend. "Backend" always means the customer's own service ("your backend").
 - Validate GraphQL examples against the live schema at `https://network.neutron.health/graphql` (introspection is open).
-- MCP runs at `ai.<env>.health` in both environments. It's open to every Neutron account. Production MCP is in private preview: label it that way, with access through a Photon contact. Its tools are documented as they are today and will change when MCP moves to `network.<env>.health/mcp`, which isn't live yet.
+- MCP runs at `ai.<env>.health` in both environments. It's open to every Neutron account. Production MCP is in private preview: label it that way, with access through a Photon contact. `ai.<env>.health` is the final URL: MCP isn't moving to `network.<env>.health/mcp`. Its tools are documented as they are today and may still change while it's in preview.
 - Mark anything documented ahead of launch (a URL that isn't live, a package that isn't published) with ⚠️ and a `{/* TODO(launch): … */}` comment. Search for `TODO(launch)` before going public, and remove each marker as it's fixed. Inline components inside table cells don't survive the editor, so use the plain ⚠️ there.
 - Permissions: `read:` lets a token read and draft. `write:` commits: `write:patient` adds and edits patients, `write:prescription` signs (machine tokens never have it), and `write:order` sends.
 

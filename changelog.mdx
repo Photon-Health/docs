@@ -18,7 +18,7 @@ Every page shows when it was last updated. This page says what's stable, and lis
 | [JavaScript client](/prescribe/embed/javascript) | Coming soon | ⚠️ `@photon-rx/core` isn't published to npm yet. |
 | [GraphQL](/network/graphql) | Stable in Neutron | ⚠️ Production, `network.photon.health/graphql`, isn't live yet. |
 | [Webhooks](/network/webhooks) | Stable | Signed with HMAC-SHA256. |
-| [MCP](/network/mcp) | Available in Neutron | `ai.neutron.health` in the sandbox. Production, `ai.photon.health`, is in private preview: ask your Photon contact for access. Tools will change when MCP moves to `network.<env>.health/mcp`. |
+| [MCP](/network/mcp) | Available in Neutron | `ai.neutron.health` in the sandbox. Production, `ai.photon.health`, is in private preview: ask your Photon contact for access. These URLs are final. Tools may still change. |
 | Elements | Deprecated | Deprecated on January 1, 2027, and fully sunset by mid-2027. See [Migrate from Elements](/prescribe/embed/migrate-from-elements). |
 
 {/* TODO(launch): update each ⚠️ row as it goes live, and add an entry below. */}
@@ -26,6 +26,10 @@ Every page shows when it was last updated. This page says what's stable, and lis
 Durable concepts, such as [records and the send](/architecture), [permissions](/authentication#permissions) and [plans](/use-cases), change rarely. Anything marked ⚠️ or **Preview** is still moving.
 
 ## Changes
+
+<Update label="October 23, 2026" tags={["Network"]}>
+  - [MCP](/network/mcp) stays at `ai.neutron.health` and `ai.photon.health`. It isn't moving to `network.<env>.health/mcp`, so connectors you've already set up keep working.
+</Update>
 
 <Update label="October 11, 2026" tags={["Prescribe"]}>
   - [Deep links](/prescribe/app/deep-links) and [iframe](/prescribe/embed/iframe) URLs carry Photon ids only, in plain query parameters: `patient`, `rx`, `template`, `med`, `order` and `org`. They never carry patient details. `url()` and `frame()` refuse anything that isn't an id, so sync details first and link by id.
