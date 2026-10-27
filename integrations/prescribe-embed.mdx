@@ -14,7 +14,7 @@ The simplest integration is entirely in your frontend. Your patient page gets a 
 ## 1. Install
 
 ```bash
-npm install @photon-rx/react
+npm install @photonhealth/react@rc
 ```
 
 {/* TODO(launch): publish to npm, then delete this line. */}
@@ -25,8 +25,8 @@ npm install @photon-rx/react
 Pass the patient as you have them. Photon finds the matching record or adds a new one.
 
 ```tsx Prescribe.tsx
-import { PhotonOrder, PhotonProvider } from "@photon-rx/react";
-import "@photon-rx/react/styles.css";
+import { PhotonOrder, PhotonProvider } from "@photonhealth/react";
+import "@photonhealth/react/styles.css";
 
 export function Prescribe({ patient, onDone }) {
   return (
@@ -82,7 +82,7 @@ If your details changed, pass the id together with them, and Photon updates only
 The [iframe](/prescribe/embed/iframe) does the same with a URL. Build it with the [JavaScript client](/prescribe/embed/javascript), which puts your `client_id` in it:
 
 ```ts
-import { photon } from "@photon-rx/core";
+import { photon } from "@photonhealth/client";
 
 const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
 iframe.src = ph.order.frame({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" } });

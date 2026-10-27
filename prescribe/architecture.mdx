@@ -11,16 +11,16 @@ The [Prescribe app](/prescribe/app) at `rx.neutron.health` is built from the sam
 flowchart TB
   App["Prescribe app<br/>pages, navigation, Photon's look"] --> React
   Embed["Your product<br/>your pages, your look"] --> React
-  React["@photon-rx/react<br/>PhotonProvider and the cards"] --> Core
-  Core["@photon-rx/core<br/>live objects, workflow rules, sign-in, links"] --> Network
+  React["@photonhealth/react<br/>PhotonProvider and the cards"] --> Core
+  Core["@photonhealth/client<br/>live objects, workflow rules, sign-in, links"] --> Network
   Network["Network GraphQL<br/>network.neutron.health/graphql"] --> Service["Photon's service<br/>matching, drug resolution, screening, routing"]
 ```
 
 | Layer | Package | What it does |
 | --- | --- | --- |
 | **App** | The Prescribe app | Pages, navigation and Photon's look. Nothing else. |
-| **Components** | `@photon-rx/react` | The cards, rendered through building blocks you can replace |
-| **Client** | `@photon-rx/core` | Sign-in, tokens, the API calls and the workflow rules |
+| **Components** | `@photonhealth/react` | The cards, rendered through building blocks you can replace |
+| **Client** | `@photonhealth/client` | Sign-in, tokens, the API calls and the workflow rules |
 | **API** | [Network](/network/overview) | Three upserts, `patient`, `prescription` and `order`, over GraphQL |
 
 Each layer uses only the one below it. The workflow rules live in the client, so the app, the iframe and your React page all behave the same.
@@ -41,7 +41,7 @@ So a [deep link](/prescribe/app/deep-links), an iframe and `<PhotonOrder />` in 
 
 ## The components
 
-`@photon-rx/react` has the three cards and `PhotonProvider`. The cards hold no prescribing logic. Each one binds to a live object from the client, renders its state, and calls its methods when the prescriber acts. Only screen state, such as which prescription is focused, stays in the card.
+`@photonhealth/react` has the three cards and `PhotonProvider`. The cards hold no prescribing logic. Each one binds to a live object from the client, renders its state, and calls its methods when the prescriber acts. Only screen state, such as which prescription is focused, stays in the card.
 
 The cards render only through building blocks (`Button`, `Input`, `Card`, `Alert` and the rest). The Prescribe app passes Photon's. Your app passes its own, or uses the stock ones, which inherit your page's styles. See [Styling](/prescribe/embed/styling).
 
@@ -49,7 +49,7 @@ The cards have no page chrome: no header, no fixed bars, no viewport breakpoints
 
 ## The client
 
-`@photon-rx/core` is where the work happens. It has no dependencies and runs in browsers and Node.
+`@photonhealth/client` is where the work happens. It has no dependencies and runs in browsers and Node.
 
 - **Live objects.** Each patient, prescription and order is one object per client, with `state`, `status` and `subscribe`. Every card that shows a record shares its object, so an edit in one card shows in all of them.
 - **Get, sync and update.** Each object calls its record's upsert in one of the [three ways](/architecture#get-sync-and-update). A card given an id gets, given fields syncs, and given both updates.

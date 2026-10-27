@@ -8,18 +8,20 @@ icon:
 ---
 
 ```bash
-npm install @photon-rx/react
+npm install @photonhealth/react@rc
 ```
 
-It includes `@photon-rx/core`, the [JavaScript client](/prescribe/embed/javascript), so you don't install that separately.
+It includes `@photonhealth/client`, the [JavaScript client](/prescribe/embed/javascript), so you don't install that separately.
+
+It's a [release candidate](/prescribe/embed/release-candidates) of 2.0.0 for now.
 
 {/* TODO(launch): publish to npm, then delete this line. */}
 
 ⚠️ Not published to npm yet.
 
 ```tsx
-import { PhotonOrder, PhotonProvider } from "@photon-rx/react";
-import "@photon-rx/react/styles.css";
+import { PhotonOrder, PhotonProvider } from "@photonhealth/react";
+import "@photonhealth/react/styles.css";
 
 export function Prescribe({ photonPatientId, onDone }) {
   return (

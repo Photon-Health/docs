@@ -9,7 +9,7 @@ The iframe is the full prescribing flow in a URL. It works with any frontend fra
 Build the URL with `frame()` from the [JavaScript client](/prescribe/embed/javascript), created with your Application `client_id`. `frame()` puts the `client_id` in the URL, and the iframe opens only from a URL that has one.
 
 ```ts
-import { photon } from "@photon-rx/core";
+import { photon } from "@photonhealth/client";
 
 const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
 
@@ -105,7 +105,7 @@ export function PrescribeFrame({ src, onSent }) {
 ```html HTML
 <iframe id="photon" title="Prescribe" style="width: 100%; border: 0"></iframe>
 <script type="module">
-  import { photon } from "@photon-rx/core";
+  import { photon } from "@photonhealth/client";
 
   const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
   const frame = document.getElementById("photon");

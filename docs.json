@@ -106,6 +106,7 @@
               "prescribe/embed/iframe",
               "prescribe/embed/javascript",
               "prescribe/embed/styling",
+              "prescribe/embed/release-candidates",
               "prescribe/embed/migrate-from-elements"
             ]
           }

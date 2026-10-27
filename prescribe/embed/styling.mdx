@@ -11,7 +11,7 @@ The React components ship unbranded. They inherit your page's font and colors, s
 Import the structural stylesheet once:
 
 ```tsx
-import "@photon-rx/react/styles.css";
+import "@photonhealth/react/styles.css";
 ```
 
 It sets layout only. Its rules have zero specificity, so your own CSS always wins.
@@ -35,7 +35,7 @@ The stylesheet also reads `--prx-success`, `--prx-warning`, `--prx-critical` and
 The cards draw everything through a small set of building blocks: `Stack`, `Card`, `Button`, `Input`, `Select`, `Alert`, `Badge` and a few more. Map any of them to your design system's components with `components`. The ones you leave out fall back to the defaults.
 
 ```tsx
-import { PhotonProvider } from "@photon-rx/react";
+import { PhotonProvider } from "@photonhealth/react";
 import { Button, Input } from "./design-system";
 
 <PhotonProvider
@@ -55,7 +55,7 @@ The `PhotonComponents` type lists every building block and its props.
 If your app uses Tailwind, use the stock Tailwind set:
 
 ```tsx
-import { tailwindComponents } from "@photon-rx/react/tailwind";
+import { tailwindComponents } from "@photonhealth/react/tailwind";
 
 <PhotonProvider clientId="YOUR_CLIENT_ID" environment="neutron" components={tailwindComponents}>
 ```
@@ -63,5 +63,5 @@ import { tailwindComponents } from "@photon-rx/react/tailwind";
 These are class strings only, using the default theme. Add the package to Tailwind's sources so the classes are generated:
 
 ```css
-@source "../node_modules/@photon-rx/react/dist";
+@source "../node_modules/@photonhealth/react/dist";
 ```

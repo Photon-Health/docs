@@ -1,0 +1,72 @@
+---
+title: "Release candidates"
+description: "Install @photonhealth/react and @photonhealth/client from npm as 2.0.0 release candidates."
+icon: "flask"
+---
+
+The [React components](/prescribe/embed/react) and the [JavaScript client](/prescribe/embed/javascript) are on npm as release candidates of 2.0.0. They're the packages the Prescribe app is built on, and you can build with them before the stable release.
+
+| Package | What it is | Docs |
+| --- | --- | --- |
+| `@photonhealth/react` | `PhotonProvider` and the `PhotonOrder`, `PhotonPatient` and `PhotonPrescription` cards. The cards render through building blocks you can swap for your own components. | [README on npm](https://www.npmjs.com/package/@photonhealth/react) |
+| `@photonhealth/client` | `photon({ environment, auth })`: patients, prescriptions and orders as live objects, with `get`, `sync` and `update`. It has no dependencies and runs in browsers and Node. | [README on npm](https://www.npmjs.com/package/@photonhealth/client) |
+
+{/* TODO(TECH-1126): once Photon-Health/core is public, link the READMEs on GitHub too. */}
+
+## Install
+
+Release candidates are published under npm's `rc` tag, as `2.0.0-rc.N`.
+
+<CodeGroup>
+
+```bash React
+npm install @photonhealth/react@rc
+```
+
+```bash JavaScript client only
+npm install @photonhealth/client@rc
+```
+
+</CodeGroup>
+
+`@photonhealth/react` includes the matching `@photonhealth/client`, so you don't install that separately. Include `@rc` until 2.0.0 is released.
+
+{/* TODO(launch): publish 2.0.0-rc.1 to npm, then delete this line. */}
+
+⚠️ Not published to npm yet.
+
+## Start in the sandbox
+
+Use `neutron` while you build. See [Environments](/environments).
+
+<CodeGroup>
+
+```tsx React
+import { PhotonOrder, PhotonProvider } from "@photonhealth/react";
+import "@photonhealth/react/styles.css";
+
+<PhotonProvider clientId="YOUR_CLIENT_ID" environment="neutron">
+  <PhotonOrder patient="pat_…" onSent={() => closeDialog()} />
+</PhotonProvider>;
+```
+
+```ts JavaScript
+import { photon } from "@photonhealth/client";
+
+const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
+const patient = await ph.patient.get("pat_…");
+```
+
+</CodeGroup>
+
+The READMEs cover the rest: sign-in, live objects, errors, each card's props and mapping your own components. These docs cover the same packages in [React components](/prescribe/embed/react), [JavaScript client](/prescribe/embed/javascript) and [Styling](/prescribe/embed/styling).
+
+## What a release candidate means
+
+- Each `2.0.0-rc.N` can change before 2.0.0. Pin an exact version, such as `2.0.0-rc.1`, to choose when you take changes.
+- 2.0.0 will be published under npm's `latest` tag. Then you can drop `@rc`.
+- `@photonhealth/client/testing`, the helpers for your own tests, may change before 2.0.0.
+
+<Note>
+  `@photonhealth/react` 1.x is an earlier, unrelated package with a different API. 2.0.0 isn't an upgrade from it. If you use 1.x, see the [migration guide](/prescribe/embed/migrate-from-elements).
+</Note>
