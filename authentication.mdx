@@ -120,10 +120,10 @@ curl https://network.neutron.health/graphql \
   --request POST \
   --header "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   --header "Content-Type: application/json" \
-  --data '{ "query": "{ ping }" }'
+  --data '{ "query": "{ me { __typename ... on MachineCaller { organizationId permissions } ... on ProviderCaller { organizationId permissions } } }" }'
 ```
 
-`ping` is a health check that touches no records. Use it to test a token.
+`me` touches no records. It says what the token authenticated as (`MachineCaller` for a machine token, `ProviderCaller` for a prescriber), its organization and its permissions. Use it to test a token. `ping` still works, but is deprecated and will be removed after January 31, 2027.
 
 ## When a token is refused
 
@@ -133,13 +133,15 @@ A missing, invalid or expired token fails the whole request. The response has a 
 { "errors": [{ "message": "An authentication token is not present", "extensions": { "code": "EMPTY_AUTHORIZATION_HEADER" } }] }
 ```
 
-A valid token that isn't allowed to do something gets an `UnauthorizedError` in the mutation's result. For example, a machine token that tries to sign gets one:
+A valid token that isn't allowed to do something gets an `OperationError` with `type: UNAUTHORIZED` in the mutation's result. For example, a machine token that tries to sign gets one:
 
 ```json
 {
-  "__typename": "UnauthorizedError",
+  "__typename": "OperationError",
+  "type": "UNAUTHORIZED",
   "code": "PRESCRIPTION_SIGNING_UNAUTHORIZED",
-  "message": "You are not authorized to sign prescriptions."
+  "message": "You are not authorized to sign prescriptions.",
+  "retryable": false
 }
 ```
 

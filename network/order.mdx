@@ -12,6 +12,7 @@ order(order: OrderInput!, metadata: RequestMetadata!): OrderResult!
 | --- | --- | --- |
 | **Get** | `{ id }` | The order, with its patient, prescriptions and pharmacy. Nothing changes. |
 | **Sync** | `{ patient, prescriptions }` | The patient's draft order with these prescriptions added, or a new draft |
+| **Sync**, no patient | `{ prescriptions }` | A new draft for the prescriptions' patient. They must all be for the same patient. It never continues an existing draft. |
 | **Update** | `{ id, prescriptions?, pharmacy?, state? }` | That order, with only those fields changed |
 | **Send** | `{ id, state: SUBMITTED }` | The order, submitted, and Photon texts the patient. Needs [`write:order`](/authentication#permissions). Drafting needs only `read:order`. |
 
@@ -24,10 +25,10 @@ DRAFT ──▶ SUBMITTED ──▶ CANCELED
 | State | Meaning |
 | --- | --- |
 | `DRAFT` | The default. Editable, and nothing goes out. A draft can hold unsigned prescriptions. |
-| `SUBMITTED` | Sent. After this, the only changes allowed are switching the pharmacy or canceling. |
+| `SUBMITTED` | Sent. After this, the only changes allowed are [moving it to another pharmacy](#moving-a-sent-order) or canceling. |
 | `CANCELED` | Canceled. Only a `SUBMITTED` order can be canceled. |
 
-To send an order, set `state: SUBMITTED`. Photon checks first, and if anything is missing it rejects the send with a change in `unappliedChanges`:
+To send an order, set `state: SUBMITTED`. Photon checks first, and if anything is missing it rejects the send with a change in `changes`:
 
 - every prescription on the order is signed
 - every prescription belongs to the order's patient
@@ -50,11 +51,12 @@ mutation Order($order: OrderInput!, $metadata: RequestMetadata!) {
         screeningAlerts { severity type description involvedEntities { name } }
         pharmacy { id name }
         exceptions { type message }
+        fulfillment { state }
       }
-      unappliedChanges { key status severity reason options { displayName argument value } }
+      changes { key status severity reason options { displayName argument value } }
     }
     ... on AmbiguousOrderMatch { reason candidates { id prescriptions { id treatment { name } } pharmacy { name } } }
-    ... on OperationError { code message }
+    ... on OperationError { type code message }
   }
 }
 ```
@@ -102,7 +104,7 @@ An order screens its prescriptions together. `screeningAlerts` on the order incl
 | `externalId` | `String` | Your own id for the order, scoped to your organization |
 | `patient` | `PatientReferenceInput` | Usually `{ id }` |
 | `prescriptions` | `{ add, remove, none }` | Each by `id`, or by `externalId`. Removing a prescription takes it off the order but doesn't cancel it. |
-| `pharmacy` | `{ pharmacy }` or `{ none: true }` | Optional. See below. |
+| `pharmacy` | `{ pharmacy, reason }` or `{ none: true }` | Optional. See [Pharmacies](#pharmacies). `reason` is only for [moving a sent order](#moving-a-sent-order). |
 | `state` | `DRAFT`, `SUBMITTED`, `CANCELED` | |
 
 ## Pharmacies
@@ -113,10 +115,10 @@ You don't need to choose a pharmacy. With none set, the patient chooses one from
 | --- | --- |
 | `id` | Exactly that pharmacy |
 | `name` | Case-insensitive, partial: `"walgreens"` matches. Typos don't match. |
-| `near` | One of `latLong` (with `radiusMiles` to filter, or without it to sort by distance) or `address` (sorts by distance). `text` isn't supported yet. |
+| `near` | One of `latLong` (with `radiusMiles` to filter, or without it to sort by distance), `address` (sorts by distance) or `text`, a place such as `"Brooklyn, NY"`, searched within 25 miles |
 | `fulfillmentType` | `PICK_UP` or `MAIL_ORDER` |
 
-The fields combine to narrow the results. One match is applied directly. Several come back as an `AMBIGUOUS` change with up to 20 options, each with pricing `offers` where available. Resend with the chosen pharmacy's `id`. To unassign a pharmacy, send `pharmacy: { none: true }`.
+The fields combine to narrow the results. Only an `id` sets the pharmacy directly. Any other search comes back as an `AMBIGUOUS` change for you to pick from, even with one match (`CONFIRMATION_REQUIRED`). Several matches come back with up to 20 options. Each option's `entity` is the `Pharmacy`, with pricing `offers` where available. Resend with the chosen pharmacy's `id`. To unassign a pharmacy, send `pharmacy: { none: true }`.
 
 ```json
 "pharmacy": {
@@ -128,6 +130,69 @@ The fields combine to narrow the results. One match is applied directly. Several
 }
 ```
 
+### Listing pharmacies for an order
+
+To show pharmacies before you choose one, read the order through the [`orders` query](/network/graphql#orders) and select `availablePharmacies`. It returns the same choices as an ambiguous pharmacy, a page at a time, each priced against the order's prescriptions, including discount-card prices:
+
+```graphql
+query OrderPharmacies($filter: OrdersFilterInput) {
+  orders(filter: $filter, limit: 1) {
+    ... on OrdersPayload {
+      orders {
+        id
+        availablePharmacies(pharmacy: { near: { text: "Brooklyn, NY" } }, page: { limit: 20, offset: 0 }) {
+          totalCount
+          nextOffset
+          options {
+            displayName
+            value
+            entity { ... on Pharmacy { id name address { street1 city state } isOpen offers { source priceSummary { totalAmount } } } }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+`pharmacy` takes the same reference as the `order` mutation. Leave it out for the sponsored pharmacies that have offers for this order. Unless you search by `id`, the first page also includes sponsored pharmacies the search didn't match, which don't count toward `limit`. `page.limit` defaults to 20 and is capped at 100. `nextOffset` is null on the last page.
+
+`availablePharmacies` is null in the `order` mutation's response. Only `orders` fills it in.
+
+Each `Pharmacy` also has its `phone`, `logo`, weekly `hours` and, relative to a time you pass or now, `isOpen` and `nextEvents`.
+
+## Moving a sent order
+
+To move a `SUBMITTED` order to a different pharmacy, send the new `pharmacy` with a `reason`:
+
+```json
+"pharmacy": {
+  "pharmacy": { "id": "phr_01GA9HPXGSXZYRBZT6TDCVT3QT" },
+  "reason": { "type": "OUT_OF_STOCK" }
+}
+```
+
+`reason.type` is one of `CLOSER_LOCATION`, `PHARMACY_CLOSED`, `OUT_OF_STOCK`, `FILL_TIME_TOO_SLOW`, `INSURANCE_NOT_ACCEPTED`, `PRICE_TOO_HIGH`, `WRONG_PHARMACY_SELECTED` or `OTHER`. `OTHER` needs a `note`. A `reason` is accepted only on a `SUBMITTED` order that already has a pharmacy, and only with `pharmacy`.
+
+## Fulfillment
+
+Once an order is sent to a pharmacy, `fulfillment.state` says how far the pharmacy has gotten. `fulfillment` is null until then, so it's always null on a draft. `state` is null until the pharmacy reports one.
+
+| `state` | Means |
+| --- | --- |
+| `CREATED` | Created, but not sent to the pharmacy yet |
+| `SENT` | Sent to the pharmacy, which hasn't confirmed it |
+| `RECEIVED` | The pharmacy confirmed it |
+| `PROCESSING` | The pharmacy is working on it |
+| `FILLING` | Being prepared for shipping |
+| `READY` | Ready for the patient to pick up |
+| `PICKED_UP` | The patient picked it up |
+| `SHIPPED` | On its way to the patient |
+| `DELIVERED` | Delivered to the patient |
+| `CANCELED` | Canceled before it was filled |
+
+Pick-up orders move through `READY` to `PICKED_UP`. Mail orders move through `FILLING` and `SHIPPED` to `DELIVERED`. To hear about each step as it happens, use [webhooks](/network/webhooks).
+
 ## Exceptions
 
 Once an order is sent, `exceptions` lists problems that need attention, such as `PHARMACY_UNREACHABLE`, `PHARMACY_NEEDS_INSURANCE_INFO` or `DOCTOR_NOT_LICENSED_IN_STATE`. A draft never has exceptions. See [Reference](/network/reference#order-exceptions) for every type.
@@ -138,11 +203,13 @@ Once an order is sent, `exceptions` lists problems that need attention, such as 
 fragment OrderFields on Order {
   id
   state
-  patient { ... on Patient { id } ... on UpstreamServiceError { code message retryable } }
+  patient { ... on Patient { id } ... on OperationError { type code message retryable } }
+  organization { ... on Organization { id } ... on OperationError { type code message retryable } }
   prescriptions { id treatment { id name } signing { state } }
   screeningAlerts { severity type category description involvedEntities { id name } }
   pharmacy { id name address { street1 street2 city state postalCode } fulfillmentType }
   exceptions { id type message createdAt }
+  fulfillment { state }
 }
 ```
 

@@ -31,9 +31,14 @@ npm install @photonhealth/client@rc
 
 `@photonhealth/react` includes the matching `@photonhealth/client`, so you don't install that separately. Include `@rc` until 2.0.0 is released.
 
-{/* TODO(launch): publish 2.0.0-rc.1 to npm, then delete this line. */}
+The latest release candidate is `2.0.0-rc.1`, for both packages.
 
-⚠️ Not published to npm yet.
+{/* TODO(launch): when the next release candidate is published, update the version above and remove this list and the matching ⚠️ notes on the React and JavaScript pages. */}
+
+The next release candidate adds:
+
+- **Machine credentials** for the JavaScript client, so your backend can call it with its own client id and secret. See [On your backend](/prescribe/embed/javascript#on-your-backend).
+- **Sig options**: `rx.loadSigs()` in the client, and suggested sigs in `PhotonPrescription`. See [Sig options](/network/prescription#sig-options).
 
 ## Start in the sandbox
 

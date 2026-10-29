@@ -32,10 +32,10 @@ mutation DraftPrescription($prescription: PrescriptionInput!, $metadata: Request
     __typename
     ... on PrescriptionPayload {
       prescription { id treatment { name } screeningAlerts { severity type description } }
-      unappliedChanges { key status reason }
+      changes { key status reason }
     }
     ... on AmbiguousPrescriptionMatch { reason candidates { id instructions } }
-    ... on OperationError { code message }
+    ... on OperationError { type code message }
   }
 }
 ```
@@ -64,10 +64,10 @@ mutation DraftOrder($order: OrderInput!, $metadata: RequestMetadata!) {
     __typename
     ... on OrderPayload {
       order { id state prescriptions { id } }
-      unappliedChanges { key status reason }
+      changes { key status reason }
     }
     ... on AmbiguousOrderMatch { reason candidates { id prescriptions { id } } }
-    ... on OperationError { code message }
+    ... on OperationError { type code message }
   }
 }
 ```

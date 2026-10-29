@@ -17,6 +17,7 @@ For every type and field, introspect `https://network.neutron.health/graphql` wi
 | `alg_` | Allergen |
 | `phr_` | Pharmacy |
 | `org_` | Organization |
+| `usr_` | User, such as a prescription's `prescriber` |
 
 ## Patients
 
@@ -24,6 +25,7 @@ For every type and field, introspect `https://network.neutron.health/graphql` wi
 | --- | --- |
 | `Sex` | `MALE`, `FEMALE`, `UNKNOWN` |
 | `MedicationHistoryStatus` | `ACTIVE` (taking it now), `HISTORICAL` (took it in the past), `UNKNOWN` |
+| `ListDocumentationStatus` | `NOT_DOCUMENTED`, `NO_KNOWN_CONFIRMED`, `DOCUMENTED`. See [Reading lists](/network/patient#reading-lists). |
 
 ## Prescriptions
 
@@ -33,6 +35,7 @@ For every type and field, introspect `https://network.neutron.health/graphql` wi
 | `ScreeningAlertType` | `DRUG`, `ALLERGEN`, `CONDITION` |
 | `ScreeningSeverity` | `MINOR`, `MODERATE`, `MAJOR`. None of them blocks. See [Screening](/network/screening). |
 | `CatalogEntityKind` | `MEDICATION`, `MEDICAL_EQUIPMENT`, `COMPOUND`, `SUBSTANCE` |
+| `StructuredSigNoticeKind` | `MISSING_INPUT`, `NO_MATCH`, `CONTRAINDICATED`, `NOT_APPLICABLE`, `DEFAULT_VALUE_USED`, `OTHER`. See [Sig options](/network/prescription#sig-options). |
 
 ## Orders
 
@@ -41,6 +44,9 @@ For every type and field, introspect `https://network.neutron.health/graphql` wi
 | `OrderState` | `DRAFT`, `SUBMITTED`, `CANCELED`. See [States](/network/order#states). |
 | `FulfillmentType` | `PICK_UP`, `MAIL_ORDER` |
 | `OfferPriceType` | `CASH`, `INSURANCE`, `MEMBERSHIP` |
+| `OrderFulfillmentState` | `CREATED`, `SENT`, `RECEIVED`, `PROCESSING`, `FILLING`, `READY`, `PICKED_UP`, `SHIPPED`, `DELIVERED`, `CANCELED`. See [Fulfillment](/network/order#fulfillment). |
+| `OrderRerouteReasonType` | `CLOSER_LOCATION`, `PHARMACY_CLOSED`, `OUT_OF_STOCK`, `FILL_TIME_TOO_SLOW`, `INSURANCE_NOT_ACCEPTED`, `PRICE_TOO_HIGH`, `WRONG_PHARMACY_SELECTED`, `OTHER`. See [Moving a sent order](/network/order#moving-a-sent-order). |
+| `DayOfWeek` | `SUNDAY` through `SATURDAY`, on a pharmacy's `hours` |
 
 ### Order exceptions
 
@@ -79,9 +85,15 @@ For every type and field, introspect `https://network.neutron.health/graphql` wi
 | `COST_SAVINGS` | A cheaper equivalent exists |
 | `PRODUCT_PREFERENCE` | A specific brand or manufacturer may matter |
 | `OBSOLETE_REFERENCE` | The code or product is retired |
-| `CONFIRMATION_REQUIRED` | It would work, but needs explicit confirmation |
+| `CONFIRMATION_REQUIRED` | One thing fits, but not exactly, so confirm it by its id |
 
 `MatchReasonType` says why an option matched: `EXACT_NAME_MATCH`, `FUZZY_NAME_MATCH`, `RXNORM_CODE_MATCH`, `DRUG_CLASS_MATCH`, `NAME`, `ADDRESS`, `LAT_LONG`, `FULFILLMENT_TYPE`, `OPEN_AT`, `EMAIL`, `PHONE`, `NAME_AND_DOB`, `PARTIAL_NAME` or `DATE_OF_BIRTH`.
+
+## Errors
+
+| Enum | Values |
+| --- | --- |
+| `OperationErrorType` | `UNAUTHORIZED`, `UPSTREAM_SERVICE`. See [Errors](/network/errors#2-result-types). |
 
 ## Metadata
 

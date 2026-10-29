@@ -33,10 +33,10 @@ const SYNC_PATIENT = `
       __typename
       ... on PatientPayload {
         patient { ... on Patient { id } }
-        unappliedChanges { key status reason }
+        changes { key status reason }
       }
       ... on AmbiguousPatientMatch { reason candidates { id firstName lastName dateOfBirth } }
-      ... on OperationError { code message }
+      ... on OperationError { type code message retryable }
     }
   }`;
 
@@ -101,15 +101,15 @@ switch (result.__typename) {
   case "PatientPayload":
     if (result.patient?.id) await savePhotonId(ourPatient.id, result.patient.id);
     // anything Photon couldn't apply, such as an allergy name that matched several products
-    for (const change of result.unappliedChanges) log(change.key, change.status, change.reason);
+    for (const change of result.changes.filter((c) => c.status !== "APPLIED")) log(change.key, change.status, change.reason);
     break;
   case "AmbiguousPatientMatch":
     // Photon isn't sure which patient this is. Don't guess: leave it unlinked and
     // let the prescriber pick in Prescribe, or match one of result.candidates yourself.
     break;
   default:
-    // UnauthorizedError or UpstreamServiceError (retry if retryable)
-    throw new Error(`${result.code}: ${result.message}`);
+    // OperationError: UNAUTHORIZED, or UPSTREAM_SERVICE (retry if retryable)
+    throw new Error(`${result.type} ${result.code}: ${result.message}`);
 }
 ```
 

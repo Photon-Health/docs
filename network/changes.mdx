@@ -4,12 +4,17 @@ description: "How every response reports what Photon did, and how to answer when
 icon: "code-compare"
 ---
 
-Every payload reports what happened to each thing you sent, split into two lists:
+Every payload has one `changes` list: an entry for each thing you sent, whether or not it was saved. Each change's `status` says which:
 
-- **`appliedChanges`**: saved.
-- **`unappliedChanges`**: not saved. Its `status` is `REJECTED` (fix the input) or `AMBIGUOUS` (pick an option).
+- **`APPLIED`**: saved.
+- **`REJECTED`**: not saved. Fix the input.
+- **`AMBIGUOUS`**: not saved. Pick one of its `options`.
 
-An empty `unappliedChanges` means everything you sent took effect.
+When every change is `APPLIED`, everything you sent took effect.
+
+```graphql
+changes { key label status severity category reason options { displayName argument value } after { displayName argument value } }
+```
 
 ## A change
 
@@ -19,11 +24,28 @@ An empty `unappliedChanges` means everything you sent took effect.
 | `label` | A human-readable name for it |
 | `status` | `APPLIED`, `REJECTED` or `AMBIGUOUS` |
 | `severity` | `INFO` (no action needed), `ADVISORY` (worth showing, doesn't block) or `BLOCKING` (must be resolved) |
-| `category` | Why it matters: `DISAMBIGUATION`, `MISSING_INPUT`, `INVALID_INPUT`, `SAFETY`, `CODING_SPECIFICITY`, `COST_SAVINGS` and [others](/network/reference#changes). It can be null. |
+| `category` | Why it matters: `DISAMBIGUATION`, `CONFIRMATION_REQUIRED`, `MISSING_INPUT`, `INVALID_INPUT`, `SAFETY`, `CODING_SPECIFICITY`, `COST_SAVINGS` and [others](/network/reference#changes). It can be null. |
 | `operation` | `ADDED`, `MODIFIED` or `REMOVED` |
 | `reason` | An explanation to show a person. Don't parse it. |
-| `options` | What you can do about it. Always present for `AMBIGUOUS`, and sometimes present on others. |
-| `detail` | Before and after values (`FieldChangeDetail`), or what a name resolved to (`EntityResolutionDetail`, `PharmacyResolutionDetail`) |
+| `options` | What you can do about it, as choices. Always present for `AMBIGUOUS`, and sometimes present on others. |
+| `before` | The value it replaced, as a choice. Null for `ADDED`, or when the old value isn't known. |
+| `after` | What the input resolved to, as a choice, whatever the `status`. Null for `REMOVED`, or when the input didn't resolve to one value (see `options`). |
+
+`after` is set even on a rejected change. A rejected call returns no record, so `after` is the only place that shows what each input resolved to. Resend its `argument` and `value` to skip resolving it again.
+
+## Choices
+
+`options`, `before` and `after` are all `Choice`s. A choice says what it is and how to send it:
+
+| Field | Description |
+| --- | --- |
+| `displayName` | Its name, to show a person |
+| `operation` | The mutation to call, such as `prescription` |
+| `argument` | The input path to set, such as `treatment.id` or `clinical.allergies.add.0.id`. Null when the choice means calling a different mutation. |
+| `value` | The value to set at `argument` |
+| `matchReasons` | Why it matched, and how confidently: `type`, `label`, `confidence` and, for a distance, `value`. Empty for an exact id. |
+| `entity` | The record it picks, when it picks one: a `Treatment`, `Allergy`, `Diagnosis`, `Pharmacy`, `PatientCandidate`, `Prescription` or `MedicationCandidate` |
+| `reason` | Why it's offered, beyond the change's own `reason` |
 
 ## Answering a choice
 
@@ -55,9 +77,11 @@ When a name fits several things (a drug, an allergen, a pharmacy), Photon doesn'
 }
 ```
 
-An option can also carry `entity`, the record it picks. For a drug, that's a `Treatment` with its brand, form and strength in separate fields (see [Choosing the drug](/network/prescription#choosing-the-drug)).
+For a drug, an option's `entity` is a `Treatment` with its brand, form and strength in separate fields (see [Choosing the drug](/network/prescription#choosing-the-drug)).
 
 Each option says exactly what to do: in the input of the `operation` mutation, set the `argument` path to `value`, then resend. Here that means resending with `treatment: { id: "med_01M3D93NFGCZJPQ3XW3AF7578G" }` in place of the name.
+
+**A single match can ask too.** A name that matches one thing, but not exactly, comes back `AMBIGUOUS` with one option and the `CONFIRMATION_REQUIRED` category. A drug, allergen or diagnosis name attaches on its own only when it's exactly that entry's name. A pharmacy search never picks a pharmacy on its own, even with one match: only a pharmacy `id` does.
 
 **Who picks:** pick automatically only when there's a single option that matched exactly (`EXACT_NAME_MATCH` or `RXNORM_CODE_MATCH`). Otherwise, show the options to a person, or apply your own deterministic rule. Prescribe and the [JavaScript client](/prescribe/embed/javascript) follow this same rule.
 
@@ -67,7 +91,7 @@ Each option says exactly what to do: in the input of the `operation` mutation, s
 
 ## Rules
 
-- **A call is all or nothing.** If any input is `BLOCKING`, nothing is saved. Inputs that were fine come back `REJECTED`, with a `reason` pointing at the input that failed. Fix that input and resend the whole call.
-- **The record can be null.** When nothing was saved, `patient`, `prescription` or `order` may be `null`. The cause is in `unappliedChanges`.
+- **A call is all or nothing.** If any change is `REJECTED` or `AMBIGUOUS`, nothing is saved. Inputs that were fine come back `REJECTED`, with a `reason` pointing at the input that failed. Fix that input and resend the whole call.
+- **The record can be null.** When nothing was saved, `patient`, `prescription` or `order` may be `null`. The cause is in `changes`.
 - **Applied changes can carry advice.** An `APPLIED` change with `ADVISORY` severity was saved, but its options suggest something better, such as a more specific diagnosis code.
 - **Ambiguous records are separate.** When Photon can't tell which existing patient, draft or order you meant, the whole result is an `Ambiguous…Match` with `candidates`, not a change. Resend with the candidate's `id`.
