@@ -21,7 +21,7 @@ Network is the API underneath everything in Photon. It has three upserts, `patie
 
 ## Three upserts
 
-Network has no queries. Each record has one mutation, and how you call it decides what it does:
+Each record has one mutation, and how you call it decides what it does:
 
 | | Send | Photon |
 | --- | --- | --- |
@@ -35,13 +35,14 @@ Network has no queries. Each record has one mutation, and how you call it decide
 | `prescription(prescription:, metadata:)` | Prescription `rx_…` | [Prescription](/network/prescription) |
 | `order(order:, metadata:)` | Order `ord_…` | [Order](/network/order) |
 
+Two queries read without changing anything: `me`, to check a token, and `orders`, to list your organization's orders. See [Queries](/network/graphql#queries).
+
 ## Photon decides, then tells you
 
 Send what you know, and Photon does the matching, resolution and screening, so your code doesn't have to. Each response reports what Photon did:
 
 - **The record**, as saved.
-- **`appliedChanges`**: what was written.
-- **`unappliedChanges`**: what wasn't, and why. When Photon isn't sure, this lists the options to pick from.
+- **`changes`**: an entry for each thing you sent. Its `status` says whether it was written (`APPLIED`), and if not, why (`REJECTED`), or which options to pick from when Photon isn't sure (`AMBIGUOUS`).
 
 See [Changes and choices](/network/changes).
 

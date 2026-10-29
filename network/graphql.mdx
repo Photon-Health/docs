@@ -55,13 +55,58 @@ Each mutation returns a union, so always select `__typename` and branch on it:
 | --- | --- |
 | `PatientPayload`, `PrescriptionPayload`, `OrderPayload` | The call ran. Read the record and its [changes](/network/changes). |
 | `AmbiguousPatientMatch`, `AmbiguousPrescriptionMatch`, `AmbiguousOrderMatch` | Photon couldn't tell which existing record you meant, so nothing was saved. Resend with the `id` of one of the `candidates`. |
-| `UnauthorizedError` | The token isn't allowed to do this. |
-| `UpstreamServiceError` | A Photon service failed. Retry if `retryable` is true. |
-
-Both errors implement `OperationError`, so you can select them together:
+| `OperationError` | The call failed. `type` is `UNAUTHORIZED` (the token isn't allowed to do this) or `UPSTREAM_SERVICE` (a Photon service failed: retry if `retryable` is true). |
 
 ```graphql
-... on OperationError { code message }
+... on OperationError { type code message retryable }
 ```
 
 See [Errors](/network/errors) for the full checklist.
+
+## Queries
+
+Besides the three mutations, two queries read without changing anything.
+
+### `me`
+
+Who the token authenticated as, and what it can do. Use it to check a token before you start.
+
+```graphql
+query {
+  me {
+    __typename
+    ... on MachineCaller { organizationId permissions }
+    ... on ProviderCaller { organizationId permissions }
+    ... on PatientCaller { patientId }
+  }
+}
+```
+
+A machine token is a `MachineCaller`, and a prescriber's user token is a `ProviderCaller`. `permissions` lists its [scopes](/authentication#permissions).
+
+### `orders`
+
+Your organization's orders, newest first, drafts included. It needs `read:order`, and returns no orders without it.
+
+```graphql
+query Orders($filter: OrdersFilterInput) {
+  orders(filter: $filter, limit: 25) {
+    __typename
+    ... on OrdersPayload { orders { id state fulfillment { state } prescriptions { id treatment { name } } } }
+    ... on AmbiguousPatientMatch { reason candidates { id firstName lastName dateOfBirth } }
+    ... on OperationError { type code message }
+  }
+}
+```
+
+| Argument | Description |
+| --- | --- |
+| `filter.patient` | Only this patient's orders. Usually `{ id }`. Details that match several patients return `AmbiguousPatientMatch`. Details that match none return no orders. |
+| `filter.state` | `DRAFT` for drafts only, `SUBMITTED` for sent orders that aren't canceled, or `CANCELED`. Leave it out for drafts and every sent order, canceled ones included. |
+| `limit` | Defaults to 25, and is capped at 100 |
+
+`orders` is also the only place an order's [`availablePharmacies`](/network/order#pharmacies) are filled in.
+
+<Note>
+  `ping` is deprecated and will be removed after January 31, 2027. Use `me` instead.
+</Note>

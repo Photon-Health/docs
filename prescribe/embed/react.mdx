@@ -13,11 +13,7 @@ npm install @photonhealth/react@rc
 
 It includes `@photonhealth/client`, the [JavaScript client](/prescribe/embed/javascript), so you don't install that separately.
 
-It's a [release candidate](/prescribe/embed/release-candidates) of 2.0.0 for now.
-
-{/* TODO(launch): publish to npm, then delete this line. */}
-
-⚠️ Not published to npm yet.
+It's a [release candidate](/prescribe/embed/release-candidates) of 2.0.0 for now. It needs React 18.2 or 19.
 
 ```tsx
 import { PhotonOrder, PhotonProvider } from "@photonhealth/react";
@@ -101,6 +97,12 @@ One prescription: the drug, sig and dispense, screening, and **Sign**. A signed 
 | `onPrescription` | `(rx) => void` | The prescription once Photon has a record, and again when it's saved or signed. |
 | `onSigned` | `(rx) => void` | Called once, when it's signed on this card. |
 
+Once the drug and patient are known, the sig field offers [sig options](/network/prescription#sig-options) for them. The prescriber can pick one or type their own.
+
+{/* TODO(launch): remove once sig options are in a published @photonhealth/react release candidate (after 2.0.0-rc.1). */}
+
+⚠️ Sig options aren't in a published release candidate yet. They arrive after `2.0.0-rc.1`.
+
 ## Events
 
 Every event gets the live object. `obj.id` is the record's id, and `obj.state` is the record itself, with the same fields as the [API](/network/overview). Events fire when Photon has a record and when that record changes. They don't fire while a save is in flight.
@@ -119,3 +121,14 @@ Every event gets the live object. `obj.id` is the record's id, and `obj.state` i
 ## Live objects as props
 
 Any record prop also takes a live object from the [JavaScript client](/prescribe/embed/javascript). The card uses it as is and doesn't fetch it again, and anything else holding the same object sees every change.
+
+To render a live object in your own components, `useLive(obj)` returns its current snapshot and re-renders on every change:
+
+```tsx
+import { useLive } from "@photonhealth/react";
+
+function OrderStatus({ order }) {
+  const snapshot = useLive(order);
+  return <span>{snapshot?.state?.state ?? "New"}</span>;
+}
+```

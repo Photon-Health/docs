@@ -35,10 +35,10 @@ mutation Prescription($prescription: PrescriptionInput!, $metadata: RequestMetad
         screeningAlerts { severity type description }
         signing { state contentHash }
       }
-      unappliedChanges { key status severity reason options { displayName argument value } }
+      changes { key status severity reason options { displayName argument value } }
     }
     ... on AmbiguousPrescriptionMatch { reason candidates { id instructions } }
-    ... on OperationError { code message }
+    ... on OperationError { type code message }
   }
 }
 ```
@@ -87,15 +87,16 @@ mutation Prescription($prescription: PrescriptionInput!, $metadata: RequestMetad
 
 ## Choosing the drug
 
-Identify the treatment by exactly one of `id`, `rxNormId`, `ndc`, `upc` or `name`, or start from a `templateId`, which fills in the drug, sig and dispense. An `id` resolves exactly. A name that fits several products comes back as an `AMBIGUOUS` change whose options are the candidate drugs. Resend with the chosen option's `value` (a `treatment.id`). See [Changes and choices](/network/changes).
+Identify the treatment by exactly one of `id`, `rxNormId`, `ndc`, `upc` or `name`, or start from a `templateId`, which fills in the drug, sig and dispense. An `id` resolves exactly. A name that fits several products comes back as an `AMBIGUOUS` change whose options are the candidate drugs. So does a name that fits one product without being its exact name, with that one option to confirm (`CONFIRMATION_REQUIRED`). Resend with the chosen option's `value` (a `treatment.id`). See [Changes and choices](/network/changes).
 
 Syncing without a patient is a safe lookup that never creates anything. Use it to resolve the drug before you draft.
 
 Each drug option's `entity` is the `Treatment` it picks, in parts. Use them to show the choices as a prescriber decides (drug, then form, then strength) instead of parsing `displayName`:
 
 ```graphql
-unappliedChanges {
+changes {
   key
+  status
   options {
     displayName
     value
@@ -126,6 +127,39 @@ These are null for medical equipment and compounds. A prescription's own `treatm
   Always send a `templateId` or a `treatment` when you draft. With a patient, a sync may continue a draft the patient already has in progress. If they have several, you get `AmbiguousPrescriptionMatch`. Resend with the `id` of the one you mean.
 </Warning>
 
+## Sig options
+
+Once a draft has a patient and a drug with an NDC, `structuredSigs` suggests sigs for that drug and patient, worded for the patient:
+
+```graphql
+structuredSigs {
+  sigs { instructions }
+  notices { kind message }
+}
+```
+
+```json
+{
+  "sigs": [{ "instructions": "Take 1 tablet (25 mg) by mouth 2 times per day with food" }],
+  "notices": []
+}
+```
+
+To use one, send its `instructions` as the prescription's `instructions`. Each sig also has a `dispense`, but its fields are all null for now, so the prescriber still enters the quantity, unit and days supply.
+
+`structuredSigs` is null until the draft has both a patient and a drug with an NDC, and on a signed prescription. When no sig fits, `sigs` is empty and `notices` says why:
+
+| `kind` | Means |
+| --- | --- |
+| `MISSING_INPUT` | A patient detail needed to find sigs is missing, such as kidney function |
+| `NO_MATCH` | No sig fits this patient, such as an age the drug isn't dosed for |
+| `CONTRAINDICATED` | The drug is contraindicated for this patient |
+| `NOT_APPLICABLE` | Sigs don't apply to this product, such as test strips |
+| `DEFAULT_VALUE_USED` | A typical weight or body surface area for the patient's age and sex stood in for one Photon doesn't have |
+| `OTHER` | Any other message, including a lookup that couldn't be done |
+
+Looking sigs up takes longer than the rest of a prescription, so select `structuredSigs` only when you'll show it, such as in a separate get.
+
 ## Signing
 
 Signing is the prescriber's approval of exactly what they reviewed:
@@ -143,7 +177,7 @@ If the content changed after the prescriber reviewed it, the hashes don't match.
 | `INVALIDATED_SIGN` | The hash sent doesn't match the current content |
 
 <Note>
-  Only a prescriber's [user token](/authentication) can sign. A machine token gets an `UnauthorizedError`. Most integrations let [Prescribe](/prescribe/overview) do the signing.
+  Only a prescriber's [user token](/authentication) can sign. A machine token gets an `OperationError` with `type: UNAUTHORIZED`. Most integrations let [Prescribe](/prescribe/overview) do the signing.
 </Note>
 
 ## Fields
@@ -160,6 +194,8 @@ If the content changed after the prescriber reviewed it, the hashes don't match.
 | `clinical` | `{ diagnoses, notes }` | `diagnoses` is a patch of the ICD-10 codes that justify this prescription |
 | `signing` | `{ signedHash, message }` | See [Signing](#signing) |
 
+A prescription's `prescriber` is the prescriber assigned to it (`usr_…`), with their `name`. It's null for drafts and when no prescriber is assigned, and it doesn't say who signed. `signing` does.
+
 <Accordion title="Full selection set">
 
 ```graphql
@@ -167,6 +203,7 @@ fragment PrescriptionFields on Prescription {
   id
   templateId
   patient { id }
+  prescriber { id name { first last } }
   treatment { id name prescribableName rxNormId ndc upc brandName genericName form route strength medicationType }
   instructions
   dispense { quantity unit daysSupply refillsAllowed dispenseAsWritten }

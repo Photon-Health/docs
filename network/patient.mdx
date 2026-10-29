@@ -28,16 +28,16 @@ mutation Patient($patient: PatientInput!, $metadata: RequestMetadata!) {
           id
           demographic { name { first last } dateOfBirth sex phone email }
           clinical {
-            allergies { id name rxNormId }
-            medications { id name rxNormId status }
-            diagnoses { id name icd10Code }
+            allergies { status entries { id name rxNormId } }
+            medications { status entries { id name rxNormId status } }
+            diagnoses { status entries { id name icd10Code } }
           }
         }
       }
-      unappliedChanges { key status severity reason options { displayName argument value } }
+      changes { key status severity reason options { displayName argument value } }
     }
     ... on AmbiguousPatientMatch { reason candidates { id firstName lastName dateOfBirth } }
-    ... on OperationError { code message }
+    ... on OperationError { type code message }
   }
 }
 ```
@@ -90,7 +90,7 @@ Without an `id`, Photon uses the demographics to find the patient:
 | An exact first name, last name and date of birth, or two of email and phone that match | Uses that patient |
 | A partial name, a date of birth alone, or only one of email and phone that matches | Returns `AmbiguousPatientMatch` with up to 20 `candidates`, and saves nothing |
 | Nothing that matches, with enough to add someone (first name, last name, date of birth and sex) | Adds a new patient |
-| Nothing that matches, without enough | Lists what's missing in `unappliedChanges` |
+| Nothing that matches, without enough | Lists what's missing in `changes` |
 
 To choose a candidate, resend with its `id`. Never pick one automatically: even a single candidate is a judgment call for a person or your own rules.
 
@@ -134,6 +134,18 @@ Allergies, medications, diagnoses and benefits change through patches, so you ne
 
 To leave a list unchanged, leave out the field. An empty patch is rejected.
 
+## Reading lists
+
+Each list on a patient comes back as `{ status, entries }`, so an empty list says whether anyone asked:
+
+| `status` | Means |
+| --- | --- |
+| `NOT_DOCUMENTED` | Not asked yet, or not known. `entries` is empty. |
+| `NO_KNOWN_CONFIRMED` | Asked, and the patient has none, such as no known drug allergies. `entries` is empty. |
+| `DOCUMENTED` | At least one entry is on file |
+
+`allergies` always has a `status`. On `medications`, `diagnoses` and `benefits` it can be null.
+
 An entry given by `id` resolves exactly. A `name` or code may match several catalog entries. When it does, Photon returns the options instead of guessing. See [Changes and choices](/network/changes).
 
 <Tip>
@@ -153,13 +165,13 @@ fragment PatientFields on Patient {
     email
     phone
     address { street1 street2 city state postalCode country }
-    benefits { id bin pcn groupId memberId }
+    benefits { status entries { id bin pcn groupId memberId } }
     preferredPharmacy { id name address { street1 city state postalCode } fulfillmentType }
   }
   clinical {
-    allergies { id name rxNormId }
-    medications { id name rxNormId status }
-    diagnoses { id name icd10Code }
+    allergies { status entries { id name rxNormId } }
+    medications { status entries { id name rxNormId status } }
+    diagnoses { status entries { id name icd10Code } }
     notes
   }
 }

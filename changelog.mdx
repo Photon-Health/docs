@@ -14,8 +14,8 @@ Every page shows when it was last updated. This page says what's stable, and lis
 | [Prescribe app](/prescribe/app) | Stable in Neutron | `rx.neutron.health` in the sandbox. Production, `rx.new`, is in private preview: ask your Photon contact for access. |
 | [Deep links](/prescribe/app/deep-links) | Stable | No credentials needed. |
 | [iframe](/prescribe/embed/iframe) | Stable | Needs your Application `client_id`, in a URL built by `frame()`. |
-| [React components](/prescribe/embed/react) | Release candidate | `@photonhealth/react@rc`, 2.0.0-rc. See [Release candidates](/prescribe/embed/release-candidates). ⚠️ Not published to npm yet. |
-| [JavaScript client](/prescribe/embed/javascript) | Release candidate | `@photonhealth/client@rc`, 2.0.0-rc. See [Release candidates](/prescribe/embed/release-candidates). ⚠️ Not published to npm yet. |
+| [React components](/prescribe/embed/react) | Release candidate | `@photonhealth/react@rc`, currently `2.0.0-rc.1`. See [Release candidates](/prescribe/embed/release-candidates). |
+| [JavaScript client](/prescribe/embed/javascript) | Release candidate | `@photonhealth/client@rc`, currently `2.0.0-rc.1`. See [Release candidates](/prescribe/embed/release-candidates). |
 | [GraphQL](/network/graphql) | Stable in Neutron | ⚠️ Production, `network.photon.health/graphql`, isn't live yet. |
 | [Webhooks](/network/webhooks) | Stable | Signed with HMAC-SHA256. |
 | [MCP](/network/mcp) | Available in Neutron | `ai.neutron.health` in the sandbox. Production, `ai.photon.health`, is in private preview: ask your Photon contact for access. These URLs are final. Tools may still change. |
@@ -26,6 +26,24 @@ Every page shows when it was last updated. This page says what's stable, and lis
 Durable concepts, such as [records and the send](/architecture), [permissions](/authentication#permissions) and [plans](/use-cases), change rarely. Anything marked ⚠️ or **Preview** is still moving.
 
 ## Changes
+
+<Update label="October 29, 2026" tags={["Network", "Prescribe"]}>
+  **GraphQL breaking changes.** Update your queries:
+
+  - Each payload has one [`changes`](/network/changes) list in place of `appliedChanges` and `unappliedChanges`. Each change's `status` says whether it was saved.
+  - A change has `before` and `after` in place of `detail`. Options, `before` and `after` are all `Choice`s, the same type as before with a new name.
+  - `UnauthorizedError` and `UpstreamServiceError` are now one [`OperationError`](/network/errors#2-result-types), with a `type` of `UNAUTHORIZED` or `UPSTREAM_SERVICE`.
+  - A patient's lists are `{ status, entries }`, so you can tell "none" from "not asked". See [Reading lists](/network/patient#reading-lists).
+
+  **New in GraphQL:**
+
+  - Queries: [`me`](/network/graphql#me) checks a token, and [`orders`](/network/graphql#orders) lists your organization's orders. `ping` is deprecated and will be removed after January 31, 2027.
+  - Orders: [`fulfillment.state`](/network/order#fulfillment) after the send, [`availablePharmacies`](/network/order#listing-pharmacies-for-an-order) through `orders`, a `reason` to [move a sent order](/network/order#moving-a-sent-order), and `near.text` to search pharmacies by place.
+  - Prescriptions: [`structuredSigs`](/network/prescription#sig-options), and the assigned `prescriber`.
+  - A name that matches one thing, but not exactly, now comes back `AMBIGUOUS` with `CONFIRMATION_REQUIRED`. A pharmacy search never sets the pharmacy on its own.
+
+  **Packages:** `2.0.0-rc.1` of `@photonhealth/react` and `@photonhealth/client` is on npm. Machine credentials and sig options arrive in the next release candidate.
+</Update>
 
 <Update label="October 27, 2026" tags={["Prescribe"]}>
   - The React components and the JavaScript client are now `@photonhealth/react` and `@photonhealth/client`, published to npm as 2.0.0 release candidates under the `rc` tag. See [Release candidates](/prescribe/embed/release-candidates).

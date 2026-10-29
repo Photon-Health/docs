@@ -21,10 +21,6 @@ npm install @photonhealth/client@rc
 
 It's a [release candidate](/prescribe/embed/release-candidates) of 2.0.0 for now.
 
-{/* TODO(launch): publish to npm, then delete this line. */}
-
-⚠️ Not published to npm yet.
-
 ## Create a client
 
 ```ts
@@ -42,6 +38,31 @@ const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" }
 </Card>
 
 With `clientId`, `ph.session` handles sign-in: `start()` on load, `signIn()` from a click, and `signOut()`. Its `status` and `user` show who is signed in. Create one client per signed-in person. On a server, that means one per request, never one shared module-wide.
+
+`await ph.ping()` checks the token without touching a record.
+
+### On your backend
+
+Your backend can use the client with its own [machine credentials](/authentication#machine-tokens) instead of a prescriber's sign-in:
+
+```ts
+const ph = photon({
+  environment: "neutron",
+  auth: {
+    clientId: process.env.PHOTON_CLIENT_ID,
+    clientSecret: process.env.PHOTON_CLIENT_SECRET,
+    organizationId: "org_…",
+  },
+});
+
+const { patient } = await ph.patient.sync({ demographic: { … } });
+```
+
+The client gets a machine token, keeps it until shortly before it expires, and gets a new one if Photon refuses it. A token for any organization other than `organizationId` is refused with `unauthorized`. It works only on a server: `photon()` throws if it's given a client secret in a browser. A machine token can't sign or send, so `rx.sign()` and `order.submit()` are for a prescriber's sign-in.
+
+{/* TODO(launch): remove once client credentials are in a published @photonhealth/client release candidate (after 2.0.0-rc.1). */}
+
+⚠️ Machine credentials aren't in a published release candidate yet. They arrive after `2.0.0-rc.1`.
 
 <Note>
   With `clientId`, the access token stays in memory and the refresh token is kept in the page's `localStorage`, so a reload signs back in. Any script on the page can read it, so treat script injection there as a token leak, and set a Content-Security-Policy. Auth0 rotates the refresh token on every use and revokes it as soon as an old one is reused. [How Prescribe is built](/prescribe/architecture#sign-in) has the details.
@@ -61,7 +82,9 @@ const { patient, candidates, changes } = await ph.patient.sync({
 await ph.patient.update(patient.id, { demographic: { phone: "+13175550142" } }); // just these fields
 ```
 
-`sync` and `update` return the live object, any `candidates` when Photon isn't sure which record you meant, and the `changes` it reported. The client never picks a candidate for you. Pick one with `patient.pick(id)`.
+`sync` and `update` return the live object, any `candidates` when Photon isn't sure which record you meant, and the `changes` it reported. The client never picks a candidate for you. Pick one with `patient.pick(id)`, `rx.continueDraft(id)` for a draft the patient already has in progress, or `order.pick(id)` for one of the patient's draft orders.
+
+A patient's lists (`allergies`, `medications`, `diagnoses` and `benefits`) are `null` when nothing is recorded, and `[]` when the patient has none, such as no known drug allergies. See [Reading lists](/network/patient#reading-lists).
 
 ## Live objects
 
@@ -89,6 +112,37 @@ The rules live in the objects, so every UI built on them behaves the same:
 - `rx.sign()` waits for saves in flight, then signs only what's stored.
 - `order.readyToSend` is true once the patient is found, every prescription is signed, and nothing is still saving.
 - `order.submit()` refuses until it's ready, and never sets a pharmacy.
+- `order.unacknowledgedAlerts` lists the [screening alerts](/network/screening) no one has acknowledged yet: the order's own, and each unsigned prescription's. Signing a prescription acknowledges its alerts. Show these by the send button. They never stop a send.
+
+### Sig options
+
+`rx.loadSigs()` looks up [sig options](/network/prescription#sig-options) for a draft's drug and patient into `rx.snapshot.sigs`, and looks them up again whenever the drug or patient changes. It's separate from saving, so saves don't wait for it.
+
+```ts
+rx.loadSigs();
+rx.subscribe(() => renderSigs(rx.snapshot.sigs)); // { sigs, notices }, or null
+
+// When the prescriber picks one, such as "Take 1 tablet (25 mg) by mouth 2 times per day with food":
+await rx.update({ instructions: sig.instructions });
+```
+
+`sigs` is `null` until the lookup finishes, and stays `null` without a patient, on a signed prescription, or for a drug without an NDC. When nothing fits, `sigs.sigs` is empty and `sigs.notices` says why.
+
+{/* TODO(launch): remove once sig options are in a published @photonhealth/client release candidate (after 2.0.0-rc.1). */}
+
+⚠️ Sig options aren't in a published release candidate yet. They arrive after `2.0.0-rc.1`.
+
+### Pharmacies
+
+You don't need a pharmacy to send: the patient chooses one. To choose for them, sync the order with a `pharmacy` reference. When Photon offers several, `order.pharmacyOptions` lists them, each with its `pharmacy`, address and priced `offers`. `order.choose(option)` sets one.
+
+```ts
+await order.update({ pharmacy: { pharmacy: { name: "CVS", fulfillmentType: "PICK_UP" } } });
+for (const option of order.pharmacyOptions) console.log(option.pharmacy?.name, option.pharmacy?.offers);
+await order.choose(order.pharmacyOptions[0]); // the prescriber's pick
+
+await order.update({ pharmacy: { none: true } }); // back to the patient choosing
+```
 
 ## Choices
 
@@ -100,6 +154,14 @@ import { choicesIn } from "@photonhealth/client";
 const [which] = choicesIn(rx.changes); // e.g. "which lisinopril?"
 if (which) await rx.choose(which.options[0]); // or let the prescriber pick
 ```
+
+The client splits the API's [`changes`](/network/changes) into `changes.applied` and `changes.unapplied`. Each option has a `path` and a parsed `value` (the API's `argument` and `value`), and `id`, `treatment` or `pharmacy` for the record it picks. Other helpers work on the same `changes`:
+
+| Helper | Returns |
+| --- | --- |
+| `classify(changes)` | `{ needsChoice, blocking, advisories, applied }`: what to ask, what to fix, what to show, and what took effect |
+| `declaredChoice(changes)` | The one option Photon declared a match (a single exact name or RxNorm match), or `null`. Take it without asking. Anything else is the prescriber's pick. |
+| `withChoice(input, option)` | Your input with the option applied, to send again yourself. `obj.choose(option)` does this for you. |
 
 A drug option carries its `treatment` in parts, so you can group drugs by `brandName`, then `form`, then `strength` without parsing `displayName`. It also has `genericName`, `route`, `schedule` (the DEA schedule) and `recommendedDispenseUnits`, the values `dispense.unit` takes. Once picked, the same parts are `rx.treatment`:
 
@@ -139,8 +201,17 @@ ph.url.parse(href); // what a link opens, read back
 - Links point to the environment's Prescribe app: `rx.neutron.health` in the sandbox, or `rx.new` in production. Pass `appUrl` to `photon()` to point them somewhere else.
 - `url()` is for sharing, so it never carries a `client_id`. The Prescribe app signs the prescriber in on its own.
 - `frame()` puts your Application `client_id` in the URL, from `auth: { clientId }`, and throws without one. With `auth: { getToken }`, pass it in the link: `ph.frame({ flow, …, auth: { clientId } })`.
-- Pass `organization` to `photon()`, and every link carries it, so the prescriber signs straight in to that organization.
+- Pass `organization` to `photon()`, and every link carries it, so the prescriber signs straight in to that organization. A client with [machine credentials](#on-your-backend) uses its `organizationId`. It can build `url()` links for a prescriber, but not `frame()` URLs.
 
 ## Secrets
 
-A client secret never belongs in a browser. If you pass a `clientSecret` to `photon()` in a page, it throws before doing anything else. Treat that secret as leaked and rotate it. Links never carry a secret.
+A client secret belongs only on your backend. If you pass a `clientSecret` to `photon()` in a page, it throws before doing anything else. Treat that secret as leaked and rotate it. Links never carry a secret.
+
+## Testing
+
+Two entry points help you test your own code without calling Photon:
+
+- `@photonhealth/client/testing`: `photonOver(scriptedClient(…))` gives you a client over scripted responses, with fixtures (`patient`, `rx`, `order` and others) to script them.
+- `@photonhealth/client/test-utils/msw`: `photonHandlers(responses)` gives you [MSW](https://mswjs.io) handlers for the GraphQL endpoint, for tests that run a real page or a real `photon()`. It needs `msw` installed.
+
+Both may change before 2.0.0.

@@ -10,8 +10,8 @@ Check each response in this order:
 | --- | --- | --- | --- |
 | 1 | Top-level `errors` | The call didn't run: a bad token or an invalid query | Fix the token or query. Retrying unchanged fails again. |
 | 2 | The result's `__typename` | The call failed, or needs you to pick a record | See below |
-| 3 | `unappliedChanges` | The call ran, but some inputs weren't saved | See [Changes and choices](/network/changes) |
-| 4 | `screeningAlerts` (prescriptions) | Clinical conflicts | Show them to the prescriber. See [Screening](/network/screening). |
+| 3 | `changes` that aren't `APPLIED` | The call ran, but nothing was saved | See [Changes and choices](/network/changes) |
+| 4 | `screeningAlerts` (prescriptions and orders) | Clinical conflicts | Show them to the prescriber. See [Screening](/network/screening). |
 
 ## 1. Top-level errors
 
@@ -31,15 +31,30 @@ The same happens with an expired token, an unknown field or a wrong argument typ
 | `AmbiguousPatientMatch` | Several patients could match, and nothing was saved | Resend with one of the `candidates`' `id`, or with more details |
 | `AmbiguousPrescriptionMatch` | The patient has several drafts in progress, and you didn't send an `id` | Resend with the `id` of the draft you mean |
 | `AmbiguousOrderMatch` | The patient has several draft orders, and you didn't send an `id` | Resend with the `id` of the order you mean |
-| `UnauthorizedError` | The token can't do this, such as a machine token trying to sign | Use the right token. Don't retry. |
-| `UpstreamServiceError` | A Photon service failed | Retry with backoff if `retryable` is true |
+| `OperationError` | The call failed. Its `type` says how. | See below |
 
-`PatientPayload.patient` and `Order.patient` can also be an `UpstreamServiceError`. That means the call was processed, but the patient couldn't be read back.
+An `OperationError` has these fields:
 
-## 3. Unapplied changes
+| Field | Description |
+| --- | --- |
+| `type` | `UNAUTHORIZED`: the token can't do this, such as a machine token trying to sign. `UPSTREAM_SERVICE`: a Photon service failed. |
+| `code` | The specific failure, such as `PRESCRIPTION_SIGNING_UNAUTHORIZED` |
+| `message` | A description to log |
+| `requiredPermission` | The permission the token is missing, when Photon knows it. `UNAUTHORIZED` only. |
+| `service` | The service that failed. `UPSTREAM_SERVICE` only. |
+| `retryable` | Whether retrying can help. Always `false` for `UNAUTHORIZED`. |
 
-Each entry has a `status`:
+```graphql
+... on OperationError { type code message requiredPermission retryable }
+```
 
+`PatientPayload.patient`, `Order.patient` and `Order.organization` can also be an `OperationError`. That means the call was processed, but that part couldn't be read back.
+
+## 3. Changes that weren't applied
+
+Each change in `changes` has a `status`:
+
+- `APPLIED`: saved. Nothing to do, unless it's `ADVISORY`.
 - `REJECTED`: fix the input that `reason` describes. Skip entries that were rejected only because another input failed.
 - `AMBIGUOUS`: choose one of the `options` and resend.
 
@@ -48,6 +63,6 @@ Then resend the whole call.
 ## Checklist
 
 1. If `errors` is present, stop and fix the token or query.
-2. Branch on `__typename`. Resend ambiguous matches with an `id`. Retry `UpstreamServiceError` only when `retryable` is true.
-3. Resolve `unappliedChanges` and resend.
+2. Branch on `__typename`. Resend ambiguous matches with an `id`. On an `OperationError`, retry only when `retryable` is true.
+3. Resolve the changes that aren't `APPLIED` and resend.
 4. Show `ADVISORY` changes and screening alerts to the person responsible.
