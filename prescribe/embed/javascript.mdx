@@ -1,13 +1,13 @@
 ---
 title: "JavaScript client"
-description: "@photon-rx/core: the client, sign-in and workflow rules under Prescribe, for any framework or Node."
+description: "@photonhealth/client: the client, sign-in and workflow rules under Prescribe, for any framework or Node."
 icon:
   style: "brands"
   name: "js"
   library: "fontawesome"
 ---
 
-`@photon-rx/core` sits underneath Prescribe. It handles the prescriber's sign-in and tokens, calls the API, and enforces the workflow rules: which drug was meant, when a draft is created, and when an order is ready to send. Use it when you're building your own UI in another framework, or when your backend wants typed calls.
+`@photonhealth/client` sits underneath Prescribe. It handles the prescriber's sign-in and tokens, calls the API, and enforces the workflow rules: which drug was meant, when a draft is created, and when an order is ready to send. Use it when you're building your own UI in another framework, or when your backend wants typed calls.
 
 It has no dependencies and runs in browsers and Node.
 
@@ -16,8 +16,10 @@ It has no dependencies and runs in browsers and Node.
 </Note>
 
 ```bash
-npm install @photon-rx/core
+npm install @photonhealth/client@rc
 ```
+
+It's a [release candidate](/prescribe/embed/release-candidates) of 2.0.0 for now.
 
 {/* TODO(launch): publish to npm, then delete this line. */}
 
@@ -26,7 +28,7 @@ npm install @photon-rx/core
 ## Create a client
 
 ```ts
-import { photon } from "@photon-rx/core";
+import { photon } from "@photonhealth/client";
 
 // In a browser: Photon signs the prescriber in
 const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
@@ -93,7 +95,7 @@ The rules live in the objects, so every UI built on them behaves the same:
 When Photon offers options, such as which of several drugs a name meant, `choicesIn(obj.changes)` lists them. `obj.choose(option)` applies one.
 
 ```ts
-import { choicesIn } from "@photon-rx/core";
+import { choicesIn } from "@photonhealth/client";
 
 const [which] = choicesIn(rx.changes); // e.g. "which lisinopril?"
 if (which) await rx.choose(which.options[0]); // or let the prescriber pick

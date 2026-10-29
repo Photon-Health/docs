@@ -14,7 +14,7 @@ In a few minutes you'll render Photon's order card in your app, prescribe for a 
   </Step>
   <Step title="Install">
     ```bash
-    npm install @photon-rx/react
+    npm install @photonhealth/react@rc
     ```
 
     {/* TODO(launch): publish to npm, then delete this line. */}
@@ -24,8 +24,8 @@ In a few minutes you'll render Photon's order card in your app, prescribe for a 
     Pass a test patient. Photon finds them or adds them.
 
     ```tsx Prescribe.tsx
-    import { PhotonOrder, PhotonProvider } from "@photon-rx/react";
-    import "@photon-rx/react/styles.css";
+    import { PhotonOrder, PhotonProvider } from "@photonhealth/react";
+    import "@photonhealth/react/styles.css";
 
     export function Prescribe() {
       return (
