@@ -15,7 +15,7 @@ The JSON examples below are tool arguments. Replace placeholder IDs with IDs ret
 
 **Sync a patient: find, create or update.** First try to match an existing patient using context already available, such as name, date of birth or phone. Don't ask the clinician to repeat known information or create a new record before attempting a match.
 
-To create a patient, only **first name, last name, date of birth and phone number** are required (`demographic.name.first`, `demographic.name.last`, `demographic.dateOfBirth` and `demographic.phone`). Other demographic and clinical fields are optional. You can start matching an existing patient with fewer details, as in this example:
+To create a patient, **first name, last name, date of birth and sex** are required (`demographic.name.first`, `demographic.name.last`, `demographic.dateOfBirth` and `demographic.sex`). A phone number is required to send an order, but not to create the patient. You can start matching an existing patient with fewer details, as in this example:
 
 ```json
 {
@@ -103,6 +103,8 @@ A call without an order ID may resume a matching draft. Review **every prescript
 Don't ask for a pharmacy or make it a prerequisite for submission. Don't infer a choice from a previous order, profile preference or shopping result. Photon handles the fulfillment link and fallback routing. See [Pharmacy changes](/network/mcp/fulfillment#pharmacy-changes) for an explicitly requested destination.
 
 ### Submit the reviewed order
+
+The patient must have a phone number before you send an order. If it is missing, update the existing patient with `patient`, using its ID and `demographic.phone`.
 
 After the prescriber approves the complete order, call `order` with only its ID and submission state:
 
