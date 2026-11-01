@@ -1,17 +1,17 @@
 ---
 title: "Prescribing tools"
 sidebarTitle: "Prescribing"
-description: "Use patient, prescription and order to move from intake to a reviewed prescription order."
+description: "Send prescriptions with Photon: sync the patient, draft and sign prescriptions, then draft and send the order."
 icon: "prescription-bottle-medical"
 ---
 
-Use `patient`, `prescription` and `order` to build a prescription progressively. Each tool can change records. None is an ID-only fetch tool; use [`orders`](/network/mcp/fulfillment#orders) to read an order.
+The prescribing flow uses four tools in order: `patient` to **sync** (find, create or update), `prescription` to **draft/sign**, `order` to **draft/send**, and [`orders`](/network/mcp/fulfillment#orders) to **fetch** the result. The first three can change records and are not ID-only fetch tools.
 
 The JSON examples below are tool arguments. Replace placeholder IDs with IDs returned by Photon.
 
 ## patient
 
-**Resolve, create or update a patient.** First try to match an existing patient using context already available, such as name, date of birth or phone. Don't ask the clinician to repeat known information or create a new record before attempting a match.
+**Sync a patient: find, create or update.** First try to match an existing patient using context already available, such as name, date of birth or phone. Don't ask the clinician to repeat known information or create a new record before attempting a match.
 
 ```json
 {
@@ -31,11 +31,11 @@ Inspect `patient`, `candidates` and `changes.unapplied`. If several candidates r
 
 Record known clinical context before medication search when possible. Missing history is not confirmed absence. Set an allergy `none` value only when no known allergies have been confirmed.
 
-Don't ask for a pharmacy during intake. Provider accounts cannot set the profile's preferred pharmacy through this tool.
+Don't ask for a pharmacy during patient sync. Provider accounts cannot set the profile's preferred pharmacy through this tool.
 
 ## prescription
 
-**Search, progressively draft or update, and explicitly sign a prescription.** Start with a drug name or search string before asking for missing strength, dosage, instructions, quantity, units, days supply or refills.
+**Draft and sign prescriptions.** Search and progressively complete or update the draft. Start with a drug name or search string before asking for missing strength, dosage, instructions, quantity, units, days supply or refills.
 
 ```json
 {
@@ -77,7 +77,7 @@ Inspect the returned `prescription.signing.state` and unapplied changes before r
 
 ## order
 
-**Prepare, update or submit an order from existing prescriptions.** Add the reviewed drafts for the resolved patient:
+**Draft and send orders from existing prescriptions.** Add the reviewed drafts for the resolved patient:
 
 ```json
 {

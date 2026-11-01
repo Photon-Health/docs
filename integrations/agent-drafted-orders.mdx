@@ -1,6 +1,6 @@
 ---
 title: "Agent-drafted orders"
-description: "An agent takes intake and drafts prescriptions over MCP, and a prescriber sends them from Prescribe."
+description: "Send prescriptions with Photon using agent-prepared drafts and prescriber review in Prescribe."
 icon: "robot"
 tag: "Preview"
 ---
@@ -9,14 +9,14 @@ tag: "Preview"
   MCP is open to every Neutron account. In production, it's in **private preview**: see [client approval](/network/mcp/connect#cimd-and-client-approval) or contact [support@photon.health](mailto:support@photon.health).
 </Note>
 
-Your clinical agent reads the encounter, resolves the patient, searches medications and prepares draft prescriptions. A prescriber then opens the drafts in Prescribe to review, sign and submit the order.
+Your clinical agent reads the encounter, syncs the patient, searches medications and prepares draft prescriptions. A prescriber then opens the drafts in Prescribe to review, sign and submit the order.
 
 ```mermaid
 sequenceDiagram
   participant A as Your agent
   participant M as Photon MCP
   participant F as Prescribe
-  A->>M: patient (known identity and clinical context)
+  A->>M: patient (sync identity and clinical context)
   M-->>A: patient.id, candidates, changes
   A->>M: prescription (patient, treatment.name)
   M-->>A: medication choices, changes
@@ -36,9 +36,9 @@ https://ai.neutron.health
 
 The agent authenticates like any other caller. A backend agent uses a [machine token](/authentication#machine-tokens). An agent that runs in a prescriber's MCP client, such as Claude or ChatGPT, signs in as that prescriber. See [Connect a client](/network/mcp/connect).
 
-## 2. Intake, search, draft
+## 2. Sync the patient and draft prescriptions
 
-Use `patient` to match one existing patient from the encounter context before creating a record. Supply known allergies, medication history and diagnoses when available.
+Use `patient` to sync the patient: find, create or update from the encounter context. Match an existing patient before creating a new record. Supply known allergies, medication history and diagnoses when available.
 
 Then call `prescription` with `treatment.name` and the resolved `patient.id`. Search before asking for missing dosage, directions or dispense details. If identity is unresolved, you can search without a patient and attach one later.
 

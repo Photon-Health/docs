@@ -1,7 +1,7 @@
 ---
 title: "Order status and pharmacies"
 sidebarTitle: "Fulfillment"
-description: "Read orders, compare pharmacies and apply an explicitly requested destination."
+description: "Fetch prescription orders, check their progress and update an explicitly requested pharmacy."
 icon: "truck"
 ---
 
@@ -9,13 +9,13 @@ Use `orders` when a clinician asks about an existing order, pharmacy availabilit
 
 ## orders
 
-**Read orders and available pharmacies without changing a record.** Read one order by ID:
+**Fetch orders and available pharmacies without changing a record.** Fetch one order by ID:
 
 ```json
 { "id": "ord_existing" }
 ```
 
-Or find submitted orders for a resolved patient:
+Or fetch submitted orders for a synced patient:
 
 ```json
 {

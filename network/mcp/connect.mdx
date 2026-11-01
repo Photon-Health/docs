@@ -1,6 +1,6 @@
 ---
 title: "Connect a client"
-description: "Connect ChatGPT, Claude or your own MCP client, and request production access."
+description: "Connect your AI assistant to send prescriptions with Photon."
 icon: "plug"
 ---
 
@@ -15,9 +15,9 @@ Neutron creates test prescriptions only. Any compatible client can connect: it m
 
 Try:
 
-> Find test patient Paige Turner and search for amlodipine. Show me the options before completing the prescription.
+> Prescribe amlodipine for test patient Paige Turner. Show me the draft before sending.
 
-The assistant uses `patient` and `prescription`, asks for unresolved details, and shows the draft for review. It must not sign or submit without the prescriber's approval.
+The assistant uses `patient` to sync (find, create or update), `prescription` to draft/sign, `order` to draft/send, and `orders` to fetch the result. It gathers unresolved details and shows the draft for review before signing or sending with the prescriber's approval.
 
 ## Production clients
 
