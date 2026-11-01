@@ -10,11 +10,11 @@ sidebarTitle: "Overview"
   MCP is available to every Neutron account for testing. Production MCP is in **private preview** and currently supports ChatGPT and Claude. Contact [support@photon.health](mailto:support@photon.health) for access or to request approval for another client.
 </Note>
 
-Use Photon to send prescriptions from your AI assistant. Describe what you want to prescribe, review the draft, and approve sending. You can complete the flow in your assistant or continue in [Prescribe](/prescribe/overview).
+Use Photon to send prescriptions from your AI assistant. Ask for the prescription you want to send. Drafting and review are built into the flow; you do not need to request them separately. You can complete the flow in your assistant or continue in [Prescribe](/prescribe/overview).
 
 Start with what you know:
 
-> Prescribe amlodipine for test patient Paige Turner. Show me the draft before sending.
+> Send a prescription for amlodipine to test patient Paige Turner.
 
 Patient sync, medication search and order preparation are steps within that prescribing flow. The assistant searches before asking for missing dosage, instructions or quantity, then gathers the details needed for the prescriber to review and approve.
 
@@ -23,11 +23,11 @@ Patient sync, medication search and order preparation are steps within that pres
 | Tool | Step |
 | --- | --- |
 | [`patient`](/network/mcp/prescribing#patient) | **Sync patients:** find, create or update the patient from the context you provide. |
-| [`prescription`](/network/mcp/prescribing#prescription) | **Draft and sign prescriptions:** start with a drug name, complete the draft, then sign after review. |
+| [`prescription`](/network/mcp/prescribing#prescription) | **Draft/sign prescriptions:** start with a drug name and complete the draft. Separate signing is optional. |
 | [`order`](/network/mcp/prescribing#order) | **Draft and send orders:** assemble prescriptions, review the complete order, then send after approval. |
 | [`orders`](/network/mcp/fulfillment#orders) | **Fetch orders:** retrieve order status and available pharmacy options without changing a record. |
 
-The three singular tools can change records. `orders` is read-only. Search and ordinary draft edits do not sign a prescription or submit an order.
+The three singular tools can change records. `orders` is read-only. Standalone signing through `prescription` is optional; Photon enforces signing requirements when you send the order. Search and ordinary draft edits do not send a prescription.
 
 ## Connect
 
@@ -41,7 +41,7 @@ Use an MCP client with Streamable HTTP support. See [Connect a client](/network/
 ## How the workflow fits together
 
 1. **`patient` → sync.** Find, create or update the patient using known identity and clinical context. Match an existing patient before creating a new one.
-2. **`prescription` → draft/sign.** Start with a drug name. Include the synced patient when available so Photon has recorded allergies, medication history and benefits for the prescribing workflow. Complete and review the draft before signing; confirm or correct any defaults. You can search without a patient and attach one later.
+2. **`prescription` → draft/sign.** Start with a drug name. Include the synced patient when available so Photon has recorded allergies, medication history and benefits for the prescribing workflow. Drafting and review are built in; confirm or correct any defaults. A separate signing call is optional. You can search without a patient and attach one later.
 3. **`order` → draft/send.** Assemble the prescriptions and review the entire returned order, including screening and unapplied changes. Send with an explicit submission call after the prescriber approves.
 4. **`orders` → fetch.** Fetch the order to confirm its current state. Submission, pharmacy assignment and pharmacy receipt are separate milestones.
 

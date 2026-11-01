@@ -1,11 +1,13 @@
 ---
 title: "Prescribing tools"
 sidebarTitle: "Prescribing"
-description: "Send prescriptions with Photon: sync the patient, draft and sign prescriptions, then draft and send the order."
+description: "Send prescriptions with Photon, with patient sync, drafting and review built into the flow."
 icon: "prescription-bottle-medical"
 ---
 
 The prescribing flow uses four tools in order: `patient` to **sync** (find, create or update), `prescription` to **draft/sign**, `order` to **draft/send**, and [`orders`](/network/mcp/fulfillment#orders) to **fetch** the result. The first three can change records and are not ID-only fetch tools.
+
+You do not need to ask the assistant for a draft before sending. Drafting and review are built into the flow. A separate `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
 
 The JSON examples below are tool arguments. Replace placeholder IDs with IDs returned by Photon.
 
@@ -35,7 +37,7 @@ Don't ask for a pharmacy during patient sync. Provider accounts cannot set the p
 
 ## prescription
 
-**Draft and sign prescriptions.** Search and progressively complete or update the draft. Start with a drug name or search string before asking for missing strength, dosage, instructions, quantity, units, days supply or refills.
+**Draft prescriptions, with optional standalone signing.** Search and progressively complete or update the draft. Start with a drug name or search string before asking for missing strength, dosage, instructions, quantity, units, days supply or refills.
 
 ```json
 {
@@ -62,7 +64,7 @@ Photon may populate draft directions or dispense details with defaults. Show the
 
 ### Sign a reviewed prescription
 
-Signing is an explicit call to the same `prescription` tool, separate from edits. After the prescriber approves the draft, copy its `signing.contentHash` into `signing.signedHash`:
+**Optional:** use this when your workflow needs to sign a prescription separately from sending the order. It is an explicit call to the same `prescription` tool, separate from edits. After the prescriber approves the draft, copy its `signing.contentHash` into `signing.signedHash`:
 
 ```json
 {
@@ -77,7 +79,7 @@ Inspect the returned `prescription.signing.state` and unapplied changes before r
 
 ## order
 
-**Draft and send orders from existing prescriptions.** Add the reviewed drafts for the resolved patient:
+**Draft and send orders from existing prescriptions.** As part of the send flow, add the drafts for the synced patient:
 
 ```json
 {
@@ -109,7 +111,7 @@ After the prescriber approves the complete order, call `order` with only its ID 
 }
 ```
 
-Photon enforces authorization and signing requirements. If it reports an unmet requirement, resolve that requirement against the existing records before continuing. Don't assume submission automatically signed every prescription. Submission cannot be combined with content or pharmacy edits.
+Photon enforces authorization and signing requirements. If it reports an unmet requirement, resolve that requirement against the existing records before continuing. Confirm the returned signing and order states before reporting success. Submission cannot be combined with content or pharmacy edits.
 
 Check `order.state`, each prescription's signing state and `changes.unapplied`, then read back with `orders`. A `DRAFT` order has not been submitted. `SUBMITTED` does not by itself confirm pharmacy receipt.
 

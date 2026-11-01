@@ -77,6 +77,6 @@ To hand over a single ID, call the MCP [`order` tool](/network/mcp/prescribing#o
 
 ## Sending from the agent
 
-An agent acting for a signed-in prescriber can use the same MCP tools for finalization after explicit review and approval. `prescription` signs reviewed content using its content hash. `order` with only `id` and `state: "SUBMITTED"` requests submission. Photon enforces authorization and signing requirements.
+An agent acting for a signed-in prescriber can use the same MCP tools for finalization after explicit review and approval. A separate `prescription` call can optionally sign reviewed content using its content hash. `order` with only `id` and `state: "SUBMITTED"` requests submission. Photon enforces authorization and signing requirements as part of sending; the user does not need to request a draft or a separate signing step.
 
 Don't ask for a pharmacy unless the user explicitly requests a destination. Read back with `orders` and distinguish submission from pharmacy receipt. See [Sign a reviewed prescription](/network/mcp/prescribing#sign-a-reviewed-prescription) and [Submit the reviewed order](/network/mcp/prescribing#submit-the-reviewed-order).

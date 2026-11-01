@@ -15,9 +15,9 @@ Neutron creates test prescriptions only. Any compatible client can connect: it m
 
 Try:
 
-> Prescribe amlodipine for test patient Paige Turner. Show me the draft before sending.
+> Send a prescription for amlodipine to test patient Paige Turner.
 
-The assistant uses `patient` to sync (find, create or update), `prescription` to draft/sign, `order` to draft/send, and `orders` to fetch the result. It gathers unresolved details and shows the draft for review before signing or sending with the prescriber's approval.
+The assistant uses `patient` to sync (find, create or update), `prescription` to draft/sign, `order` to draft/send, and `orders` to fetch the result. Drafting and review are built into the send flow, so you don't need to ask for a draft separately. A standalone `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
 
 ## Production clients
 
