@@ -1,8 +1,10 @@
 ---
 title: "Connect a client"
-description: "Connect your AI assistant to send prescriptions with Photon."
+description: "Connect ChatGPT, Claude or your own agent to send prescriptions with Photon."
 icon: "plug"
 ---
+
+Use Photon in a chat app such as ChatGPT or Claude, or connect your own agent.
 
 ## Start in Neutron
 
@@ -19,7 +21,7 @@ Try:
 
 > Send a prescription for amlodipine to Paige Turner.
 
-The assistant uses `patient` to sync (find, create or update), `prescription` to draft/sign, `order` to draft/send, and `orders` to fetch the result. Drafting and review are built into the send flow, so you don't need to ask for a draft separately. A standalone `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
+The agent uses `patient` to sync (find, create or update), `prescription` to draft/sign, `order` to draft/send, and `orders` to fetch the result. Drafting and review are built into the send flow, so you don't need to ask for a draft separately. A standalone `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
 
 ## Production clients
 

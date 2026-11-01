@@ -7,7 +7,7 @@ icon: "prescription-bottle-medical"
 
 The prescribing flow uses four tools in order: `patient` to **sync** (find, create or update), `prescription` to **draft/sign**, `order` to **draft/send**, and [`orders`](/network/mcp/fulfillment#orders) to **fetch** the result. The first three can change records and are not ID-only fetch tools.
 
-You do not need to ask the assistant for a draft before sending. Drafting and review are built into the flow. A separate `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
+You do not need to ask the agent for a draft before sending. Drafting and review are built into the flow. A separate `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
 
 The JSON examples below are tool arguments. Replace placeholder IDs with IDs returned by Photon.
 

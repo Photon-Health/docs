@@ -1,6 +1,6 @@
 ---
 title: "MCP"
-description: "Use Photon to send prescriptions from your AI assistant."
+description: "Send prescriptions with Photon from ChatGPT, Claude or your own agent."
 icon: "robot"
 tag: "Preview"
 sidebarTitle: "Overview"
@@ -10,13 +10,13 @@ sidebarTitle: "Overview"
   MCP is available to every Neutron account for testing. Production MCP is in **private preview** and currently supports ChatGPT and Claude. Contact [support@photon.health](mailto:support@photon.health) for access or to request approval for another client.
 </Note>
 
-Use Photon to send prescriptions from your AI assistant. Ask for the prescription you want to send. Drafting and review are built into the flow; you do not need to request them separately. You can complete the flow in your assistant or continue in [Prescribe](/prescribe/overview).
+Send prescriptions with Photon from ChatGPT, Claude or your own agent. Ask for the prescription you want to send. Drafting and review are built into the flow; you do not need to request them separately. Use your preferred chat app or connect your own agent. You can complete the flow there or continue in [Prescribe](/prescribe/overview).
 
 Start with what you know:
 
 > Send a prescription for amlodipine to Paige Turner.
 
-Patient sync, medication search and order preparation are steps within that prescribing flow. The assistant searches before asking for missing dosage, instructions or quantity, then gathers the details needed for the prescriber to review and approve.
+Patient sync, medication search and order preparation are steps within that prescribing flow. The agent searches before asking for missing dosage, instructions or quantity, then gathers the details needed for the prescriber to review and approve.
 
 ## Four tools
 
@@ -49,4 +49,4 @@ Don't ask for a pharmacy as a routine prescribing step. Only include a destinati
 
 Photon enforces permissions for every action. For an agent running on your backend, use your existing [API credentials](/authentication#machine-tokens) to prepare drafts, then hand them to a prescriber in [Prescribe](/integrations/agent-drafted-orders). Machine tokens cannot sign prescriptions.
 
-The assistant retains the conversation and carries returned record IDs between calls. Photon stores the records. If a call returns choices or unapplied fields, resolve them and send those fields again with the appropriate ID.
+The agent retains the conversation and carries returned record IDs between calls. Photon stores the records. If a call returns choices or unapplied fields, resolve them and send those fields again with the appropriate ID.
