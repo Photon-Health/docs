@@ -21,7 +21,7 @@ Network is the API underneath everything in Photon. It has three upserts, `patie
 
 ## Three upserts
 
-Each record has one mutation, and how you call it decides what it does:
+Each record has one GraphQL mutation, and how you call it decides what it does:
 
 | | Send | Photon |
 | --- | --- | --- |
@@ -35,7 +35,9 @@ Each record has one mutation, and how you call it decides what it does:
 | `prescription(prescription:, metadata:)` | Prescription `rx_…` | [Prescription](/network/prescription) |
 | `order(order:, metadata:)` | Order `ord_…` | [Order](/network/order) |
 
-Two queries read without changing anything: `me`, to check a token, and `orders`, to list your organization's orders. See [Queries](/network/graphql#queries).
+MCP exposes these records through three mutation tools, plus the read-only `orders` tool. Its mutation tools do not accept ID-only fetch calls. See [MCP tools](/network/mcp#four-tools).
+
+Two GraphQL queries read without changing anything: `me`, to check a token, and `orders`, to list your organization's orders. See [Queries](/network/graphql#queries).
 
 ## Photon decides, then tells you
 
