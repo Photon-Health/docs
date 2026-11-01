@@ -1,27 +1,27 @@
 ---
 title: "Agent-drafted orders"
-description: "An agent takes intake and drafts prescriptions over MCP, and a prescriber sends them from Prescribe."
+description: "Send prescriptions with Photon using agent-prepared drafts and prescriber review in Prescribe."
 icon: "robot"
 tag: "Preview"
 ---
 
 <Note>
-  MCP is open to every Neutron account. In production, it's in **private preview**: to get access, ask your Photon contact.
+  MCP is open to every Neutron account. In production, it's in **private preview**: see [client approval](/network/mcp/connect#cimd-and-client-approval) or contact [support@photon.health](mailto:support@photon.health).
 </Note>
 
-The most advanced integrations put an agent in front. It talks to the patient or reads the encounter, records what it learns on the patient, finds the right drug, and drafts the prescriptions. A prescriber then opens the drafts in Prescribe and signs and sends them.
+Your clinical agent reads the encounter, syncs the patient, searches medications and prepares draft prescriptions. A prescriber then opens the drafts in Prescribe to review, sign and submit the order.
 
 ```mermaid
 sequenceDiagram
   participant A as Your agent
   participant M as Photon MCP
   participant F as Prescribe
-  A->>M: rx_intake (demographics, allergies, medications)
-  M-->>A: patientId
-  A->>M: rx_search ("semaglutide")
-  M-->>A: templates and catalog matches
-  A->>M: rx_draft (patientId, treatment, sig, quantity)
-  M-->>A: prescriptionId, screening status
+  A->>M: patient (sync identity and clinical context)
+  M-->>A: patient.id, candidates, changes
+  A->>M: prescription (patient, treatment.name)
+  M-->>A: medication choices, changes
+  A->>M: prescription (selected treatment, confirmed details)
+  M-->>A: prescription.id, screening, changes
   F->>F: PhotonOrder with the drafts
   Note over F: prescriber reviews, signs, sends
 ```
@@ -36,19 +36,15 @@ https://ai.neutron.health
 
 The agent authenticates like any other caller. A backend agent uses a [machine token](/authentication#machine-tokens). An agent that runs in a prescriber's MCP client, such as Claude or ChatGPT, signs in as that prescriber. See [Connect a client](/network/mcp/connect).
 
-## 2. Intake, search, draft
+## 2. Sync the patient and draft prescriptions
 
-The agent calls three tools, in order:
+Use `patient` to sync the patient: find, create or update from the encounter context. Match an existing patient before creating a new record. Supply known allergies, medication history and diagnoses when available.
 
-| Tool | Does | Returns |
-| --- | --- | --- |
-| `rx_intake` | Finds or adds the patient and records allergies and medications, so drafts are screened against them | `patientId` |
-| `rx_search` | Finds your organization's templates and catalog drugs by name and strength. It doesn't need a patient. | Options, each with a `treatment` |
-| `rx_draft` | Drafts one unsigned prescription from a chosen `treatment`, which needs `instructions`, `dispenseQuantity` and `dispenseUnit`, and screens it | `prescriptionId` and `ready`, `warning` or `blocked` |
+Then call `prescription` with `treatment.name` and the resolved `patient.id`. Search before asking for missing dosage, directions or dispense details. If identity is unresolved, you can search without a patient and attach one later.
 
-Each tool's inputs and outputs are in [Prescribing tools](/network/mcp/prescribing). Photon makes the decisions here as well. When it isn't sure which patient or drug is meant, the tool fails closed and tells the agent what to ask or send next. Agents should never invent ids, sigs or quantities.
+Use returned choices and `changes.unapplied` to complete the draft. Keep any returned prescription ID and resend pending fields when resolving a choice. Show draft defaults and screening to the prescriber for review; don't invent missing clinical details or treat a medication match as a complete screen.
 
-If the agent learns something safety-relevant after drafting, such as a new allergy, it calls `rx_intake` again and redrafts.
+If the encounter changes, update the patient and prescription as needed, then obtain a fresh review. See [Prescribing tools](/network/mcp/prescribing) for input examples and continuation rules.
 
 ## 3. Hand the drafts to a prescriber
 
@@ -77,8 +73,10 @@ iframe.src = ph.order.frame({
 
 </CodeGroup>
 
-To hand over a single id instead, put the drafts on a draft order from your backend ([step 2 of One-click orders](/integrations/one-click-orders#2-put-the-prescriptions-on-an-order)) and open `order="ord_…"`.
+To hand over a single ID, call the MCP [`order` tool](/network/mcp/prescribing#order) with the patient and prescription IDs, then open the returned order in Prescribe. The call may resume an existing draft, so review every prescription it returns.
 
 ## Sending from the agent
 
-When the agent runs as the prescriber, it can send without Prescribe. `rx_send` takes the reviewed drafts and the prescriber's explicit confirmation, and Photon checks on the server that the token belongs to a prescriber. A machine token can't send. See [`rx_send`](/network/mcp/prescribing#rx_send).
+An agent acting for a signed-in prescriber can use the same MCP tools for finalization after explicit review and approval. A separate `prescription` call can optionally sign reviewed content using its content hash. `order` with only `id` and `state: "SUBMITTED"` requests submission. Photon enforces authorization and signing requirements as part of sending; the user does not need to request a draft or a separate signing step.
+
+Don't ask for a pharmacy unless the user explicitly requests a destination. Read back with `orders` and distinguish submission from pharmacy receipt. See [Sign a reviewed prescription](/network/mcp/prescribing#sign-a-reviewed-prescription) and [Submit the reviewed order](/network/mcp/prescribing#submit-the-reviewed-order).

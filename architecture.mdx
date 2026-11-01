@@ -63,7 +63,7 @@ The send has a different name on each surface, but it's always the same operatio
 | iframe | The `PhotonOrder.onSent` message |
 | JavaScript client | `order.submit()` |
 | GraphQL | `order` with `state: SUBMITTED` |
-| MCP | `rx_send` |
+| MCP | `order` with `id` and `state: SUBMITTED` |
 | Webhooks | `photon:order:created` |
 
 Anyone can draft. Signing needs a prescriber, and sending needs the `write:order` permission. See [Authentication](/authentication#permissions).
@@ -78,7 +78,7 @@ Each record has one upsert. You call it in one of three ways, and they work the 
 | **Sync** | Whatever you know, with or without an id | Finds, matches, creates or updates the record. Photon decides which. |
 | **Update** | An id and the fields to change | Changes only those fields on that record. |
 
-Prescribe, GraphQL and MCP all use the same three calls. A React component given an id runs a get. Given fields, it runs a sync. Given both, it runs an update.
+Prescribe and GraphQL support these three forms. A React component given an id runs a get. Given fields, it runs a sync. Given both, it runs an update. MCP exposes `patient`, `prescription` and `order` as mutation tools that require fields beyond an ID; use its read-only `orders` tool for order lookup. See [MCP tools](/network/mcp#four-tools).
 
 ## Photon makes the decisions
 

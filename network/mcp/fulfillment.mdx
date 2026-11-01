@@ -1,48 +1,86 @@
 ---
-title: "Fulfillment tools"
+title: "Order status and pharmacies"
 sidebarTitle: "Fulfillment"
-description: "rx_shop and rx_route: an order's status, pharmacy prices, and routing."
+description: "Fetch prescription orders, check their progress and update an explicitly requested pharmacy."
 icon: "truck"
 ---
 
-After an order is sent, the patient chooses a pharmacy from the link Photon texts them. Your agent doesn't have to do anything. When the agent should help choose or change the pharmacy, use `rx_shop` to look and `rx_route` to decide.
+Use `orders` when a clinician asks about an existing order, pharmacy availability or price. Shopping is optional; it is not a routine prerequisite for prescribing.
 
-Use them in the order `rx_shop` → `rx_route` → `rx_shop`, ending with a read that confirms the route.
+## orders
 
-## rx_shop
+**Fetch orders and available pharmacies without changing a record.** Fetch one order by ID:
 
-Read-only. It works for a prescriber, a patient, or an agent acting for either. Send `orderId`, `pharmacySearch`, or both.
+```json
+{ "id": "ord_existing" }
+```
 
-| Input | Notes |
+Or fetch submitted orders for a synced patient:
+
+```json
+{
+  "filter": {
+    "patient": { "id": "pat_resolved" },
+    "state": "SUBMITTED"
+  },
+  "limit": 10
+}
+```
+
+The response contains an `orders` array, plus any warnings and review link. Select the intended order before requesting pharmacy options; don't mix offers from different orders.
+
+### Compare pharmacies
+
+Request options for the selected order, for example pickup near a postal code:
+
+```json
+{
+  "id": "ord_existing",
+  "availablePharmacies": {
+    "pharmacy": {
+      "near": { "address": { "postalCode": "10001" } },
+      "fulfillmentType": "PICK_UP"
+    },
+    "page": { "limit": 10, "offset": 0 }
+  }
+}
+```
+
+| Input | Use |
 | --- | --- |
-| `orderId` | Returns the order's status, and its offers when it can still be rerouted |
-| `pharmacySearch.name` | Search by pharmacy name |
-| `pharmacySearch.location` | `{ latitude, longitude, radius }`, with `radius` in miles (default 10). Needed to price pharmacies near the patient, so convert their address to coordinates first. |
-| `pharmacySearch.fulfillmentType` | `PICK_UP` or `MAIL_ORDER` |
-| `pharmacySearch.openAt` | An ISO 8601 date and time. Only pharmacies open then are returned. |
-| `pharmacySearch.includePrice` | Defaults to `true` |
-| `pharmacySearch.limit` | 1 to 20. Defaults to 10. |
+| `id` | Exact order to read or shop. |
+| `filter.patient.id`, `filter.state` | Narrow an order list. |
+| `limit` | Maximum orders to return. |
+| `availablePharmacies.pharmacy` | Optional pharmacy filters, such as `name`, `near` and `fulfillmentType`. |
+| `availablePharmacies.page` | Pharmacy page `limit` and `offset`. |
 
-A pharmacy search needs a `name` or a `location`. The server doesn't convert addresses to coordinates.
+Read `availablePharmacies.options` and use `nextOffset` for the next page. Preserve sponsored and matching labels, price source and delivery estimates. A missing price is not zero, and an offer is not a guaranteed price. Without a pharmacy filter, results can include sponsored options.
 
-With an `orderId`, the response's `status` includes:
+Order status can remain available when shopping is unavailable. Report the returned warning and keep the successful status result; don't substitute another order's offers or use a mutation to search for pharmacies.
 
-- the order's state: `ROUTING`, `PENDING`, `PLACED`, `COMPLETED`, `CANCELED` or `ERROR`
-- `isReroutable`, which says whether the order can still change pharmacy
-- the `patient` (with the address on their record), the `deliveryAddress`, and the `prescribers`
+## Pharmacy changes
 
-Offers come back only while `isReroutable` is true. Pharmacies include `price` and `retailPrice` when pricing is available.
+Use `order` only after the user explicitly chooses a destination for that order. Resolve the pharmacy ID from `orders` or another trusted source:
 
-## rx_route
+```json
+{
+  "id": "ord_existing",
+  "pharmacy": { "pharmacy": { "id": "phr_selected" } }
+}
+```
 
-Sends an order to the chosen pharmacy. For an order that hasn't been routed yet, it sets the pharmacy. After that, it reroutes.
+Send the pharmacy change separately from patient, prescription or submission changes. Clarify an ambiguous destination, but don't ask for a pharmacy just because none was supplied. Omission keeps the existing assignment; `pharmacy.none: true` requests removal and should only be used when explicitly requested.
 
-| Input | Notes |
+Inspect applied and unapplied changes and the resulting pharmacy. Read the order again with `orders` to confirm the assignment. Photon decides whether the order can be routed or rerouted.
+
+## Explain the current status
+
+| Returned state | What it establishes |
 | --- | --- |
-| `orderId` | The order |
-| `pharmacyId` | From `rx_shop`, or another trusted source |
-| `confirmed` | Must be `true`. Set it only after the patient, prescriber or delegated agent has confirmed the pharmacy. |
-| `reason` | Optional, such as `"closest"` or `"lowest price"` |
-| `selectedBasedOnPrice` | Optional. Set it to `true` when price decided the pharmacy. |
+| Prescription `signing.state: SIGNED` | The prescription is signed. It does not establish order submission. |
+| Order `state: DRAFT` | The order has not been submitted. |
+| Order `state: SUBMITTED` | Photon accepted submission. It does not establish pharmacy receipt. |
+| `pharmacy` | The assigned destination, when present. Assignment alone does not confirm delivery. |
+| `fulfillment` | Available fulfillment state, history, routability and exceptions. Use these to describe pharmacy progress. |
 
-The response's `operation` is `SET_PHARMACY`, `REROUTE` or `UNCHANGED`. It also says whether the change was only accepted or was confirmed by a follow-up read. Call `rx_shop` afterward to check.
+If `fulfillment` is `null` or its history is empty, don't claim the pharmacy received the prescription. Report the last confirmed milestone. Use [webhooks](/network/webhooks) when your integration needs ongoing updates.

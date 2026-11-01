@@ -65,7 +65,7 @@ Neutron runs the same API, schema, permissions and workflow rules as production,
 | Webhooks | No `order:placed`, `order:fulfillment` or `order:completed`, because orders never reach a pharmacy | Every event |
 | Prices | Real when a pharmacy returns one, but many options have none | Real |
 | Screening | The same as production | |
-| MCP `rx_send` | Creates test orders only | Sends real orders |
+| MCP `order` submission | Creates test orders only | Submits real orders |
 | Patients | Use fake patients only | Real patients |
 | Accounts, teams, catalog, templates | Separate. Nothing carries over. | Separate |
 | Credentials and webhook subscriptions | Separate. Set them up again for production. | Separate |

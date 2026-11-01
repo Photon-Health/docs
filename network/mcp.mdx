@@ -1,64 +1,52 @@
 ---
 title: "MCP"
-description: "Prescribe from Claude, ChatGPT or your own agent with Photon's MCP server."
+description: "Send prescriptions with Photon from ChatGPT, Claude or your own agent."
 icon: "robot"
 tag: "Preview"
 sidebarTitle: "Overview"
 ---
 
 <Note>
-  MCP is open to every Neutron account. In production, it's in **private preview**: to get access, ask your Photon contact. These pages describe the tools as they are today, and they'll change as MCP is rebuilt on the new Network API.
+  MCP is available to every Neutron account for testing. Production MCP is in **private preview** and currently supports ChatGPT and Claude. Contact [support@photon.health](mailto:support@photon.health) for access or to request approval for another client.
 </Note>
 
-Photon's MCP server gives an AI assistant or agent a few prescribing tools. A clinician can prescribe from Claude or ChatGPT, and your own agent can take intake and draft prescriptions for a prescriber to send.
+Send prescriptions with Photon from ChatGPT, Claude or your own agent. Ask for the prescription you want to send. Drafting and review are built into the flow; you do not need to request them separately. You can complete the flow in the conversation or continue in [Prescribe](/prescribe/overview).
 
-> Prescribe amlodipine 5 mg daily for Paige Turner, born 1990-01-01.
+Start with what you know:
 
-From a request like that, the agent finds the patient, finds the medication, drafts the prescription, shows the screening results, and sends once the prescriber confirms.
+> Send a prescription for amlodipine to Paige Turner.
 
-<Frame>
-  <iframe src="https://www.loom.com/embed/8216d63e7d15431cb725593c893e7327" width="100%" height="400" frameBorder="0" allowFullScreen />
-</Frame>
+Patient sync, medication search and order preparation are steps within that prescribing flow. The agent searches before asking for missing dosage, instructions or quantity, then gathers the details needed for the prescriber to review and approve.
 
-## The flow
+## Four tools
 
-```mermaid
-flowchart LR
-  I[rx_intake] --> S[rx_search] --> D[rx_draft] --> X[rx_send]
-  X --> Sh[rx_shop] --> R[rx_route]
-```
+| Tool | Step |
+| --- | --- |
+| [`patient`](/network/mcp/prescribing#patient) | **Sync patients:** find, create or update the patient from the context you provide. |
+| [`prescription`](/network/mcp/prescribing#prescription) | **Draft/sign prescriptions:** start with a drug name and complete the draft. Separate signing is optional. |
+| [`order`](/network/mcp/prescribing#order) | **Draft and send orders:** assemble prescriptions, review the complete order, then send after approval. |
+| [`orders`](/network/mcp/fulfillment#orders) | **Fetch orders:** retrieve order status and available pharmacy options without changing a record. |
 
-| Tool | Does | Page |
+The three singular tools can change records. `orders` is read-only. Standalone signing through `prescription` is optional; Photon enforces signing requirements when you send the order. Search and ordinary draft edits do not send a prescription.
+
+## Connect
+
+| Environment | Server URL | Client access |
 | --- | --- | --- |
-| `rx_intake` | Finds or adds the patient and records allergies and medications | [Prescribing](/network/mcp/prescribing#rx_intake) |
-| `rx_search` | Finds templates and medications by name | [Prescribing](/network/mcp/prescribing#rx_search) |
-| `rx_draft` | Drafts one prescription and screens it | [Prescribing](/network/mcp/prescribing#rx_draft) |
-| `rx_send` | Sends reviewed drafts after the prescriber confirms | [Prescribing](/network/mcp/prescribing#rx_send) |
-| `rx_shop` | Reads an order's status, offers and nearby pharmacies | [Fulfillment](/network/mcp/fulfillment#rx_shop) |
-| `rx_route` | Sends an order to the chosen pharmacy | [Fulfillment](/network/mcp/fulfillment#rx_route) |
+| Neutron — sandbox | `https://ai.neutron.health` | Any compatible client; dynamic CIMD is enabled. Test prescriptions only. |
+| Photon — production | `https://ai.photon.health` | Approved ChatGPT and Claude clients during private preview. |
 
-## Server
+Use an MCP client with Streamable HTTP support. See [Connect a client](/network/mcp/connect) for sign-in, client approval and the upcoming production plugins.
 
-| Environment | URL | Access |
-| --- | --- | --- |
-| Neutron | `https://ai.neutron.health` | Every sandbox account |
-| Photon | `https://ai.photon.health` | Private preview. Ask your Photon contact. |
+## How the workflow fits together
 
-The server speaks MCP over streamable HTTP and supports OAuth discovery. See [Connect a client](/network/mcp/connect).
+1. **`patient` → sync.** Find, create or update the patient using known identity and clinical context. Match an existing patient before creating a new one.
+2. **`prescription` → draft/sign.** Start with a drug name. Include the synced patient when available so Photon has recorded allergies, medication history and benefits for the prescribing workflow. Drafting and review are built in; confirm or correct any defaults. A separate signing call is optional. You can search without a patient and attach one later.
+3. **`order` → draft/send.** Assemble the prescriptions and review the entire returned order, including screening and unapplied changes. Send with an explicit submission call after the prescriber approves.
+4. **`orders` → fetch.** Fetch the order to confirm its current state. Submission, pharmacy assignment and pharmacy receipt are separate milestones.
 
-## Who's calling
+Don't ask for a pharmacy as a routine prescribing step. Only include a destination on `order` when the user explicitly specifies one. Photon handles the fulfillment link and any fallback to a saved preference.
 
-| Token | From | Can |
-| --- | --- | --- |
-| A prescriber's sign-in | Claude or ChatGPT, added as a custom connector. Other clients, such as a scribe, must be allowlisted on your Application credential. | Every tool, including `rx_send` |
-| A [machine token](/authentication#machine-tokens) | Your backend agent | Intake, search and draft. It can't send, so a prescriber sends from [Prescribe](/prescribe/overview). |
+Photon enforces permissions for every action. For an agent running on your backend, use your existing [API credentials](/authentication#machine-tokens) to prepare drafts, then hand them to a prescriber in [Prescribe](/integrations/agent-drafted-orders). Machine tokens cannot sign prescriptions.
 
-The server passes your token to Photon's API, and the API enforces what it can do. Agents shouldn't ask a prescriber to prove they're authorized, or refuse to send because a send transmits a prescription. Photon makes that check.
-
-## Rules for agents
-
-- **Photon decides.** When a patient or drug is ambiguous, the tool fails closed and says what to ask next. Never invent ids, instructions, quantities or units.
-- **The agent holds the conversation.** The server keeps no state between calls. Records live in Photon, and the agent passes `patientId` and the draft fields from one call to the next.
-- **The prescriber sends.** The agent drafts. Only the prescriber's explicit confirmation sends, either with `rx_send` or in [Prescribe](/prescribe/overview).
-- **Don't ask for a pharmacy or address before sending.** The patient chooses a pharmacy after the order exists. Use `rx_shop` and `rx_route` if you need to route it.
-- **Neutron never sends real prescriptions.** In the sandbox, `rx_send` creates test orders only.
+The agent retains the conversation and carries returned record IDs between calls. Photon stores the records. If a call returns choices or unapplied fields, resolve them and send those fields again with the appropriate ID.
