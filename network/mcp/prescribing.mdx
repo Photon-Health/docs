@@ -15,6 +15,8 @@ The JSON examples below are tool arguments. Replace placeholder IDs with IDs ret
 
 **Sync a patient: find, create or update.** First try to match an existing patient using context already available, such as name, date of birth or phone. Don't ask the clinician to repeat known information or create a new record before attempting a match.
 
+To create a patient, only **first name, last name, date of birth and phone number** are required (`demographic.name.first`, `demographic.name.last`, `demographic.dateOfBirth` and `demographic.phone`). Other demographic and clinical fields are optional. You can start matching an existing patient with fewer details, as in this example:
+
 ```json
 {
   "demographic": {
