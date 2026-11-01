@@ -9,13 +9,15 @@ icon: "plug"
 1. [Create a Neutron account](https://photonhealth.com/onboard#developer).
 2. Add a remote MCP connection in your client with the URL `https://ai.neutron.health`.
 3. Choose OAuth sign-in and sign in with your Neutron account. Select the organization you want to work in when prompted.
-4. Enable the connection in your conversation and use synthetic patients to test.
+4. Enable the connection in your conversation and ask it to send a prescription.
 
-Neutron creates test prescriptions only. Any compatible client can connect: it must support Streamable HTTP and CIMD for OAuth sign-in, or accept an existing Photon bearer token.
+Neutron uses the same tools and prescribing workflow as production. An environment notice in the tool descriptions signals that Neutron creates test orders only; you do not need to say "test patient" or use special wording in your request.
+
+Any compatible client can connect: it must support Streamable HTTP and CIMD for OAuth sign-in, or accept an existing Photon bearer token.
 
 Try:
 
-> Send a prescription for amlodipine to test patient Paige Turner.
+> Send a prescription for amlodipine to Paige Turner.
 
 The assistant uses `patient` to sync (find, create or update), `prescription` to draft/sign, `order` to draft/send, and `orders` to fetch the result. Drafting and review are built into the send flow, so you don't need to ask for a draft separately. A standalone `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
 
