@@ -63,8 +63,8 @@ mutation Order($order: OrderInput!, $metadata: RequestMetadata!) {
 ```json Draft
 {
   "order": {
-    "patient": { "id": "pat_01M3WQQHRB1T0K1469KD18BAWX" },
-    "prescriptions": { "add": [{ "id": "rx_01M3WT4NERS2YVQRF6YTWR4A6C" }] }
+    "patient": { "id": "pat_EXAMPLE_ID" },
+    "prescriptions": { "add": [{ "id": "rx_EXAMPLE_ID" }] }
   },
   "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
 }
@@ -73,8 +73,8 @@ mutation Order($order: OrderInput!, $metadata: RequestMetadata!) {
 ```json Add a prescription
 {
   "order": {
-    "id": "ord_01M3WT5GK51DBRH7ZKBKBV9QWK",
-    "prescriptions": { "add": [{ "id": "rx_01M3WT515TQ3D1348GGS70MV1Z" }] }
+    "id": "ord_EXAMPLE_ID",
+    "prescriptions": { "add": [{ "id": "rx_EXAMPLE_ID_2" }] }
   },
   "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
 }
@@ -82,7 +82,7 @@ mutation Order($order: OrderInput!, $metadata: RequestMetadata!) {
 
 ```json Send
 {
-  "order": { "id": "ord_01M3WT5GK51DBRH7ZKBKBV9QWK", "state": "SUBMITTED" },
+  "order": { "id": "ord_EXAMPLE_ID", "state": "SUBMITTED" },
   "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
 }
 ```
@@ -166,7 +166,7 @@ Check `fulfillment.routability` before moving a `SUBMITTED` order. If `allowed` 
 
 ```json
 "pharmacy": {
-  "pharmacy": { "id": "phr_01GA9HPXGSXZYRBZT6TDCVT3QT" },
+  "pharmacy": { "id": "phr_EXAMPLE_ID" },
   "reason": { "type": "OUT_OF_STOCK" }
 }
 ```

@@ -15,9 +15,9 @@ sequenceDiagram
   participant N as Photon Network
   participant F as Your frontend (Prescribe)
   B->>N: patient sync (demographics, allergies, medications)
-  N-->>B: pat_…
-  Note over B: store pat_… with your patient
-  F->>N: PhotonOrder patient="pat_…"
+  N-->>B: pat_EXAMPLE_ID
+  Note over B: store pat_EXAMPLE_ID with your patient
+  F->>N: PhotonOrder patient="pat_EXAMPLE_ID"
 ```
 
 ## 1. Sync the patient
@@ -126,7 +126,7 @@ Sync whenever the patient changes in your system, such as a new allergy, a new m
 | To | Send |
 | --- | --- |
 | Add an allergy | `clinical: { allergies: { add: [{ rxNormId: "723" }] } }` |
-| Remove one | `clinical: { allergies: { remove: [{ id: "alg_…" }] } }` |
+| Remove one | `clinical: { allergies: { remove: [{ id: "alg_EXAMPLE_ID" }] } }` |
 | Record no known allergies | `clinical: { allergies: { none: true } }` |
 | Stop a medication | `clinical: { medications: { update: [{ rxNormId: "314076", status: "HISTORICAL" }] } }` |
 | Change contact details | `contact: { phone: "+13175550199" }` |

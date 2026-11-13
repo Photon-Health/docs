@@ -66,7 +66,7 @@ mutation Patient($patient: PatientInput!, $metadata: RequestMetadata!) {
 
 ```json Get
 {
-  "patient": { "id": "pat_01M3WQQHRB1T0K1469KD18BAWX" },
+  "patient": { "id": "pat_EXAMPLE_ID" },
   "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
 }
 ```
@@ -74,7 +74,7 @@ mutation Patient($patient: PatientInput!, $metadata: RequestMetadata!) {
 ```json Update
 {
   "patient": {
-    "id": "pat_01M3WQQHRB1T0K1469KD18BAWX",
+    "id": "pat_EXAMPLE_ID",
     "contact": { "phone": "+13175550199" },
     "clinical": { "allergies": { "none": true } }
   },

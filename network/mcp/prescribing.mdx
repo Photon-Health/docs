@@ -46,7 +46,7 @@ Don't ask for a pharmacy during patient sync. Only authenticated patient account
 
 ```json
 {
-  "patient": { "id": "pat_resolved" },
+  "patient": { "id": "pat_EXAMPLE_ID" },
   "treatment": { "name": "amlodipine" }
 }
 ```
@@ -77,7 +77,7 @@ Photon may populate draft directions or dispense details with defaults. Show the
 
 ```json
 {
-  "id": "rx_draft",
+  "id": "rx_EXAMPLE_ID",
   "signing": {
     "signedHash": "<signing.contentHash from the reviewed prescription>"
   }
@@ -92,8 +92,8 @@ Inspect the returned `prescription.signing.state` and unapplied changes before r
 
 ```json
 {
-  "patient": { "id": "pat_resolved" },
-  "prescriptions": { "add": [{ "id": "rx_draft" }] }
+  "patient": { "id": "pat_EXAMPLE_ID" },
+  "prescriptions": { "add": [{ "id": "rx_EXAMPLE_ID" }] }
 }
 ```
 
@@ -115,7 +115,7 @@ The patient must have a phone number before you send an order. If it is missing,
 
 ```json
 {
-  "id": "pat_resolved",
+  "id": "pat_EXAMPLE_ID",
   "contact": { "phone": "+12025550123" }
 }
 ```
@@ -126,7 +126,7 @@ After the prescriber approves the complete order, call `order` with only its ID 
 
 ```json
 {
-  "id": "ord_prepared",
+  "id": "ord_EXAMPLE_ID",
   "state": "SUBMITTED"
 }
 ```

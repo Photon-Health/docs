@@ -34,11 +34,11 @@ Each card takes its records (`patient`, `prescription`, `order`) the same way, a
 
 | You pass | Example | Prescribe |
 | --- | --- | --- |
-| An id | `"pat_01M3WQ…"` | Opens that record (get) |
+| An id | `"pat_EXAMPLE_ID"` | Opens that record (get) |
 | Fields, no id | `{ demographic: { name, dateOfBirth, sex } }` | Finds, matches or adds it (sync) |
-| An id with fields | `{ id: "pat_01M3WQ…", demographic: { phone } }` | Updates only those fields (update) |
+| An id with fields | `{ id: "pat_EXAMPLE_ID", demographic: { phone } }` | Updates only those fields (update) |
 
-These are the same [get, sync and update](/architecture#get-sync-and-update) calls the API uses, with the same field names. An order can also take prescriptions, either drafts by id (`{ id: "rx_…" }`) or new ones from a template (`{ templateId }`).
+These are the same [get, sync and update](/architecture#get-sync-and-update) calls the API uses, with the same field names. An order can also take prescriptions, either drafts by id (`{ id: "rx_EXAMPLE_ID" }`) or new ones from a template (`{ templateId }`).
 
 ## Environments
 

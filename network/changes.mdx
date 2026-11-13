@@ -63,14 +63,14 @@ When a name fits several things (a drug, an allergen, a pharmacy), Photon doesn'
       "displayName": "Ibuprofen Oral Tablet 800 MG",
       "operation": "prescription",
       "argument": "treatment.id",
-      "value": "med_01M3D93NFGCZJPQ3XW3AF7578G",
+      "value": "med_EXAMPLE_ID",
       "matchReasons": [{ "type": "FUZZY_NAME_MATCH", "label": "Name match", "confidence": "MEDIUM" }]
     },
     {
       "displayName": "Ibuprofen-Famotidine Oral Tablet 800-26.6 MG",
       "operation": "prescription",
       "argument": "treatment.id",
-      "value": "med_01M3D93NFN58DDG2KZ7HX647WN",
+      "value": "med_EXAMPLE_ID_2",
       "matchReasons": [{ "type": "FUZZY_NAME_MATCH", "label": "Name match", "confidence": "LOW" }]
     }
   ]
@@ -79,7 +79,7 @@ When a name fits several things (a drug, an allergen, a pharmacy), Photon doesn'
 
 For a drug, an option's `entity` is a `Treatment` with its brand, form and strength in separate fields (see [Choosing the drug](/network/prescription#choosing-the-drug)).
 
-Each option says exactly what to do: in the input of the `operation` mutation, set the `argument` path to `value`, then resend. Here that means resending with `treatment: { id: "med_01M3D93NFGCZJPQ3XW3AF7578G" }` in place of the name.
+Each option says exactly what to do: in the input of the `operation` mutation, set the `argument` path to `value`, then resend. Here that means resending with `treatment: { id: "med_EXAMPLE_ID" }` in place of the name.
 
 **A single match can ask too.** A name that matches one thing, but not exactly, comes back `AMBIGUOUS` with one option and the `CONFIRMATION_REQUIRED` category. A drug, allergen or diagnosis name attaches on its own only when it's exactly that entry's name. A pharmacy search never picks a pharmacy on its own, even with one match: only a pharmacy `id` does.
 

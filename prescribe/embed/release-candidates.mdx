@@ -55,7 +55,7 @@ import { PhotonOrder, PhotonProvider } from "@photonhealth/react";
 import "@photonhealth/react/styles.css";
 
 <PhotonProvider clientId="YOUR_CLIENT_ID" environment="neutron">
-  <PhotonOrder patient="pat_…" onSent={() => closeDialog()} />
+  <PhotonOrder patient="pat_EXAMPLE_ID" onSent={() => closeDialog()} />
 </PhotonProvider>;
 ```
 
@@ -63,7 +63,7 @@ import "@photonhealth/react/styles.css";
 import { photon } from "@photonhealth/client";
 
 const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
-const patient = await ph.patient.get("pat_…");
+const patient = await ph.patient.get("pat_EXAMPLE_ID");
 ```
 
 </CodeGroup>

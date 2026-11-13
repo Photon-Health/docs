@@ -42,7 +42,7 @@ Wrap the cards in one provider. It signs the prescriber in and gives every card 
 | --- | --- | --- |
 | `clientId` | `string` | Your Application `client_id`. Public, not a secret. |
 | `environment` | `"neutron" \| "photon"` | Defaults to `"photon"` (production). Set `"neutron"` while you build. |
-| `organization` | `string` | Sign in straight to this organization (`org_…`), skipping the organization picker. Links from `usePhoton()` carry it too. |
+| `organization` | `string` | Sign in straight to this organization (`org_EXAMPLE_ID`), skipping the organization picker. Links from `usePhoton()` carry it too. |
 | `client` | `Photon` | Your own [JavaScript client](/prescribe/embed/javascript) instead of `clientId`, for example when you sign in yourself. |
 | `components` | `Partial<PhotonComponents>` | Your design system's building blocks. See [Styling](/prescribe/embed/styling). |
 | `onAuth` | `({ ok, error }) => void` | Whether Photon accepted the prescriber's token. |
@@ -66,7 +66,7 @@ The patient, a card for each prescription, then the send button: **Send prescrip
 | Prop | Type | Description |
 | --- | --- | --- |
 | `patient` | `string \| PatientInput \| Patient` | Who a new order is for. Without it, the prescriber finds or adds someone. |
-| `order` | `string \| OrderInput \| Order` | An existing order by id, or a new one with prescriptions: `{ patient, prescriptions: { add: [{ templateId }, { id: "rx_…" }] } }`. |
+| `order` | `string \| OrderInput \| Order` | An existing order by id, or a new one with prescriptions: `{ patient, prescriptions: { add: [{ templateId }, { id: "rx_EXAMPLE_ID" }] } }`. |
 | `fixed` | `boolean` | Hides **Change patient**. Use it beside your own view of the patient. |
 | `onPatient` | `(patient \| null) => void` | The patient once Photon has a record, and again when it changes. `null` on **Change patient**. |
 | `onOrder` | `(order) => void` | The order once it, its patient or a prescription has a record, and again when any of them changes. |

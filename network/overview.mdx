@@ -31,9 +31,9 @@ Each record has one GraphQL mutation, and how you call it decides what it does:
 
 | Mutation | Record | Reference |
 | --- | --- | --- |
-| `patient(patient:, metadata:)` | Patient `pat_…` | [Patient](/network/patient) |
-| `prescription(prescription:, metadata:)` | Prescription `rx_…` | [Prescription](/network/prescription) |
-| `order(order:, metadata:)` | Order `ord_…` | [Order](/network/order) |
+| `patient(patient:, metadata:)` | Patient `pat_EXAMPLE_ID` | [Patient](/network/patient) |
+| `prescription(prescription:, metadata:)` | Prescription `rx_EXAMPLE_ID` | [Prescription](/network/prescription) |
+| `order(order:, metadata:)` | Order `ord_EXAMPLE_ID` | [Order](/network/order) |
 
 MCP exposes these records through three mutation tools, plus read-only tools for orders and organizations. Its mutation tools do not accept ID-only fetch calls. See [MCP tools](/network/mcp#tools).
 
