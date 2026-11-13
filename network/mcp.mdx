@@ -18,17 +18,17 @@ Start with what you know:
 
 Patient sync, medication search and order preparation are steps within that prescribing flow. The agent searches before asking for missing dosage, instructions or quantity, then gathers the details needed for the prescriber to review and approve.
 
-## Five tools
+## Tools
 
 | Tool | Step |
 | --- | --- |
-| [`organizations`](/network/mcp/connect#organizations) | **Choose an organization:** list memberships and invites, and sign in to the organization you want to work in. |
 | [`patient`](/network/mcp/prescribing#patient) | **Sync patients:** find, create or update the patient from the context you provide. |
 | [`prescription`](/network/mcp/prescribing#prescription) | **Draft/sign prescriptions:** start with a drug name and complete the draft. Separate signing is optional. |
 | [`order`](/network/mcp/prescribing#order) | **Draft and send orders:** assemble prescriptions, review the complete order, then send after approval. |
 | [`orders`](/network/mcp/fulfillment#orders) | **Fetch orders:** retrieve order status and available pharmacy options without changing a record. |
+| [`organizations`](/network/mcp/connect#organizations) | **Choose an organization:** list memberships and invites, and sign in to the organization you want to work in. |
 
-The three singular tools can change records. `orders` and `organizations` are read-only. Organization selection starts a new sign-in; it does not move records between organizations. Standalone signing through `prescription` is optional; Photon enforces signing requirements when you send the order. Search and ordinary draft edits do not send a prescription.
+The three singular tools can change records. `orders` and `organizations` are read-only. Standalone signing through `prescription` is optional; Photon enforces signing requirements when you send the order. Search and ordinary draft edits do not send a prescription.
 
 ## Connect
 
@@ -40,8 +40,6 @@ The three singular tools can change records. `orders` and `organizations` are re
 Use an MCP client with Streamable HTTP support. See [Connect a client](/network/mcp/connect) for the [production ChatGPT plugin](https://chatgpt.com/plugins/plugin_asdk_app_6ae536598d7481919dc43c9f44a112ad), organization sign-in and client approval.
 
 ## How the workflow fits together
-
-Provider work uses the organization the connection is signed in to. If none is selected, start with [`organizations`](/network/mcp/connect#organizations) before using the prescribing tools. You can also switch organizations during a conversation.
 
 1. **`patient` → sync.** Find, create or update the patient using known identity and clinical context. Match an existing patient before creating a new one.
 2. **`prescription` → draft/sign.** Start with a drug name. Include the synced patient when available so Photon has recorded allergies, medication history and benefits for the prescribing workflow. Drafting and review are built in; confirm or correct any defaults. A separate signing call is optional. You can search without a patient and attach one later.
@@ -55,5 +53,7 @@ Photon enforces permissions for every action. For an agent running on your backe
 Patient accounts are scoped to their own record. They cannot use medication search, draft or sign prescriptions, submit orders, or use `organizations`. Their order changes are limited to an explicitly chosen pharmacy on an existing order. Tool visibility does not grant permission.
 
 These tools do not place lab or imaging orders, cancel prescriptions, take or confirm payments, or file insurance appeals.
+
+If you need to switch organizations or the connection asks you to select one, use [`organizations`](/network/mcp/connect#organizations).
 
 The agent retains the conversation and carries returned record IDs between calls. Photon stores the records. If a call returns choices or unapplied fields, resolve them and send those fields again with the appropriate ID.
