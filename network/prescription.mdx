@@ -46,8 +46,8 @@ mutation Prescription($prescription: PrescriptionInput!, $metadata: RequestMetad
 ```json From a template
 {
   "prescription": {
-    "patient": { "id": "pat_EXAMPLE_ID" },
-    "templateId": "tmp_EXAMPLE_ID"
+    "patient": { "id": "pat_PATIENT_ID" },
+    "templateId": "tmp_TEMPLATE_ID"
   },
   "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
 }
@@ -56,7 +56,7 @@ mutation Prescription($prescription: PrescriptionInput!, $metadata: RequestMetad
 ```json From a treatment
 {
   "prescription": {
-    "patient": { "id": "pat_EXAMPLE_ID" },
+    "patient": { "id": "pat_PATIENT_ID" },
     "treatment": { "rxNormId": "861007" },
     "instructions": "Take 1 tablet by mouth twice daily with meals.",
     "dispense": { "quantity": 60, "unit": "tablet", "daysSupply": 30, "refillsAllowed": 2 },
@@ -76,7 +76,7 @@ mutation Prescription($prescription: PrescriptionInput!, $metadata: RequestMetad
 ```json Sign
 {
   "prescription": {
-    "id": "rx_EXAMPLE_ID",
+    "id": "rx_PRESCRIPTION_ID",
     "signing": { "signedHash": "211ce2887eb9ed5c3c383a1950617decd0e75acc33e258b85fae3f354ddea8f4" }
   },
   "metadata": { "source": "WEB_APP", "client": "acme-ehr" }
@@ -180,7 +180,7 @@ If the content changed after the prescriber reviewed it, the hashes don't match.
 | `clinical` | `{ diagnoses, notes }` | `diagnoses` is a patch of the ICD-10 codes that justify this prescription |
 | `signing` | `{ signedHash, message }` | See [Signing](#signing) |
 
-A prescription's `prescriber` is the prescriber assigned to it (`usr_EXAMPLE_ID`), with their `name`. It's null for drafts and when no prescriber is assigned, and it doesn't say who signed. `signing` does.
+A prescription's `prescriber` is the prescriber assigned to it (`usr_USER_ID`), with their `name`. It's null for drafts and when no prescriber is assigned, and it doesn't say who signed. `signing` does.
 
 <Accordion title="Full selection set">
 

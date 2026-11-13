@@ -14,7 +14,7 @@ Typical uses:
 - Follow up on orders that are canceled or hit an error
 
 <Note>
-  Drafts don't send webhooks. Events start when an order is sent (`state: SUBMITTED`). The order keeps the `ord_EXAMPLE_ID` id it had as a draft.
+  Drafts don't send webhooks. Events start when an order is sent (`state: SUBMITTED`). The order keeps the `ord_ORDER_ID` id it had as a draft.
 </Note>
 
 ## Subscribe
@@ -31,17 +31,17 @@ Photon sends one `POST` per event. The body is a JSON [CloudEvent](https://cloud
 
 ```json
 {
-  "id": "EXAMPLE_EVENT_ID",
+  "id": "EVENT_ID",
   "type": "photon:order:completed",
   "specversion": "1.0",
   "datacontenttype": "application/json",
   "time": "2026-10-08T01:00:00.000Z",
-  "subject": "ord_EXAMPLE_ID",
-  "source": "org:org_EXAMPLE_ID",
+  "subject": "ord_ORDER_ID",
+  "source": "org:org_ORGANIZATION_ID",
   "data": {
-    "id": "ord_EXAMPLE_ID",
-    "externalId": "EXAMPLE_EXTERNAL_ID",
-    "patient": { "id": "pat_EXAMPLE_ID", "externalId": "EXAMPLE_EXTERNAL_ID" }
+    "id": "ord_ORDER_ID",
+    "externalId": "EXTERNAL_ID",
+    "patient": { "id": "pat_PATIENT_ID", "externalId": "EXTERNAL_ID" }
   }
 }
 ```

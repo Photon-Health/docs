@@ -31,12 +31,12 @@ An order was sent. Each prescription on it becomes a fill.
 
 ```json
 "data": {
-  "id": "ord_EXAMPLE_ID",
-  "externalId": "EXAMPLE_EXTERNAL_ID",
-  "pharmacyId": "phr_EXAMPLE_ID",
-  "patient": { "id": "pat_EXAMPLE_ID", "externalId": "EXAMPLE_EXTERNAL_ID" },
+  "id": "ord_ORDER_ID",
+  "externalId": "EXTERNAL_ID",
+  "pharmacyId": "phr_PHARMACY_ID",
+  "patient": { "id": "pat_PATIENT_ID", "externalId": "EXTERNAL_ID" },
   "fills": [
-    { "id": "fil_EXAMPLE_ID", "prescription": { "id": "rx_EXAMPLE_ID", "externalId": "EXAMPLE_EXTERNAL_ID" } }
+    { "id": "fil_FILL_ID", "prescription": { "id": "rx_PRESCRIPTION_ID", "externalId": "EXTERNAL_ID" } }
   ]
 }
 ```
@@ -49,11 +49,11 @@ The order was sent to a pharmacy. If it's rerouted, you get this event again for
 
 ```json
 "data": {
-  "id": "ord_EXAMPLE_ID",
-  "externalId": "EXAMPLE_EXTERNAL_ID",
-  "patient": { "id": "pat_EXAMPLE_ID", "externalId": "EXAMPLE_EXTERNAL_ID" },
+  "id": "ord_ORDER_ID",
+  "externalId": "EXTERNAL_ID",
+  "patient": { "id": "pat_PATIENT_ID", "externalId": "EXTERNAL_ID" },
   "pharmacy": {
-    "id": "phr_EXAMPLE_ID_2",
+    "id": "phr_PHARMACY_ID_2",
     "name": "Example Pharmacy",
     "phone": "+15025550123",
     "address": { "street1": "4343 Test Street", "street2": null, "city": "Georgetown", "state": "KY", "postalCode": "40004" }
@@ -67,10 +67,10 @@ The pharmacy made progress. You get one event for each step.
 
 ```json
 "data": {
-  "id": "ord_EXAMPLE_ID",
-  "externalId": "EXAMPLE_EXTERNAL_ID",
+  "id": "ord_ORDER_ID",
+  "externalId": "EXTERNAL_ID",
   "fulfillment": { "type": "MAIL_ORDER", "state": "SHIPPED", "carrier": "USPS", "trackingNumber": "1LS729104296564" },
-  "patient": { "id": "pat_EXAMPLE_ID", "externalId": "EXAMPLE_EXTERNAL_ID" }
+  "patient": { "id": "pat_PATIENT_ID", "externalId": "EXTERNAL_ID" }
 }
 ```
 
@@ -99,10 +99,10 @@ Something went wrong with the order that needs attention.
 
 ```json
 "data": {
-  "id": "ord_EXAMPLE_ID",
-  "externalId": "EXAMPLE_EXTERNAL_ID",
+  "id": "ord_ORDER_ID",
+  "externalId": "EXTERNAL_ID",
   "reason": "…",
-  "patient": { "id": "pat_EXAMPLE_ID", "externalId": "EXAMPLE_EXTERNAL_ID" }
+  "patient": { "id": "pat_PATIENT_ID", "externalId": "EXTERNAL_ID" }
 }
 ```
 
@@ -116,10 +116,10 @@ A draft became an active prescription. Drafts themselves send no events.
 
 ```json
 "data": {
-  "id": "rx_EXAMPLE_ID",
-  "externalId": "EXAMPLE_EXTERNAL_ID",
-  "treatmentId": "med_EXAMPLE_ID",
-  "prescriberId": "usr_EXAMPLE_ID",
+  "id": "rx_PRESCRIPTION_ID",
+  "externalId": "EXTERNAL_ID",
+  "treatmentId": "med_MEDICATION_ID",
+  "prescriberId": "usr_USER_ID",
   "instructions": "Take once daily",
   "notes": "",
   "dispenseQuantity": 30,
@@ -130,7 +130,7 @@ A draft became an active prescription. Drafts themselves send no events.
   "daysSupply": 30,
   "effectiveDate": "2026-10-08",
   "expirationDate": "2027-10-08",
-  "patient": { "id": "pat_EXAMPLE_ID", "externalId": "EXAMPLE_EXTERNAL_ID" }
+  "patient": { "id": "pat_PATIENT_ID", "externalId": "EXTERNAL_ID" }
 }
 ```
 

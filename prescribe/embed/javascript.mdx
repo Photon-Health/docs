@@ -51,7 +51,7 @@ const ph = photon({
   auth: {
     clientId: process.env.PHOTON_CLIENT_ID,
     clientSecret: process.env.PHOTON_CLIENT_SECRET,
-    organizationId: "org_EXAMPLE_ID",
+    organizationId: "org_ORGANIZATION_ID",
   },
 });
 
@@ -73,7 +73,7 @@ The client gets a machine token, keeps it until shortly before it expires, and g
 `ph.patient`, `ph.prescription` and `ph.order` each have the [same three calls](/architecture#get-sync-and-update):
 
 ```ts
-const existing = await ph.patient.get("pat_EXAMPLE_ID"); // read, change nothing
+const existing = await ph.patient.get("pat_PATIENT_ID"); // read, change nothing
 
 const { patient, candidates, changes } = await ph.patient.sync({
   demographic: { name: { first: "Paige", last: "Turner" }, dateOfBirth: "1990-01-01", sex: "FEMALE" },
@@ -93,7 +93,7 @@ Each record is a live object. `state` is the record, and `status` is `idle`, `lo
 ```ts
 const { prescription: rx } = await ph.prescription.sync({
   patient: { id: patient.id },
-  templateId: "tmp_EXAMPLE_ID",
+  templateId: "tmp_TEMPLATE_ID",
 });
 
 rx.subscribe(() => render(rx.state)); // re-render on every change
@@ -176,8 +176,8 @@ Anything Photon answers about your data comes back as a result. Only failures th
 `url()` builds a [deep link](/prescribe/app/deep-links) and `frame()` builds an [iframe](/prescribe/embed/iframe) URL. Each record's calls have both, and so does every live object:
 
 ```ts
-ph.patient.url("pat_EXAMPLE_ID"); // https://rx.neutron.health/patient/pat_EXAMPLE_ID
-ph.order.frame({ patient: { id: "pat_EXAMPLE_ID" } }); // https://rx.neutron.health/order/embed?patient=pat_EXAMPLE_ID&client=YOUR_CLIENT_ID
+ph.patient.url("pat_PATIENT_ID"); // https://rx.neutron.health/patient/pat_PATIENT_ID
+ph.order.frame({ patient: { id: "pat_PATIENT_ID" } }); // https://rx.neutron.health/order/embed?patient=pat_PATIENT_ID&client=YOUR_CLIENT_ID
 order.url(); // a live order you already have
 ph.url.parse(href); // what a link opens, read back
 ```

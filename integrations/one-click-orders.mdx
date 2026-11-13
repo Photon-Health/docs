@@ -13,14 +13,14 @@ sequenceDiagram
   participant N as Photon Network
   participant F as Prescribe
   B->>N: prescription sync (patient + templateId)
-  N-->>B: rx_EXAMPLE_ID (draft)
-  B->>N: order sync (patient + rx_EXAMPLE_ID)
-  N-->>B: ord_EXAMPLE_ID (DRAFT)
-  F->>N: PhotonOrder order="ord_EXAMPLE_ID"
+  N-->>B: rx_PRESCRIPTION_ID (draft)
+  B->>N: order sync (patient + rx_PRESCRIPTION_ID)
+  N-->>B: ord_ORDER_ID (DRAFT)
+  F->>N: PhotonOrder order="ord_ORDER_ID"
   Note over F: prescriber reviews, signs, sends
 ```
 
-Before you start, [sync the patient](/integrations/sync-patients) so you have their `pat_EXAMPLE_ID` id, and find your organization's template ids under [Settings → Templates](https://app.neutron.health/settings/templates).
+Before you start, [sync the patient](/integrations/sync-patients) so you have their `pat_PATIENT_ID` id, and find your organization's template ids under [Settings → Templates](https://app.neutron.health/settings/templates).
 
 ## 1. Draft a prescription from each template
 
@@ -43,14 +43,14 @@ mutation DraftPrescription($prescription: PrescriptionInput!, $metadata: Request
 ```json Variables
 {
   "prescription": {
-    "patient": { "id": "pat_EXAMPLE_ID" },
-    "templateId": "tmp_EXAMPLE_ID"
+    "patient": { "id": "pat_PATIENT_ID" },
+    "templateId": "tmp_TEMPLATE_ID"
   },
   "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
 }
 ```
 
-The result is an unsigned draft, `rx_EXAMPLE_ID`, with any conflicts [screening](/network/screening) found in `screeningAlerts`.
+The result is an unsigned draft, `rx_PRESCRIPTION_ID`, with any conflicts [screening](/network/screening) found in `screeningAlerts`.
 
 <Warning>
   Always send a `templateId` or a `treatment`. If the patient already has drafts in progress, Photon may continue one of them, or return `AmbiguousPrescriptionMatch` so you can say which by sending its `id`.
@@ -75,14 +75,14 @@ mutation DraftOrder($order: OrderInput!, $metadata: RequestMetadata!) {
 ```json Variables
 {
   "order": {
-    "patient": { "id": "pat_EXAMPLE_ID" },
-    "prescriptions": { "add": [{ "id": "rx_EXAMPLE_ID" }, { "id": "rx_EXAMPLE_ID_2" }] }
+    "patient": { "id": "pat_PATIENT_ID" },
+    "prescriptions": { "add": [{ "id": "rx_PRESCRIPTION_ID" }, { "id": "rx_PRESCRIPTION_ID_2" }] }
   },
   "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
 }
 ```
 
-The order stays a `DRAFT`, and nothing goes to the patient yet. Store its `ord_EXAMPLE_ID` id.
+The order stays a `DRAFT`, and nothing goes to the patient yet. Store its `ord_ORDER_ID` id.
 
 ## 3. Open the order in Prescribe
 
@@ -90,18 +90,18 @@ The order stays a `DRAFT`, and nothing goes to the patient yet. Store its `ord_E
 
 ```tsx React
 <PhotonProvider clientId="YOUR_CLIENT_ID" environment="neutron">
-  <PhotonOrder order="ord_EXAMPLE_ID" onSent={onDone} />
+  <PhotonOrder order="ord_ORDER_ID" onSent={onDone} />
 </PhotonProvider>
 ```
 
 ```ts iframe
 // ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } })
-iframe.src = ph.order.frame("ord_EXAMPLE_ID");
+iframe.src = ph.order.frame("ord_ORDER_ID");
 ```
 
 ```ts Deep link
 // From your backend, to send the prescriber: no client_id needed
-ph.order.url("ord_EXAMPLE_ID"); // https://rx.neutron.health/order/ord_EXAMPLE_ID
+ph.order.url("ord_ORDER_ID"); // https://rx.neutron.health/order/ord_ORDER_ID
 ```
 
 </CodeGroup>
@@ -115,8 +115,8 @@ If your frontend already knows the templates, skip steps 1 and 2. Pass the templ
 ```tsx
 <PhotonOrder
   order={{
-    patient: { id: "pat_EXAMPLE_ID" },
-    prescriptions: { add: [{ templateId: "tmp_EXAMPLE_ID" }] },
+    patient: { id: "pat_PATIENT_ID" },
+    prescriptions: { add: [{ templateId: "tmp_TEMPLATE_ID" }] },
   }}
 />
 ```

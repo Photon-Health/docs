@@ -25,7 +25,7 @@
 
 ## Style preferences
 
-- Use explicit placeholder IDs in examples, such as `pat_EXAMPLE_ID`, `rx_EXAMPLE_ID` and `ord_EXAMPLE_ID`. Use suffixes like `_2` when examples need distinct records. Never use real or realistic-looking record IDs.
+- Use explicit placeholder IDs in examples, such as `pat_PATIENT_ID`, `rx_PRESCRIPTION_ID` and `ord_ORDER_ID`. Use suffixes like `_2` when examples need distinct records. Never use real or realistic-looking record IDs.
 
 - Use active voice and second person ("you")
 - Keep sentences concise, with one idea per sentence

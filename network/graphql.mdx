@@ -22,7 +22,7 @@ curl https://network.neutron.health/graphql \
   --data '{
     "query": "mutation ($patient: PatientInput!, $metadata: RequestMetadata!) { patient(patient: $patient, metadata: $metadata) { __typename ... on PatientPayload { patient { ... on Patient { id } } } } }",
     "variables": {
-      "patient": { "id": "pat_EXAMPLE_ID" },
+      "patient": { "id": "pat_PATIENT_ID" },
       "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
     }
   }'

@@ -12,7 +12,7 @@ Use `orders` when a clinician asks about an existing order, pharmacy availabilit
 **Fetch orders and available pharmacies without changing a record.** Fetch one order by ID:
 
 ```json
-{ "id": "ord_EXAMPLE_ID" }
+{ "id": "ord_ORDER_ID" }
 ```
 
 Or fetch submitted orders for a synced patient:
@@ -20,7 +20,7 @@ Or fetch submitted orders for a synced patient:
 ```json
 {
   "filter": {
-    "patient": { "id": "pat_EXAMPLE_ID" },
+    "patient": { "id": "pat_PATIENT_ID" },
     "state": "SUBMITTED"
   },
   "limit": 10
@@ -35,7 +35,7 @@ Request options for the selected order, for example pickup near a postal code:
 
 ```json
 {
-  "id": "ord_EXAMPLE_ID",
+  "id": "ord_ORDER_ID",
   "routablePharmacies": {
     "pharmacy": {
       "near": { "address": { "postalCode": "10001" } },
@@ -66,8 +66,8 @@ Use `order` only after the user explicitly chooses a destination for that order.
 
 ```json
 {
-  "id": "ord_EXAMPLE_ID",
-  "pharmacy": { "pharmacy": { "id": "phr_EXAMPLE_ID" } }
+  "id": "ord_ORDER_ID",
+  "pharmacy": { "pharmacy": { "id": "phr_PHARMACY_ID" } }
 }
 ```
 
@@ -77,9 +77,9 @@ When moving a submitted order to another pharmacy, include the user's reason in 
 
 ```json
 {
-  "id": "ord_EXAMPLE_ID",
+  "id": "ord_ORDER_ID",
   "pharmacy": {
-    "pharmacy": { "id": "phr_EXAMPLE_ID" },
+    "pharmacy": { "id": "phr_PHARMACY_ID" },
     "reason": { "type": "OUT_OF_STOCK" }
   }
 }

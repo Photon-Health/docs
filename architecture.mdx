@@ -17,9 +17,9 @@ flowchart LR
 
 | Record | Id | What it is | Lifecycle |
 | --- | --- | --- | --- |
-| **Patient** | `pat_EXAMPLE_ID` | Who the prescription is for: demographics, insurance, and clinical history (allergies, medications, diagnoses). | Found or added, then updated. |
-| **Prescription** | `rx_EXAMPLE_ID` | One drug for one patient: the treatment, instructions (the sig), dispense quantity and diagnoses. | A draft until a prescriber signs it. Once signed, it can't change. |
-| **Order** | `ord_EXAMPLE_ID` | One or more signed prescriptions for one patient, sent together. | `DRAFT`, then `SUBMITTED` when it's sent. A sent order can be `CANCELED`. |
+| **Patient** | `pat_PATIENT_ID` | Who the prescription is for: demographics, insurance, and clinical history (allergies, medications, diagnoses). | Found or added, then updated. |
+| **Prescription** | `rx_PRESCRIPTION_ID` | One drug for one patient: the treatment, instructions (the sig), dispense quantity and diagnoses. | A draft until a prescriber signs it. Once signed, it can't change. |
+| **Order** | `ord_ORDER_ID` | One or more signed prescriptions for one patient, sent together. | `DRAFT`, then `SUBMITTED` when it's sent. A sent order can be `CANCELED`. |
 
 A **template** is a saved prescription your organization sets up, with the drug, sig and dispense filled in. Manage templates and find their ids in the dashboard under [Settings → Templates](https://app.neutron.health/settings/templates). Start a prescription from one by passing its `templateId`.
 
