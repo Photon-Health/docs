@@ -16,16 +16,22 @@ Every page shows when it was last updated. This page says what's stable, and lis
 | [iframe](/prescribe/embed/iframe) | Stable | Needs your Application `client_id`, in a URL built by `frame()`. |
 | [React components](/prescribe/embed/react) | Release candidate | `@photonhealth/react@rc`, currently `2.0.0-rc.1`. See [Release candidates](/prescribe/embed/release-candidates). |
 | [JavaScript client](/prescribe/embed/javascript) | Release candidate | `@photonhealth/client@rc`, currently `2.0.0-rc.1`. See [Release candidates](/prescribe/embed/release-candidates). |
-| [GraphQL](/network/graphql) | Stable in Neutron | ⚠️ Production, `network.photon.health/graphql`, isn't live yet. |
+| [GraphQL](/network/graphql) | Available | `network.neutron.health/graphql` in the sandbox; `network.photon.health/graphql` in production. Both require a [bearer token](/authentication). |
 | [Webhooks](/network/webhooks) | Stable | Signed with HMAC-SHA256. |
 | [MCP](/network/mcp) | Available | Test at `ai.neutron.health` or use the [ChatGPT plugin](/network/mcp) with `ai.photon.health`. Claude is in private preview. |
-| Elements | Deprecated | Deprecated on January 1, 2027, and fully sunset by mid-2027. See [Migrate from Elements](/prescribe/embed/migrate-from-elements). |
-
-{/* TODO(launch): update each ⚠️ row as it goes live, and add an entry below. */}
+| Elements | Deprecation scheduled | Will be deprecated on January 1, 2027, and fully sunset by mid-2027. See [Migrate from Elements](/prescribe/embed/migrate-from-elements). |
 
 Durable concepts, such as [records and the send](/architecture), [permissions](/authentication#permissions) and [plans](/use-cases), change rarely. Anything marked ⚠️ or **Preview** is still moving.
 
 ## Changes
+
+<Update label="November 13, 2026" tags={["Network", "MCP", "Prescribe"]}>
+  - Production Network is available. Removed the obsolete endpoint launch warning.
+  - Updated GraphQL examples for patient `contact`, `me` caller types, `routablePharmacies`, offer prices and `fulfillment.exceptions`.
+  - Replaced the old sig lookup with `treatment.templates` and removed the template-application limitation.
+  - Refreshed [MCP](/network/mcp) tools and client setup, with organization tools in [Admin](/network/mcp/admin).
+  - Clarified that the public [SDK release candidates](/prescribe/embed/release-candidates) still use an older schema.
+</Update>
 
 <Update label="October 29, 2026" tags={["Network", "Prescribe"]}>
   **GraphQL breaking changes.** Update your queries:

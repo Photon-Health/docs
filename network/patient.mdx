@@ -11,8 +11,8 @@ patient(patient: PatientInput!, metadata: RequestMetadata!): PatientResult!
 | Call | `patient` input | Result |
 | --- | --- | --- |
 | **Get** | `{ id }` | The patient. Nothing changes. |
-| **Sync** | `{ demographic, clinical }` | The matched patient, updated, or a new patient, or candidates to choose from |
-| **Update** | `{ id, demographic?, clinical? }` | That patient, with only those fields changed |
+| **Sync** | `{ demographic, contact?, clinical? }` | The matched patient, updated, or a new patient, or candidates to choose from |
+| **Update** | `{ id, demographic?, contact?, clinical? }` | That patient, with only those fields changed |
 
 ## Example
 
@@ -26,7 +26,8 @@ mutation Patient($patient: PatientInput!, $metadata: RequestMetadata!) {
       patient {
         ... on Patient {
           id
-          demographic { name { first last } dateOfBirth sex phone email }
+          demographic { name { first last } dateOfBirth sex }
+          contact { phone email }
           clinical {
             allergies { status entries { id name rxNormId } }
             medications { status entries { id name rxNormId status } }
@@ -48,7 +49,9 @@ mutation Patient($patient: PatientInput!, $metadata: RequestMetadata!) {
     "demographic": {
       "name": { "first": "Paige", "last": "Turner" },
       "dateOfBirth": "1990-01-01",
-      "sex": "FEMALE",
+      "sex": "FEMALE"
+    },
+    "contact": {
       "phone": "+13175550142",
       "email": "paige@example.com"
     },
@@ -72,7 +75,7 @@ mutation Patient($patient: PatientInput!, $metadata: RequestMetadata!) {
 {
   "patient": {
     "id": "pat_01M3WQQHRB1T0K1469KD18BAWX",
-    "demographic": { "phone": "+13175550199" },
+    "contact": { "phone": "+13175550199" },
     "clinical": { "allergies": { "none": true } }
   },
   "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
@@ -83,7 +86,7 @@ mutation Patient($patient: PatientInput!, $metadata: RequestMetadata!) {
 
 ## How matching works
 
-Without an `id`, Photon uses the demographics to find the patient:
+Without an `id`, Photon uses the identity and contact details to find the patient:
 
 | You send | Photon |
 | --- | --- |
@@ -106,9 +109,21 @@ Once you have a patient's id, send it on every call.
 | `dateOfBirth` | `Date` | `YYYY-MM-DD` |
 | `sex` | `MALE`, `FEMALE`, `UNKNOWN` | |
 | `gender` | `String` | Free text |
+
+### `contact`
+
+| Field | Type | Notes |
+| --- | --- | --- |
 | `phone` | `String` | Not needed to add a patient, but **required to send an order**: Photon texts the patient their order link. It must be a mobile number that can receive texts. |
 | `email` | `String` | |
 | `address` | `{ street1, street2, city, state, postalCode, country }` | Optional, including for sending |
+
+### Other patient fields
+
+These are top-level fields alongside `demographic`, `contact` and `clinical`.
+
+| Field | Type | Notes |
+| --- | --- | --- |
 | `benefits` | `BenefitsPatch` | Insurance. `add` needs `bin` and `memberId`. `pcn` and `groupId` are optional. |
 | `preferredPharmacy` | `PharmacyReferenceInput` | See [Pharmacies](/network/order#pharmacies) |
 
@@ -162,12 +177,14 @@ fragment PatientFields on Patient {
     dateOfBirth
     sex
     gender
+  }
+  contact {
     email
     phone
     address { street1 street2 city state postalCode country }
-    benefits { status entries { id bin pcn groupId memberId } }
-    preferredPharmacy { id name address { street1 city state postalCode } fulfillmentType }
   }
+  benefits { status entries { id bin pcn groupId memberId } }
+  preferredPharmacy { id name address { street1 city state postalCode } fulfillmentType }
   clinical {
     allergies { status entries { id name rxNormId } }
     medications { status entries { id name rxNormId status } }

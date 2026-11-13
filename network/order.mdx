@@ -50,8 +50,7 @@ mutation Order($order: OrderInput!, $metadata: RequestMetadata!) {
         prescriptions { id signing { state } treatment { name } }
         screeningAlerts { severity type description involvedEntities { name } }
         pharmacy { id name }
-        exceptions { type message }
-        fulfillment { state }
+        fulfillment { state exceptions { type message } }
       }
       changes { key status severity reason options { displayName argument value } }
     }
@@ -132,7 +131,7 @@ The fields combine to narrow the results. Only an `id` sets the pharmacy directl
 
 ### Listing pharmacies for an order
 
-To show pharmacies before you choose one, read the order through the [`orders` query](/network/graphql#orders) and select `availablePharmacies`. It returns the same choices as an ambiguous pharmacy, a page at a time, each priced against the order's prescriptions, including discount-card prices:
+To show pharmacies before you choose one, read the order through the [`orders` query](/network/graphql#orders) and select `routablePharmacies`. It returns the same choices as an ambiguous pharmacy, a page at a time, each priced against the order's prescriptions, including discount-card prices:
 
 ```graphql
 query OrderPharmacies($filter: OrdersFilterInput) {
@@ -140,13 +139,13 @@ query OrderPharmacies($filter: OrdersFilterInput) {
     ... on OrdersPayload {
       orders {
         id
-        availablePharmacies(pharmacy: { near: { text: "Brooklyn, NY" } }, page: { limit: 20, offset: 0 }) {
+        routablePharmacies(pharmacy: { near: { text: "Brooklyn, NY" } }, page: { limit: 20, offset: 0 }) {
           totalCount
           nextOffset
           options {
             displayName
             value
-            entity { ... on Pharmacy { id name address { street1 city state } isOpen offers { source priceSummary { totalAmount } } } }
+            entity { ... on Pharmacy { id name address { street1 city state } isOpen offers { source prescriptionId priceType price { amount retailAmount } } } }
           }
         }
       }
@@ -157,13 +156,13 @@ query OrderPharmacies($filter: OrdersFilterInput) {
 
 `pharmacy` takes the same reference as the `order` mutation. Leave it out for the sponsored pharmacies that have offers for this order. Unless you search by `id`, the first page also includes sponsored pharmacies the search didn't match, which don't count toward `limit`. `page.limit` defaults to 20 and is capped at 100. `nextOffset` is null on the last page.
 
-`availablePharmacies` is null in the `order` mutation's response. Only `orders` fills it in.
+`routablePharmacies` is null in the `order` mutation's response. Only `orders` fills it in.
 
 Each `Pharmacy` also has its `phone`, `logo`, weekly `hours` and, relative to a time you pass or now, `isOpen` and `nextEvents`.
 
 ## Moving a sent order
 
-To move a `SUBMITTED` order to a different pharmacy, send the new `pharmacy` with a `reason`:
+Check `fulfillment.routability` before moving a `SUBMITTED` order. If `allowed` is false, show its `reason`. To move an eligible order, send the new `pharmacy` with a `reason`:
 
 ```json
 "pharmacy": {
@@ -176,7 +175,7 @@ To move a `SUBMITTED` order to a different pharmacy, send the new `pharmacy` wit
 
 ## Fulfillment
 
-Once an order is sent to a pharmacy, `fulfillment.state` says how far the pharmacy has gotten. `fulfillment` is null until then, so it's always null on a draft. `state` is null until the pharmacy reports one.
+After submission, `fulfillment` carries the order's pharmacy progress, routing history and exceptions. It is null on a draft. `fulfillment.state` stays null until the order is sent to a pharmacy and the pharmacy reports a state.
 
 | `state` | Means |
 | --- | --- |
@@ -195,7 +194,7 @@ Pick-up orders move through `READY` to `PICKED_UP`. Mail orders move through `FI
 
 ## Exceptions
 
-Once an order is sent, `exceptions` lists problems that need attention, such as `PHARMACY_UNREACHABLE`, `PHARMACY_NEEDS_INSURANCE_INFO` or `DOCTOR_NOT_LICENSED_IN_STATE`. A draft never has exceptions. See [Reference](/network/reference#order-exceptions) for every type.
+Once an order is sent, `fulfillment.exceptions` lists problems that need attention, such as `PHARMACY_UNREACHABLE`, `PHARMACY_NEEDS_INSURANCE_INFO` or `DOCTOR_NOT_LICENSED_IN_STATE`. A draft never has exceptions. See [Reference](/network/reference#order-exceptions) for every type.
 
 <Accordion title="Full selection set">
 
@@ -208,8 +207,11 @@ fragment OrderFields on Order {
   prescriptions { id treatment { id name } signing { state } }
   screeningAlerts { severity type category description involvedEntities { id name } }
   pharmacy { id name address { street1 street2 city state postalCode } fulfillmentType }
-  exceptions { id type message createdAt }
-  fulfillment { state }
+  fulfillment {
+    state
+    routability { allowed reason }
+    exceptions { id type message createdAt }
+  }
 }
 ```
 

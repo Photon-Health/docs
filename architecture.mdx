@@ -78,7 +78,7 @@ Each record has one upsert. You call it in one of three ways, and they work the 
 | **Sync** | Whatever you know, with or without an id | Finds, matches, creates or updates the record. Photon decides which. |
 | **Update** | An id and the fields to change | Changes only those fields on that record. |
 
-Prescribe and GraphQL support these three forms. A React component given an id runs a get. Given fields, it runs a sync. Given both, it runs an update. MCP exposes `patient`, `prescription` and `order` as mutation tools that require fields beyond an ID; use its read-only `orders` tool for order lookup. See [MCP tools](/network/mcp#four-tools).
+Prescribe and GraphQL support these three forms. A React component given an id runs a get. Given fields, it runs a sync. Given both, it runs an update. MCP exposes `patient`, `prescription` and `order` as mutation tools that require fields beyond an ID; use its read-only `orders` tool for order lookup. See [MCP tools](/network/mcp#tools).
 
 ## Photon makes the decisions
 

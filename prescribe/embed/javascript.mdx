@@ -19,7 +19,7 @@ It has no dependencies and runs in browsers and Node.
 npm install @photonhealth/client@rc
 ```
 
-It's a [release candidate](/prescribe/embed/release-candidates) of 2.0.0 for now.
+The public `2.0.0-rc.1` release uses an older Network schema. Check [SDK compatibility](/prescribe/embed/release-candidates) before using these examples with the current API.
 
 ## Create a client
 
@@ -116,21 +116,7 @@ The rules live in the objects, so every UI built on them behaves the same:
 
 ### Sig options
 
-`rx.loadSigs()` looks up [sig options](/network/prescription#sig-options) for a draft's drug and patient into `rx.snapshot.sigs`, and looks them up again whenever the drug or patient changes. It's separate from saving, so saves don't wait for it.
-
-```ts
-rx.loadSigs();
-rx.subscribe(() => renderSigs(rx.snapshot.sigs)); // { sigs, notices }, or null
-
-// When the prescriber picks one, such as "Take 1 tablet (25 mg) by mouth 2 times per day with food":
-await rx.update({ instructions: sig.instructions });
-```
-
-`sigs` is `null` until the lookup finishes, and stays `null` without a patient, on a signed prescription, or for a drug without an NDC. When nothing fits, `sigs.sigs` is empty and `sigs.notices` says why.
-
-{/* TODO(launch): remove once sig options are in a published @photonhealth/client release candidate (after 2.0.0-rc.1). */}
-
-⚠️ Sig options aren't in a published release candidate yet. They arrive after `2.0.0-rc.1`.
+The public `2.0.0-rc.1` client does not include sig suggestions. For the current API, read [treatment templates](/network/prescription#sig-options). See [Release candidates](/prescribe/embed/release-candidates) for SDK compatibility.
 
 ### Pharmacies
 
