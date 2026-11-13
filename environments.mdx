@@ -38,12 +38,12 @@ Photon has two environments. They run the same API but keep separate data, accou
 
 Every URL follows from the environment's name, so switching environments means changing one word. The one exception is the Prescribe app, which is `rx.new` in production.
 
-The production Prescribe app and production MCP are in private preview. To get access, ask your Photon contact.
+The production Prescribe app is in private preview; ask your Photon contact for access. For MCP, use the [ChatGPT plugin](/network/mcp#production-clients). Claude is in private preview.
 
 | Service | Neutron | Photon |
 | --- | --- | --- |
 | GraphQL | `https://network.neutron.health/graphql` | `https://network.photon.health/graphql` ⚠️ |
-| [MCP](/network/mcp) | `ai.neutron.health` | `ai.photon.health` (private preview) |
+| [MCP](/network/mcp) | `ai.neutron.health` | `ai.photon.health` (Claude in private preview) |
 | Prescribe app | `https://rx.neutron.health` | `https://rx.new` (private preview) |
 | Sign-in (Auth0) | `auth.neutron.health` | `auth.photon.health` |
 | Token audience | `https://api.neutron.health` | `https://api.photon.health` |
@@ -119,7 +119,7 @@ For GraphQL or MCP, use the URLs above.
 
 ## Going live
 
-1. Choose a plan. API credentials need [Launch or above](/use-cases#plans-at-a-glance). [Start a production account](https://photonhealth.com/pricing), or email [sales@photon.health](mailto:sales@photon.health) to talk through your use case. The production Prescribe app and MCP are in private preview, so ask your Photon contact for access.
+1. Choose a plan. API credentials need [Launch or above](/use-cases#plans-at-a-glance). [Start a production account](https://photonhealth.com/pricing), or email [sales@photon.health](mailto:sales@photon.health) to talk through your use case. The production Prescribe app and Claude MCP access are in private preview; ask your Photon contact for access. The [ChatGPT plugin](/network/mcp#production-clients) is available to connect your Photon account.
 2. Get production credentials from [app.photon.health](https://app.photon.health/settings/developers). Sandbox credentials don't work in production.
 3. Invite your prescribers to the production organization, with their NPI, phone, fax and address. Nothing carries over from Neutron. See [Team](/admin/team).
 4. Change the environment from `neutron` to `photon`: the `environment` prop, or the hostnames for GraphQL and MCP.

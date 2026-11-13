@@ -4,7 +4,7 @@ description: "Connect ChatGPT, Claude or your own agent to send prescriptions wi
 icon: "plug"
 ---
 
-Use Photon in a chat app such as ChatGPT or Claude, or connect your own agent.
+For ChatGPT or Claude, start with the [production clients](/network/mcp#production-clients). To test an integration or connect your own agent, use the setup below.
 
 ## Start in Neutron
 
@@ -22,22 +22,6 @@ Try:
 > Send a prescription for amlodipine to Paige Turner.
 
 The agent uses `patient` to sync (find, create or update), `prescription` to draft/sign, `order` to draft/send, and `orders` to fetch the result. Drafting and review are built into the send flow, so you don't need to ask for a draft separately. A standalone `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
-
-## Production clients
-
-Production MCP is in **private preview** at `ai.photon.health`. Only ChatGPT and Claude are currently supported as approved OAuth clients. Contact [support@photon.health](mailto:support@photon.health) for preview access.
-
-Add the Photon plugin in ChatGPT and connect your Photon account. In Claude, use the production server URL in your approved client's remote MCP connection settings.
-
-<CardGroup cols={2}>
-  <Card title="Photon for ChatGPT" icon="comments" href="https://chatgpt.com/plugins/plugin_asdk_app_6ae536598d7481919dc43c9f44a112ad">
-    Add the production Photon plugin and connect your account.
-  </Card>
-  <Card title="Photon for Claude" icon="comment">
-    Connect to `ai.photon.health` with your preview account. ⚠️ A production plugin listing is coming soon.
-  </Card>
-</CardGroup>
-{/* TODO(launch): add the published Claude production plugin URL and remove its coming-soon marker. */}
 
 ## organizations
 
