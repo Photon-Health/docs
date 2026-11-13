@@ -13,7 +13,7 @@ Use Photon in a chat app such as ChatGPT or Claude, or connect your own agent.
 3. Choose OAuth sign-in and sign in with your Neutron account. Select the organization you want to work in when prompted.
 4. Enable the connection in your conversation and ask it to send a prescription.
 
-Neutron uses the same tools and prescribing workflow as production. An environment notice in the tool descriptions signals that Neutron creates test orders only; you do not need to say "test patient" or use special wording in your request.
+Neutron uses the same tools and prescribing workflow as production. The server instructions state that Neutron supports test prescriptions only; you do not need to say "test patient" or use special wording in your request.
 
 Any compatible client can connect: it must support Streamable HTTP and CIMD for OAuth sign-in, or accept an existing Photon bearer token.
 
@@ -27,19 +27,45 @@ The agent uses `patient` to sync (find, create or update), `prescription` to dra
 
 Production MCP is in **private preview** at `https://ai.photon.health`. Only ChatGPT and Claude are currently supported as approved OAuth clients. Contact [support@photon.health](mailto:support@photon.health) for preview access.
 
-The production plugin listings below are not live yet. If you already have preview access, use the server URL in your approved client's remote MCP connection settings.
+Add the Photon plugin in ChatGPT and connect your Photon account. In Claude, use the production server URL in your approved client's remote MCP connection settings.
 
-{/* TODO(launch): add the published ChatGPT and Claude production plugin URLs, enable these cards, and remove the coming-soon markers. */}
-<div style={{ opacity: 0.5 }} aria-disabled="true">
-  <CardGroup cols={2}>
-    <Card title="Photon for ChatGPT" icon="comments">
-      ⚠️ Coming soon. Production plugin link is not available yet.
-    </Card>
-    <Card title="Photon for Claude" icon="comment">
-      ⚠️ Coming soon. Production plugin link is not available yet.
-    </Card>
-  </CardGroup>
-</div>
+<CardGroup cols={2}>
+  <Card title="Photon for ChatGPT" icon="comments" href="https://chatgpt.com/plugins/plugin_asdk_app_6ae536598d7481919dc43c9f44a112ad">
+    Add the production Photon plugin and connect your account.
+  </Card>
+  <Card title="Photon for Claude" icon="comment">
+    Connect to `https://ai.photon.health` with your preview account. ⚠️ A production plugin listing is coming soon.
+  </Card>
+</CardGroup>
+{/* TODO(launch): add the published Claude production plugin URL and remove its coming-soon marker. */}
+
+## organizations
+
+**List your organizations and invites, or sign in to another organization.** This read-only tool is available to provider accounts. Call it with no arguments to see the current organization and the choices available to you:
+
+```json
+{}
+```
+
+The result includes `current`, `organizations`, `invites` and `nextStep`. If `current` is `null`, the other tools cannot run until you sign in to an organization.
+
+| `nextStep` | What to do |
+| --- | --- |
+| `SIGNED_IN` | Continue in `current`, or choose another listed organization. |
+| `SIGN_IN` | There is one organization and no pending invite. Use `signInTo.organizationId` without asking the user to choose. |
+| `CHOOSE_ORGANIZATION` | Ask which listed organization to use or which invite to accept. |
+| `ACCEPT_INVITE` | Open an invite's `acceptUrl` to accept it in Prescribe, then call `organizations` again. Invites cannot be accepted in chat. |
+| `ONBOARD` | Open `onboardingUrl` to set up an organization, then call `organizations` again. |
+
+To sign in to a listed organization, pass its returned ID:
+
+```json
+{ "organizationId": "org_selected" }
+```
+
+When the selected organization differs from `current`, the tool returns `SIGN_IN_REQUIRED`. Complete the Photon sign-in opened by your client and choose that organization when prompted. Keep the plugin installed; changing organizations does not require removing it. Call `organizations` again and confirm `current` before continuing. Record IDs from the previous organization may not be accessible in the new one.
+
+Show pending invites alongside existing memberships. Preserve each returned `acceptUrl` and `onboardingUrl` exactly, including its query string, so Prescribe can return the user to their chat app. If `INVITES_UNAVAILABLE` is returned, the invite list is incomplete; do not describe it as empty.
 
 ## CIMD and client approval
 
@@ -63,6 +89,8 @@ Your own agent can also use a regular Photon Application or Backend client to ob
 Authorization: Bearer <token>
 ```
 
+The public `/auth.md` on each server describes its OAuth connection flow; it does not support agent registration through the Auth.md protocol.
+
 Use the account, token and server URL from the same environment. Keep Backend client secrets on your own server. See [Authentication](/authentication) for obtaining user and machine tokens.
 
 A machine token can prepare drafts but cannot sign prescriptions. Hand drafts to a signed-in prescriber in [Prescribe](/integrations/agent-drafted-orders). Creating an OAuth connection for a new third-party client still follows the production approval process above.
@@ -70,7 +98,8 @@ A machine token can prepare drafts but cannot sign prescriptions. Hand drafts to
 ## Connection problems
 
 - **Client not approved:** use a supported production client or ask support to whitelist yours. For development, use Neutron.
-- **No organization access:** check that you're signing into the correct environment and organization. Contact your administrator or Photon support if access is blocked.
+- **`ORGANIZATION_REQUIRED`:** call `organizations` and follow its `nextStep`. Check the environment and contact your administrator or Photon support if access is blocked.
+- **`VERIFICATION_REQUIRED`:** open the returned `details.verifyUrl` to complete clinician verification in Prescribe, then return and retry the same signing or submission call. Preserve the full URL, including its query string. Verification does not replace review and approval of the prescription.
 - **Expired sign-in:** reconnect the client. If an earlier write had an unknown outcome, inspect the existing record before repeating it.
 
 When contacting support, include the environment, client name and error message. Don't send access tokens or client secrets.
