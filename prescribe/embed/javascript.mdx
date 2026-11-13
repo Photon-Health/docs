@@ -19,7 +19,7 @@ It has no dependencies and runs in browsers and Node.
 npm install @photonhealth/client@rc
 ```
 
-It's a [release candidate](/prescribe/embed/release-candidates) of 2.0.0 for now.
+The public `2.0.0-rc.1` release uses an older Network schema. Check [SDK compatibility](/prescribe/embed/release-candidates) before using these examples with the current API.
 
 ## Create a client
 
@@ -51,7 +51,7 @@ const ph = photon({
   auth: {
     clientId: process.env.PHOTON_CLIENT_ID,
     clientSecret: process.env.PHOTON_CLIENT_SECRET,
-    organizationId: "org_…",
+    organizationId: "org_ORGANIZATION_ID",
   },
 });
 
@@ -73,7 +73,7 @@ The client gets a machine token, keeps it until shortly before it expires, and g
 `ph.patient`, `ph.prescription` and `ph.order` each have the [same three calls](/architecture#get-sync-and-update):
 
 ```ts
-const existing = await ph.patient.get("pat_01M3WQQHRB1T0K1469KD18BAWX"); // read, change nothing
+const existing = await ph.patient.get("pat_PATIENT_ID"); // read, change nothing
 
 const { patient, candidates, changes } = await ph.patient.sync({
   demographic: { name: { first: "Paige", last: "Turner" }, dateOfBirth: "1990-01-01", sex: "FEMALE" },
@@ -93,7 +93,7 @@ Each record is a live object. `state` is the record, and `status` is `idle`, `lo
 ```ts
 const { prescription: rx } = await ph.prescription.sync({
   patient: { id: patient.id },
-  templateId: "YOUR_TEMPLATE_ID",
+  templateId: "tmp_TEMPLATE_ID",
 });
 
 rx.subscribe(() => render(rx.state)); // re-render on every change
@@ -116,21 +116,7 @@ The rules live in the objects, so every UI built on them behaves the same:
 
 ### Sig options
 
-`rx.loadSigs()` looks up [sig options](/network/prescription#sig-options) for a draft's drug and patient into `rx.snapshot.sigs`, and looks them up again whenever the drug or patient changes. It's separate from saving, so saves don't wait for it.
-
-```ts
-rx.loadSigs();
-rx.subscribe(() => renderSigs(rx.snapshot.sigs)); // { sigs, notices }, or null
-
-// When the prescriber picks one, such as "Take 1 tablet (25 mg) by mouth 2 times per day with food":
-await rx.update({ instructions: sig.instructions });
-```
-
-`sigs` is `null` until the lookup finishes, and stays `null` without a patient, on a signed prescription, or for a drug without an NDC. When nothing fits, `sigs.sigs` is empty and `sigs.notices` says why.
-
-{/* TODO(launch): remove once sig options are in a published @photonhealth/client release candidate (after 2.0.0-rc.1). */}
-
-⚠️ Sig options aren't in a published release candidate yet. They arrive after `2.0.0-rc.1`.
+The public `2.0.0-rc.1` client does not include sig suggestions. For the current API, read [treatment templates](/network/prescription#sig-options). See [Release candidates](/prescribe/embed/release-candidates) for SDK compatibility.
 
 ### Pharmacies
 
@@ -190,8 +176,8 @@ Anything Photon answers about your data comes back as a result. Only failures th
 `url()` builds a [deep link](/prescribe/app/deep-links) and `frame()` builds an [iframe](/prescribe/embed/iframe) URL. Each record's calls have both, and so does every live object:
 
 ```ts
-ph.patient.url("pat_01M3WQQHRB1T0K1469KD18BAWX"); // https://rx.neutron.health/patient/pat_01M3WQQHRB1T0K1469KD18BAWX
-ph.order.frame({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" } }); // https://rx.neutron.health/order/embed?patient=pat_01M3WQQHRB1T0K1469KD18BAWX&client=YOUR_CLIENT_ID
+ph.patient.url("pat_PATIENT_ID"); // https://rx.neutron.health/patient/pat_PATIENT_ID
+ph.order.frame({ patient: { id: "pat_PATIENT_ID" } }); // https://rx.neutron.health/order/embed?patient=pat_PATIENT_ID&client=YOUR_CLIENT_ID
 order.url(); // a live order you already have
 ph.url.parse(href); // what a link opens, read back
 ```

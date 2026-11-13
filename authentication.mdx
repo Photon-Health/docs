@@ -120,10 +120,10 @@ curl https://network.neutron.health/graphql \
   --request POST \
   --header "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   --header "Content-Type: application/json" \
-  --data '{ "query": "{ me { __typename ... on MachineCaller { organizationId permissions } ... on ProviderCaller { organizationId permissions } } }" }'
+  --data '{ "query": "{ me { __typename ... on Machine { organization { ... on Organization { id } } permissions } ... on User { id organization { ... on Organization { id } } permissions } ... on OperationError { type code message } } }" }'
 ```
 
-`me` touches no records. It says what the token authenticated as (`MachineCaller` for a machine token, `ProviderCaller` for a prescriber), its organization and its permissions. Use it to test a token. `ping` still works, but is deprecated and will be removed after January 31, 2027.
+`me` touches no records. It says what the token authenticated as (`Machine` for a machine token, `User` for a prescriber), its organization and its permissions. Use it to test a token. `ping` still works, but is deprecated and will be removed after January 31, 2027.
 
 ## When a token is refused
 

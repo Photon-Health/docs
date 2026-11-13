@@ -62,10 +62,10 @@ What happens:
 
 ## 3. Keep the Photon id
 
-`onPatient` gives you the patient once Photon has a record. Store `p.id` (`pat_…`) beside your own patient. Next time, pass the id instead of the details:
+`onPatient` gives you the patient once Photon has a record. Store `p.id` (`pat_PATIENT_ID`) beside your own patient. Next time, pass the id instead of the details:
 
 ```tsx
-<PhotonOrder patient="pat_01M3WQQHRB1T0K1469KD18BAWX" fixed onSent={onDone} />
+<PhotonOrder patient="pat_PATIENT_ID" fixed onSent={onDone} />
 ```
 
 If your details changed, pass the id together with them, and Photon updates only those fields:
@@ -82,7 +82,7 @@ The [iframe](/prescribe/embed/iframe) does the same with a URL. Build it with th
 import { photon } from "@photonhealth/client";
 
 const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
-iframe.src = ph.order.frame({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" } });
+iframe.src = ph.order.frame({ patient: { id: "pat_PATIENT_ID" } });
 ```
 
 Add `https://rx.neutron.health` to your Application credential's allowed URLs too, beside your app's domain.

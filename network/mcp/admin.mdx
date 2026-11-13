@@ -27,7 +27,7 @@ The result includes `current`, `organizations`, `invites` and `nextStep`. If `cu
 To sign in to a listed organization, pass its returned ID:
 
 ```json
-{ "organizationId": "org_selected" }
+{ "organizationId": "org_ORGANIZATION_ID" }
 ```
 
 When the selected organization differs from `current`, the tool returns `SIGN_IN_REQUIRED`. Complete the Photon sign-in opened by your client and choose that organization when prompted. Keep the plugin installed; changing organizations does not require removing it. Call `organizations` again and confirm `current` before continuing. Record IDs from the previous organization may not be accessible in the new one.

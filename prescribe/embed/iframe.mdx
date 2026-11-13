@@ -13,8 +13,8 @@ import { photon } from "@photonhealth/client";
 
 const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
 
-const src = ph.order.frame({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" } });
-// https://rx.neutron.health/order/embed?patient=pat_01M3WQQHRB1T0K1469KD18BAWX&client=YOUR_CLIENT_ID
+const src = ph.order.frame({ patient: { id: "pat_PATIENT_ID" } });
+// https://rx.neutron.health/order/embed?patient=pat_PATIENT_ID&client=YOUR_CLIENT_ID
 ```
 
 Use it as your iframe's `src`, as in [Height and events](#height-and-events). The page has no chrome and a transparent background, so your page shows through.
@@ -37,12 +37,12 @@ Each record's `frame()` takes Photon ids only, and reads and writes nothing. The
 | Call | Opens |
 | --- | --- |
 | `ph.order.frame()` | A new order. The prescriber finds or adds the patient. |
-| `ph.order.frame({ patient: { id: "pat_…" } })` | A new order for this patient |
-| `ph.order.frame({ patient: { id: "pat_…" }, prescriptions: { add: [{ id: "rx_…" }] } })` | A new order for this patient, with this draft on it |
-| `ph.order.frame({ patient: { id: "pat_…" }, prescriptions: { add: [{ templateId: "tmp_…" }] } })` | A new order for this patient, with a prescription from this template |
-| `ph.order.frame("ord_…")` | This order |
-| `ph.patient.frame("pat_…")` | This patient |
-| `ph.prescription.frame("rx_…")` | This prescription |
+| `ph.order.frame({ patient: { id: "pat_PATIENT_ID" } })` | A new order for this patient |
+| `ph.order.frame({ patient: { id: "pat_PATIENT_ID" }, prescriptions: { add: [{ id: "rx_PRESCRIPTION_ID" }] } })` | A new order for this patient, with this draft on it |
+| `ph.order.frame({ patient: { id: "pat_PATIENT_ID" }, prescriptions: { add: [{ templateId: "tmp_TEMPLATE_ID" }] } })` | A new order for this patient, with a prescription from this template |
+| `ph.order.frame("ord_ORDER_ID")` | This order |
+| `ph.patient.frame("pat_PATIENT_ID")` | This patient |
+| `ph.prescription.frame("rx_PRESCRIPTION_ID")` | This prescription |
 
 URLs start with `https://rx.neutron.health` in the sandbox, or `https://rx.new` in production, which is in private preview.
 
@@ -51,8 +51,8 @@ To give a flow more than one record, pass the whole link to `ph.frame()`:
 ```ts
 const src = ph.frame({
   flow: "order",
-  patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" },
-  order: { prescriptions: { add: [{ templateId: "YOUR_TEMPLATE_ID" }] } },
+  patient: { id: "pat_PATIENT_ID" },
+  order: { prescriptions: { add: [{ templateId: "tmp_TEMPLATE_ID" }] } },
 });
 ```
 
@@ -73,7 +73,7 @@ The iframe posts messages to your page. They contain ids and states only, never 
 | `resize` | Whenever the content's height changes | `height`, in CSS pixels |
 | `PhotonOrder.onPatient` | The order's patient has a record or changed | `detail`: the patient's id, or `null (changed)` when the prescriber changes patient |
 | `PhotonOrder.onOrder` | The order or one of its prescriptions changed | `detail`: a summary that starts with the order's id |
-| `PhotonOrder.onSent` | The order was sent | `detail`: the order's id and state, such as `ord_… · submitted` |
+| `PhotonOrder.onSent` | The order was sent | `detail`: the order's id and state, such as `ord_ORDER_ID · submitted` |
 | `PhotonPatient.onPatient` | The patient has a record or changed | `detail`: the patient's id, or `null (changed)` when the prescriber changes patient |
 | `PhotonPrescription.onPrescription` | The prescription was saved or signed | `detail`: a summary that starts with its id |
 | `PhotonPrescription.onSigned` | The prescription was signed | `detail`: its id |
@@ -109,7 +109,7 @@ export function PrescribeFrame({ src, onSent }) {
 
   const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
   const frame = document.getElementById("photon");
-  frame.src = ph.order.frame({ patient: { id: "pat_01M3WQQHRB1T0K1469KD18BAWX" } });
+  frame.src = ph.order.frame({ patient: { id: "pat_PATIENT_ID" } });
 
   window.addEventListener("message", ({ origin, data }) => {
     if (origin !== "https://rx.neutron.health" || data?.source !== "photon-rx") return;
@@ -128,7 +128,7 @@ The first time, the iframe shows **Sign in to Photon**. Clicking it opens a popu
 To skip the organization picker, give the client your organization, and every URL it makes carries it:
 
 ```ts
-const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" }, organization: "org_…" });
+const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" }, organization: "org_ORGANIZATION_ID" });
 ```
 
 The popup needs your page to allow it:

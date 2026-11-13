@@ -4,7 +4,7 @@ description: "Install @photonhealth/react and @photonhealth/client from npm as 2
 icon: "flask"
 ---
 
-The [React components](/prescribe/embed/react) and the [JavaScript client](/prescribe/embed/javascript) are on npm as release candidates of 2.0.0. They're the packages the Prescribe app is built on, and you can build with them before the stable release.
+The [React components](/prescribe/embed/react) and the [JavaScript client](/prescribe/embed/javascript) are on npm as release candidates of 2.0.0. These public releases lag the packages currently used by the Prescribe app.
 
 | Package | What it is | Docs |
 | --- | --- | --- |
@@ -33,12 +33,16 @@ npm install @photonhealth/client@rc
 
 The latest release candidate is `2.0.0-rc.1`, for both packages.
 
-{/* TODO(launch): when the next release candidate is published, update the version above and remove this list and the matching ⚠️ notes on the React and JavaScript pages. */}
+<Warning>
+  This release uses an older Network schema, including contact details under `demographic`. The current API uses `contact` and has changed order and treatment fields. Use the [GraphQL API](/network/graphql) or [Prescribe links](/prescribe/app/deep-links) for current integrations until a compatible public SDK release is available.
+</Warning>
 
-The next release candidate adds:
+{/* TODO(launch): when a compatible release candidate is published, recheck its schema and features, then update the version and compatibility notes. */}
+
+`2.0.0-rc.1` does not include:
 
 - **Machine credentials** for the JavaScript client, so your backend can call it with its own client id and secret. See [On your backend](/prescribe/embed/javascript#on-your-backend).
-- **Sig options**: `rx.loadSigs()` in the client, and suggested sigs in `PhotonPrescription`. See [Sig options](/network/prescription#sig-options).
+- **Sig options** in the client and `PhotonPrescription`. See [Sig options](/network/prescription#sig-options).
 
 ## Start in the sandbox
 
@@ -51,7 +55,7 @@ import { PhotonOrder, PhotonProvider } from "@photonhealth/react";
 import "@photonhealth/react/styles.css";
 
 <PhotonProvider clientId="YOUR_CLIENT_ID" environment="neutron">
-  <PhotonOrder patient="pat_…" onSent={() => closeDialog()} />
+  <PhotonOrder patient="pat_PATIENT_ID" onSent={() => closeDialog()} />
 </PhotonProvider>;
 ```
 
@@ -59,7 +63,7 @@ import "@photonhealth/react/styles.css";
 import { photon } from "@photonhealth/client";
 
 const ph = photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" } });
-const patient = await ph.patient.get("pat_…");
+const patient = await ph.patient.get("pat_PATIENT_ID");
 ```
 
 </CodeGroup>
@@ -69,7 +73,7 @@ The READMEs cover the rest: sign-in, live objects, errors, each card's props and
 ## What a release candidate means
 
 - Each `2.0.0-rc.N` can change before 2.0.0. Pin an exact version, such as `2.0.0-rc.1`, to choose when you take changes.
-- 2.0.0 will be published under npm's `latest` tag. Then you can drop `@rc`.
+- Both `latest` and `rc` currently resolve to `2.0.0-rc.1`; `latest` does not mean a stable 2.0.0 release is available.
 - `@photonhealth/client/testing`, the helpers for your own tests, may change before 2.0.0.
 
 <Note>

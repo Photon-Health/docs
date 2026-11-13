@@ -46,8 +46,8 @@ mutation Prescription($prescription: PrescriptionInput!, $metadata: RequestMetad
 ```json From a template
 {
   "prescription": {
-    "patient": { "id": "pat_01M3WQQHRB1T0K1469KD18BAWX" },
-    "templateId": "YOUR_TEMPLATE_ID"
+    "patient": { "id": "pat_PATIENT_ID" },
+    "templateId": "tmp_TEMPLATE_ID"
   },
   "metadata": { "source": "DIRECT_API", "client": "acme-ehr" }
 }
@@ -56,7 +56,7 @@ mutation Prescription($prescription: PrescriptionInput!, $metadata: RequestMetad
 ```json From a treatment
 {
   "prescription": {
-    "patient": { "id": "pat_01M3WQQHRB1T0K1469KD18BAWX" },
+    "patient": { "id": "pat_PATIENT_ID" },
     "treatment": { "rxNormId": "861007" },
     "instructions": "Take 1 tablet by mouth twice daily with meals.",
     "dispense": { "quantity": 60, "unit": "tablet", "daysSupply": 30, "refillsAllowed": 2 },
@@ -76,7 +76,7 @@ mutation Prescription($prescription: PrescriptionInput!, $metadata: RequestMetad
 ```json Sign
 {
   "prescription": {
-    "id": "rx_01M3WXVP8G9GB7811W74VE3ZTP",
+    "id": "rx_PRESCRIPTION_ID",
     "signing": { "signedHash": "211ce2887eb9ed5c3c383a1950617decd0e75acc33e258b85fae3f354ddea8f4" }
   },
   "metadata": { "source": "WEB_APP", "client": "acme-ehr" }
@@ -101,7 +101,7 @@ changes {
     displayName
     value
     entity {
-      ... on Treatment { brandName genericName form route strength schedule medicationType recommendedDispenseUnits }
+      ... on Treatment { brandName genericName form route strength schedule medicationType templates { id source instructions dispense { unit } } }
     }
   }
 }
@@ -116,12 +116,9 @@ changes {
 | `strength` | `"10 MG"`, `"125 MG/5ML"` |  |
 | `schedule` | `"II"`, `"UNCONTROLLED"` | DEA schedule. On a lookup's options only. |
 | `medicationType` | `"RX"`, `"OTC"` |  |
-| `recommendedDispenseUnits` | `["Bottle", "Tablet"]` | Values for `dispense.unit`. On a lookup's options only. |
+| `templates` | Prescription templates | Saved and recommended directions and dispense details. See [Sig options](#sig-options). |
 
-These are null for medical equipment and compounds. A prescription's own `treatment` has the same parts. Its `name` may be just the drug (`"Lisinopril"`), and `prescribableName` is the full product name.
-
-{/* TODO(launch): remove once network-api applies templateId (Photon-Health/prescribe docs/api-gaps.md, "Templates aren't applied"). */}
-⚠️ Templates aren't applied yet: a sync with a `templateId` and no `treatment` comes back with `treatment` rejected (`MISSING_INPUT`). Send a `treatment` for now.
+Medication-specific fields are null for medical equipment and compounds. A prescription's own `treatment` has the same parts. Its `name` may be just the drug (`"Lisinopril"`), and `prescribableName` is the full product name.
 
 <Warning>
   Always send a `templateId` or a `treatment` when you draft. With a patient, a sync may continue a draft the patient already has in progress. If they have several, you get `AmbiguousPrescriptionMatch`. Resend with the `id` of the one you mean.
@@ -129,36 +126,25 @@ These are null for medical equipment and compounds. A prescription's own `treatm
 
 ## Sig options
 
-Once a draft has a patient and a drug with an NDC, `structuredSigs` suggests sigs for that drug and patient, worded for the patient:
+Read `treatment.templates` for saved templates and recommended directions. `source` distinguishes `PERSONAL_CATALOG`, `ORG_CATALOG` and `RECOMMENDED` choices. Recommended sigs appear on a draft once it has a patient and a drug with an NDC.
 
 ```graphql
-structuredSigs {
-  sigs { instructions }
-  notices { kind message }
+fragment PrescriptionSuggestions on Prescription {
+  treatment {
+    templates {
+      id
+      source
+      name
+      instructions
+      dispense { quantity unit daysSupply refillsAllowed dispenseAsWritten }
+    }
+  }
 }
 ```
 
-```json
-{
-  "sigs": [{ "instructions": "Take 1 tablet (25 mg) by mouth 2 times per day with food" }],
-  "notices": []
-}
-```
+After the prescriber chooses a template, send its `id` as `templateId`, or copy its `instructions` and `dispense` into the prescription update. A recommended sig's ID applies only to the draft it was suggested for. A recommendation that only supplies a dispense unit can have a null `id`; use the returned unit and collect the remaining details.
 
-To use one, send its `instructions` as the prescription's `instructions`. Each sig also has a `dispense`, but its fields are all null for now, so the prescriber still enters the quantity, unit and days supply.
-
-`structuredSigs` is null until the draft has both a patient and a drug with an NDC, and on a signed prescription. When no sig fits, `sigs` is empty and `notices` says why:
-
-| `kind` | Means |
-| --- | --- |
-| `MISSING_INPUT` | A patient detail needed to find sigs is missing, such as kidney function |
-| `NO_MATCH` | No sig fits this patient, such as an age the drug isn't dosed for |
-| `CONTRAINDICATED` | The drug is contraindicated for this patient |
-| `NOT_APPLICABLE` | Sigs don't apply to this product, such as test strips |
-| `DEFAULT_VALUE_USED` | A typical weight or body surface area for the patient's age and sex stood in for one Photon doesn't have |
-| `OTHER` | Any other message, including a lookup that couldn't be done |
-
-Looking sigs up takes longer than the rest of a prescription, so select `structuredSigs` only when you'll show it, such as in a separate get.
+Templates are null on a prescription that is no longer a draft. Review suggested directions and dispense details before signing.
 
 ## Signing
 
@@ -194,7 +180,7 @@ If the content changed after the prescriber reviewed it, the hashes don't match.
 | `clinical` | `{ diagnoses, notes }` | `diagnoses` is a patch of the ICD-10 codes that justify this prescription |
 | `signing` | `{ signedHash, message }` | See [Signing](#signing) |
 
-A prescription's `prescriber` is the prescriber assigned to it (`usr_…`), with their `name`. It's null for drafts and when no prescriber is assigned, and it doesn't say who signed. `signing` does.
+A prescription's `prescriber` is the prescriber assigned to it (`usr_USER_ID`), with their `name`. It's null for drafts and when no prescriber is assigned, and it doesn't say who signed. `signing` does.
 
 <Accordion title="Full selection set">
 

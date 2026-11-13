@@ -4,20 +4,22 @@ description: "Ids and enum values in one place."
 icon: "book"
 ---
 
-For every type and field, introspect `https://network.neutron.health/graphql` with any GraphQL client.
+For every type and field, introspect `https://network.neutron.health/graphql` with a GraphQL client configured with your [bearer token](/authentication).
 
 ## Ids
 
-| Prefix | Record |
-| --- | --- |
-| `pat_` | Patient |
-| `rx_` | Prescription |
-| `ord_` | Order |
-| `med_` | Catalog drug (a treatment) |
-| `alg_` | Allergen |
-| `phr_` | Pharmacy |
-| `org_` | Organization |
-| `usr_` | User, such as a prescription's `prescriber` |
+| Prefix | Record | Example placeholder |
+| --- | --- | --- |
+| `pat_` | Patient | `pat_PATIENT_ID` |
+| `rx_` | Prescription | `rx_PRESCRIPTION_ID` |
+| `ord_` | Order | `ord_ORDER_ID` |
+| `tmp_` | Prescription template | `tmp_TEMPLATE_ID` |
+| `med_` | Catalog drug (a treatment) | `med_MEDICATION_ID` |
+| `alg_` | Allergen | `alg_ALLERGEN_ID` |
+| `phr_` | Pharmacy | `phr_PHARMACY_ID` |
+| `org_` | Organization | `org_ORGANIZATION_ID` |
+| `usr_` | User, such as a prescription's `prescriber` | `usr_USER_ID` |
+| `fil_` | Prescription fill in webhook events | `fil_FILL_ID` |
 
 ## Patients
 
@@ -35,7 +37,6 @@ For every type and field, introspect `https://network.neutron.health/graphql` wi
 | `ScreeningAlertType` | `DRUG`, `ALLERGEN`, `CONDITION` |
 | `ScreeningSeverity` | `MINOR`, `MODERATE`, `MAJOR`. None of them blocks. See [Screening](/network/screening). |
 | `CatalogEntityKind` | `MEDICATION`, `MEDICAL_EQUIPMENT`, `COMPOUND`, `SUBSTANCE` |
-| `StructuredSigNoticeKind` | `MISSING_INPUT`, `NO_MATCH`, `CONTRAINDICATED`, `NOT_APPLICABLE`, `DEFAULT_VALUE_USED`, `OTHER`. See [Sig options](/network/prescription#sig-options). |
 
 ## Orders
 
@@ -50,7 +51,7 @@ For every type and field, introspect `https://network.neutron.health/graphql` wi
 
 ### Order exceptions
 
-`OrderExceptionType`, on a sent order's `exceptions`:
+`OrderExceptionType`, on a sent order's `fulfillment.exceptions`:
 
 | Value | Meaning |
 | --- | --- |
