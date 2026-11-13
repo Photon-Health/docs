@@ -4,7 +4,27 @@ description: "Connect ChatGPT, Claude or your own agent to send prescriptions wi
 icon: "plug"
 ---
 
-Use the [Photon plugin](/network/mcp) in ChatGPT, connect Claude manually, or set up your own MCP client.
+Add a custom MCP connection to your chat client to try Photon in Neutron. This works in ChatGPT, Claude and other compatible clients. For production in ChatGPT, you can also use the [Photon plugin](/network/mcp).
+
+## Start in Neutron
+
+Use this setup to add Neutron to the chat app you already use, including ChatGPT:
+
+1. [Create a Neutron account](https://photonhealth.com/onboard#developer).
+2. In your chat client's settings, add a custom MCP server or remote connector. Name it **Neutron** and use [ai.neutron.health](https://ai.neutron.health) as the server address.
+3. Choose OAuth sign-in. If the client asks how to register, choose CIMD or its published client identity.
+4. Save the connection and sign in with your Neutron account. Select your organization when prompted.
+5. Install or enable the connection in your conversation, then ask it to send a prescription.
+
+In ChatGPT, open **Plugins**, select **+ → Add custom MCP server**, and use the Neutron address and OAuth settings above. Create the plugin, install it, then select it with `@` in your chat. See [ChatGPT's custom MCP setup](https://developers.openai.com/api/docs/guides/custom-mcp-server) for account and workspace requirements.
+
+In Claude, add a custom connector from **Customize → Connectors** using the same Neutron details. See [Claude's custom connector guide](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp) for individual and workspace setup.
+
+Try:
+
+> Send a prescription for amlodipine to Paige Turner.
+
+Neutron uses the same prescribing workflow as production, with test prescriptions only. The assistant gathers missing details and prepares the order for your review before sending.
 
 ## Server addresses
 
@@ -13,40 +33,17 @@ Use the [Photon plugin](/network/mcp) in ChatGPT, connect Claude manually, or se
 | Environment | Server URL | Client access |
 | --- | --- | --- |
 | Neutron — sandbox | `ai.neutron.health` | Any compatible client. Test prescriptions only. |
-| Photon — production | `ai.photon.health` | ChatGPT; Claude in private preview. Other OAuth clients require approval. |
+| Photon — production | `ai.photon.health` | ChatGPT and Claude only. Email support for other clients. |
 
 </div>
 
-Use an MCP client with Streamable HTTP support. Keep the account and server in the same environment.
+Use an MCP client with Streamable HTTP support. Keep the account and server in the same environment. Neutron accepts compatible OAuth clients through dynamic CIMD, or existing bearer tokens from approved integrations.
 
-## Connect Claude manually
+## Connect a chat client in production
 
-Claude is in **private preview**, but you can connect it yourself with your Photon account. You do not need to contact Photon to get started.
+To use a chat client with real patients, add a custom MCP connection using [ai.photon.health](https://ai.photon.health), choose OAuth sign-in and connect your Photon account. Enable the connection in your conversation, just as you would with Neutron.
 
-1. In Claude, open **Customize → Connectors**, then choose **Add → Add custom connector**.
-2. Name the connector **Photon** and enter the server address `ai.photon.health`. For sandbox testing, use `ai.neutron.health` and a Neutron account instead.
-3. Continue through the detected authentication settings. Use OAuth sign-in and **Claude's published identity** for the OAuth client.
-4. Finish adding the connector, then connect and sign in to your Photon account. Choose your organization if prompted.
-5. Enable Photon for your conversation and ask it to send a prescription.
-
-On a Claude team or enterprise account, your workspace administrator may need to add the connector first. See [Claude's custom connector guide](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp) for the setup options available to your account.
-
-## Start in Neutron
-
-1. [Create a Neutron account](https://photonhealth.com/onboard#developer).
-2. Add a remote MCP connection in your client with the URL `ai.neutron.health`.
-3. Choose OAuth sign-in and sign in with your Neutron account. Select the organization you want to work in when prompted.
-4. Enable the connection in your conversation and ask it to send a prescription.
-
-Neutron uses the same tools and prescribing workflow as production. The server instructions state that Neutron supports test prescriptions only; you do not need to say "test patient" or use special wording in your request.
-
-Any compatible client can connect: it must support Streamable HTTP and CIMD for OAuth sign-in, or accept an existing Photon bearer token.
-
-Try:
-
-> Send a prescription for amlodipine to Paige Turner.
-
-The agent uses `patient` to sync (find, create or update), `prescription` to draft/sign, `order` to draft/send, and `orders` to fetch the result. Drafting and review are built into the send flow, so you don't need to ask for a draft separately. A standalone `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
+Only **ChatGPT and Claude** are currently whitelisted for production OAuth. Claude remains in private preview and can be connected manually. To use another chat client, email [support@photon.health](mailto:support@photon.health) with the client name, use case and CIMD metadata URL. Neutron does not require this approval.
 
 ## CIMD and client approval
 
@@ -60,7 +57,7 @@ The agent uses `patient` to sync (find, create or update), `prescription` to dra
 
 We do not plan to support DCR. Choose CIMD when building a new OAuth integration.
 
-To whitelist a new production client, email [support@photon.health](mailto:support@photon.health) with its name, use case and CIMD metadata URL. Approval is separate from a user's access to their organization and records. A successful connection only permits the actions that their account is authorized to take.
+Client approval is separate from a user's access to their organization and records. A successful connection only permits the actions that their account is authorized to take.
 
 ## Use existing API credentials
 
