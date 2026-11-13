@@ -12,7 +12,7 @@ Network is the API underneath everything in Photon. It has three upserts, `patie
     For your backend: sync patients and draft prescriptions and orders with a machine token.
   </Card>
   <Card title="MCP" icon="robot" href="/network/mcp">
-    Send prescriptions with Photon from ChatGPT, Claude or your own agent. Available in Neutron, and in private preview in production.
+    Send prescriptions with Photon from ChatGPT, Claude or your own agent. Use the ChatGPT plugin in production or test in Neutron. Claude is in private preview.
   </Card>
   <Card title="Webhooks" icon="webhook" href="/network/webhooks">
     For your backend: get notified as orders are sent, filled, shipped and picked up.
@@ -35,7 +35,7 @@ Each record has one GraphQL mutation, and how you call it decides what it does:
 | `prescription(prescription:, metadata:)` | Prescription `rx_…` | [Prescription](/network/prescription) |
 | `order(order:, metadata:)` | Order `ord_…` | [Order](/network/order) |
 
-MCP exposes these records through three mutation tools, plus the read-only `orders` tool. Its mutation tools do not accept ID-only fetch calls. See [MCP tools](/network/mcp#four-tools).
+MCP exposes these records through three mutation tools, plus read-only tools for orders and organizations. Its mutation tools do not accept ID-only fetch calls. See [MCP tools](/network/mcp#tools).
 
 Two GraphQL queries read without changing anything: `me`, to check a token, and `orders`, to list your organization's orders. See [Queries](/network/graphql#queries).
 

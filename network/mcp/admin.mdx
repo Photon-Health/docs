@@ -1,0 +1,35 @@
+---
+title: "Admin"
+description: "Choose your Photon organization, accept invitations and switch organizations in a conversation."
+icon: "building"
+---
+
+Your connection works in one Photon organization at a time. Ask which organization you're using, switch to another one you belong to, or check for invitations. The `organizations` tool handles these requests without changing patient or prescription records.
+
+## organizations
+
+**List your organizations and invites, or sign in to another organization.** This read-only tool is available to provider accounts. Call it with no arguments to see the current organization and the choices available to you:
+
+```json
+{}
+```
+
+The result includes `current`, `organizations`, `invites` and `nextStep`. If `current` is `null`, the other tools cannot run until you sign in to an organization.
+
+| `nextStep` | What to do |
+| --- | --- |
+| `SIGNED_IN` | Continue in `current`, or choose another listed organization. |
+| `SIGN_IN` | There is one organization and no pending invite. Use `signInTo.organizationId` without asking the user to choose. |
+| `CHOOSE_ORGANIZATION` | Ask which listed organization to use or which invite to accept. |
+| `ACCEPT_INVITE` | Open an invite's `acceptUrl` to accept it in Prescribe, then call `organizations` again. Invites cannot be accepted in chat. |
+| `ONBOARD` | Open `onboardingUrl` to set up an organization, then call `organizations` again. |
+
+To sign in to a listed organization, pass its returned ID:
+
+```json
+{ "organizationId": "org_selected" }
+```
+
+When the selected organization differs from `current`, the tool returns `SIGN_IN_REQUIRED`. Complete the Photon sign-in opened by your client and choose that organization when prompted. Keep the plugin installed; changing organizations does not require removing it. Call `organizations` again and confirm `current` before continuing. Record IDs from the previous organization may not be accessible in the new one.
+
+Show pending invites alongside existing memberships. Preserve each returned `acceptUrl` and `onboardingUrl` exactly, including its query string, so Prescribe can return the user to their chat app. If `INVITES_UNAVAILABLE` is returned, the invite list is incomplete; do not describe it as empty.

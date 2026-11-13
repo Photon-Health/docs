@@ -75,3 +75,9 @@ img.env-mark-dark,
     overflow-wrap: normal;
   }
 }
+
+/* Keep MCP server hostnames whole; the table wrapper handles scrolling
+   when a narrow viewport cannot fit all three columns. */
+#content-container .mcp-server-table code {
+  white-space: nowrap;
+}

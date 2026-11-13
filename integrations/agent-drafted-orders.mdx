@@ -2,11 +2,10 @@
 title: "Agent-drafted orders"
 description: "Send prescriptions with Photon using agent-prepared drafts and prescriber review in Prescribe."
 icon: "robot"
-tag: "Preview"
 ---
 
 <Note>
-  MCP is open to every Neutron account. In production, it's in **private preview**: see [client approval](/network/mcp/connect#cimd-and-client-approval) or contact [support@photon.health](mailto:support@photon.health).
+  Test with any Neutron account. For production, use the [ChatGPT plugin](/network/mcp) or follow [client approval](/network/mcp/connect#cimd-and-client-approval) for your own OAuth client. Claude is in private preview.
 </Note>
 
 Your clinical agent reads the encounter, syncs the patient, searches medications and prepares draft prescriptions. A prescriber then opens the drafts in Prescribe to review, sign and submit the order.
@@ -31,7 +30,7 @@ sequenceDiagram
 Point your agent's MCP client at the Neutron server:
 
 ```text
-https://ai.neutron.health
+ai.neutron.health
 ```
 
 The agent authenticates like any other caller. A backend agent uses a [machine token](/authentication#machine-tokens). An agent that runs in a prescriber's MCP client, such as Claude or ChatGPT, signs in as that prescriber. See [Connect a client](/network/mcp/connect).

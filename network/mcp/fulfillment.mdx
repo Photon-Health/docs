@@ -27,7 +27,7 @@ Or fetch submitted orders for a synced patient:
 }
 ```
 
-The response contains an `orders` array, plus any warnings and review link. Select the intended order before requesting pharmacy options; don't mix offers from different orders.
+The response contains an `orders` array, plus any warnings. Select the intended order before requesting pharmacy options; don't mix offers from different orders.
 
 ### Compare pharmacies
 
@@ -36,7 +36,7 @@ Request options for the selected order, for example pickup near a postal code:
 ```json
 {
   "id": "ord_existing",
-  "availablePharmacies": {
+  "routablePharmacies": {
     "pharmacy": {
       "near": { "address": { "postalCode": "10001" } },
       "fulfillmentType": "PICK_UP"
@@ -51,10 +51,12 @@ Request options for the selected order, for example pickup near a postal code:
 | `id` | Exact order to read or shop. |
 | `filter.patient.id`, `filter.state` | Narrow an order list. |
 | `limit` | Maximum orders to return. |
-| `availablePharmacies.pharmacy` | Optional pharmacy filters, such as `name`, `near` and `fulfillmentType`. |
-| `availablePharmacies.page` | Pharmacy page `limit` and `offset`. |
+| `routablePharmacies.pharmacy` | Optional pharmacy filters, such as `name`, `near` and `fulfillmentType`. |
+| `routablePharmacies.page` | Pharmacy page `limit` and `offset`. |
 
-Read `availablePharmacies.options` and use `nextOffset` for the next page. Preserve sponsored and matching labels, price source and delivery estimates. A missing price is not zero, and an offer is not a guaranteed price. Without a pharmacy filter, results can include sponsored options.
+For each returned order, read `routablePharmacies.options` and use `nextOffset` for the next page. Preserve sponsored and matching labels, price source and delivery estimates. A missing price is not zero, and an offer is not a guaranteed price. Without a pharmacy filter, results can include sponsored options.
+
+Offers identify their prescription with `prescriptionId` and carry `priceType`, `isPromoted` and `attributeTags`; preserve those distinctions when comparing them. `offers.atPharmacy` is `null` until a pharmacy is chosen, and can be an empty array when none of its offers apply. Discount-card `redemptionState: SETTLED` does not establish that the patient or pharmacy was paid.
 
 Order status can remain available when shopping is unavailable. Report the returned warning and keep the successful status result; don't substitute another order's offers or use a mutation to search for pharmacies.
 
@@ -71,6 +73,20 @@ Use `order` only after the user explicitly chooses a destination for that order.
 
 Send the pharmacy change separately from patient, prescription or submission changes. Clarify an ambiguous destination, but don't ask for a pharmacy just because none was supplied. Omission keeps the existing assignment; `pharmacy.none: true` requests removal and should only be used when explicitly requested.
 
+When moving a submitted order to another pharmacy, include the user's reason in `pharmacy.reason`:
+
+```json
+{
+  "id": "ord_existing",
+  "pharmacy": {
+    "pharmacy": { "id": "phr_selected" },
+    "reason": { "type": "OUT_OF_STOCK" }
+  }
+}
+```
+
+Supported reason types are `CLOSER_LOCATION`, `PHARMACY_CLOSED`, `OUT_OF_STOCK`, `FILL_TIME_TOO_SLOW`, `INSURANCE_NOT_ACCEPTED`, `PRICE_TOO_HIGH`, `WRONG_PHARMACY_SELECTED` and `OTHER`. `OTHER` requires a `note`. Include a reason only with a pharmacy selection, not `none`; never invent the user's reason.
+
 Inspect applied and unapplied changes and the resulting pharmacy. Read the order again with `orders` to confirm the assignment. Photon decides whether the order can be routed or rerouted.
 
 ## Explain the current status
@@ -81,6 +97,9 @@ Inspect applied and unapplied changes and the resulting pharmacy. Read the order
 | Order `state: DRAFT` | The order has not been submitted. |
 | Order `state: SUBMITTED` | Photon accepted submission. It does not establish pharmacy receipt. |
 | `pharmacy` | The assigned destination, when present. Assignment alone does not confirm delivery. |
-| `fulfillment` | Available fulfillment state, history, routability and exceptions. Use these to describe pharmacy progress. |
+| `fulfillment` | Available order fulfillment state, history, routability and exceptions. Use these to describe pharmacy progress. |
+| `prescriptions[].fulfillment` | Per-prescription progress, `pharmacyEstimatedReadyAt` and exceptions, when available. |
+
+Returned orders also include `organization` context, and each prescription includes its `prescriber` when available.
 
 If `fulfillment` is `null` or its history is empty, don't claim the pharmacy received the prescription. Report the last confirmed milestone. Use [webhooks](/network/webhooks) when your integration needs ongoing updates.

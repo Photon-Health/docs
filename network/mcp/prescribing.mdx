@@ -5,7 +5,7 @@ description: "Send prescriptions with Photon, with patient sync, drafting and re
 icon: "prescription-bottle-medical"
 ---
 
-The prescribing flow uses four tools in order: `patient` to **sync** (find, create or update), `prescription` to **draft/sign**, `order` to **draft/send**, and [`orders`](/network/mcp/fulfillment#orders) to **fetch** the result. The first three can change records and are not ID-only fetch tools.
+The prescribing flow uses: `patient` to **sync** (find, create or update), `prescription` to **draft/sign**, `order` to **draft/send**, and [`orders`](/network/mcp/fulfillment#orders) to **fetch** the result. The first three can change records and are not ID-only fetch tools.
 
 You do not need to ask the agent for a draft before sending. Drafting and review are built into the flow. A separate `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
 
@@ -28,14 +28,17 @@ To create a patient, **first name, last name, date of birth and sex** are requir
 | Input | Use |
 | --- | --- |
 | `id` | The existing patient ID, once resolved. Include the fields you intend to update. |
-| `demographic` | Known identity and contact information, including `name`, `dateOfBirth`, `sex`, `phone`, `email` and `address`. |
+| `demographic` | Identity: `name`, `dateOfBirth`, `sex` and `gender`. |
+| `contact` | `phone`, `email` and `address`. |
 | `clinical` | Known allergies, medications and diagnoses, using the tool's patch fields. |
+
+Send `demographic.dateOfBirth` as `YYYY-MM-DD`. If you collect it in a form, use a typed text field, such as `MM/DD/YYYY`, and convert it before calling the tool.
 
 Inspect `patient`, `candidates` and `changes.unapplied`. If several candidates remain, use available context to resolve one or ask for the minimum distinguishing detail. Never guess or silently switch patients. Continue with the selected ID and resend intended fields that have not been applied.
 
 Record known clinical context before medication search when possible. Missing history is not confirmed absence. Set an allergy `none` value only when no known allergies have been confirmed.
 
-Don't ask for a pharmacy during patient sync. Provider accounts cannot set the profile's preferred pharmacy through this tool.
+Don't ask for a pharmacy during patient sync. Only authenticated patient accounts can save their own volunteered preference in top-level `preferredPharmacy`. Provider accounts cannot set it. A profile preference does not select an order's pharmacy.
 
 ## prescription
 
@@ -55,12 +58,16 @@ Omit `patient` if identity is not yet available. This allows medication search; 
 | `id` | A returned prescription ID to continue editing the same draft. |
 | `patient.id` | The resolved patient, when available. |
 | `treatment.name` | Drug name or search text for the initial call. |
-| `treatment.id` | A medication ID from a returned choice. |
+| `treatment.id` | A medication ID from a returned choice. `treatment.rxNormId` and `treatment.ndc` are also supported identifiers. |
+| `templateId` | A returned prescription template ID. |
+| `externalId` | Your own prescription identifier, when needed. |
 | `instructions` | Directions confirmed by the clinician. |
 | `dispense` | `quantity`, `unit`, `daysSupply`, `refillsAllowed` and `dispenseAsWritten`, as needed. |
 | `clinical` | Prescription diagnoses and notes. |
 
 Use returned choices in `changes.unapplied` to resolve the treatment and collect missing details. Resend pending inputs with the selected treatment ID, patient and any existing prescription ID. Calls do not retain unapplied inputs for you.
+
+Returned treatments include `entityKind`, a `schedule` value when available, and templates with `source` values such as `PERSONAL_CATALOG`, `ORG_CATALOG` or `RECOMMENDED`. Inspect the returned choices instead of assuming every treatment or template is interchangeable.
 
 Photon may populate draft directions or dispense details with defaults. Show them to the prescriber and confirm or correct them before signing or submitting. A medication match alone does not establish a complete clinical screen or coverage check; inspect returned screening and warnings.
 
@@ -104,7 +111,16 @@ Don't ask for a pharmacy or make it a prerequisite for submission. Don't infer a
 
 ### Submit the reviewed order
 
-The patient must have a phone number before you send an order. If it is missing, update the existing patient with `patient`, using its ID and `demographic.phone`.
+The patient must have a phone number before you send an order. If it is missing, update the existing patient with `patient`, using its ID and `contact.phone`:
+
+```json
+{
+  "id": "pat_resolved",
+  "contact": { "phone": "+12025550123" }
+}
+```
+
+Replace the example phone number with the patient's confirmed number.
 
 After the prescriber approves the complete order, call `order` with only its ID and submission state:
 
@@ -117,7 +133,13 @@ After the prescriber approves the complete order, call `order` with only its ID 
 
 Photon enforces authorization and signing requirements. If it reports an unmet requirement, resolve that requirement against the existing records before continuing. Confirm the returned signing and order states before reporting success. Submission cannot be combined with content or pharmacy edits.
 
-Check `order.state`, each prescription's signing state and `changes.unapplied`, then read back with `orders`. A `DRAFT` order has not been submitted. `SUBMITTED` does not by itself confirm pharmacy receipt.
+Check `order.state`, each prescription's signing state and `changes.unapplied`, then read back with `orders`. A `DRAFT` order has not been submitted. `SUBMITTED` does not by itself confirm pharmacy receipt. When the result includes `PATIENT_SELECTS_PHARMACY`, relay its message exactly:
+
+> We sent the prescription to your patient and they will select their pharmacy.
+
+### Complete clinician verification
+
+Signing or submission can return `VERIFICATION_REQUIRED` with `details.verifyUrl`. Give the prescriber that URL exactly as returned, including its query string. They complete verification in Prescribe and return to the chat app. Retry the same signing or submission call after verification; if the reviewed content has changed, obtain a fresh review first. A provider sign-in alone does not establish signing authority.
 
 ## Read the result and continue
 
@@ -125,11 +147,15 @@ Check `order.state`, each prescription's signing state and `changes.unapplied`, 
 | --- | --- |
 | `patient`, `prescription` or `order` | Keep any returned record ID for subsequent calls. A record can exist even if some changes were rejected. |
 | `candidates` | Resolve an ambiguous record using known context or a focused question. |
-| `changes.applied` | Check what Photon accepted. |
+| `changes.applied` | Check what Photon accepted, including `after` when present. |
 | `changes.unapplied` | Resolve rejected or ambiguous fields; inspect `reason` and `options`. |
 | `warnings` | Surface limitations, including unavailable history or screening. |
-| `links.review` | Open the record in Prescribe when a review link is available. |
+| `continuation` | When present, use the suggested input to continue with the resolved choices and intended pending fields. |
+
+Tool results no longer include `links.review`. For a handoff, retain the returned record IDs and follow [Agent-drafted orders](/integrations/agent-drafted-orders).
 
 If clinical context, prescription content, order membership or the destination changes, obtain a fresh review before finalization. Empty or unavailable screening does not establish that a complete check found no problems.
 
-For errors, follow `userAction` when present. An unknown write outcome means the operation may have completed. Preserve returned IDs and inspect the existing record before another write; do not automatically retry or create a replacement.
+For errors, follow `userAction` when present. `INVALID_INPUT` reports field paths in `details.issues`; unknown-key issues also include `allowedKeys` for the object at that path. Correct the input before retrying. For example, phone belongs in `contact`, not `demographic`.
+
+An unknown write outcome means the operation may have completed. Preserve returned IDs and inspect the existing record before another write; do not automatically retry or create a replacement.

@@ -142,7 +142,8 @@
               "network/mcp",
               "network/mcp/connect",
               "network/mcp/prescribing",
-              "network/mcp/fulfillment"
+              "network/mcp/fulfillment",
+              "network/mcp/admin"
             ]
           },
           {

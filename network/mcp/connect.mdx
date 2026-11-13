@@ -4,42 +4,46 @@ description: "Connect ChatGPT, Claude or your own agent to send prescriptions wi
 icon: "plug"
 ---
 
-Use Photon in a chat app such as ChatGPT or Claude, or connect your own agent.
+Add a custom MCP connection to your chat client to try Photon in Neutron. This works in ChatGPT, Claude and other compatible clients. For production in ChatGPT, you can also use the [Photon plugin](/network/mcp).
 
 ## Start in Neutron
 
+Use this setup to add Neutron to the chat app you already use, including ChatGPT:
+
 1. [Create a Neutron account](https://photonhealth.com/onboard#developer).
-2. Add a remote MCP connection in your client with the URL `https://ai.neutron.health`.
-3. Choose OAuth sign-in and sign in with your Neutron account. Select the organization you want to work in when prompted.
-4. Enable the connection in your conversation and ask it to send a prescription.
+2. In your chat client's settings, add a custom MCP server or remote connector. Name it **Neutron** and use [ai.neutron.health](https://ai.neutron.health) as the server address.
+3. Choose OAuth sign-in. If the client asks how to register, choose CIMD or its published client identity.
+4. Save the connection and sign in with your Neutron account. Select your organization when prompted.
+5. Install or enable the connection in your conversation, then ask it to send a prescription.
 
-Neutron uses the same tools and prescribing workflow as production. An environment notice in the tool descriptions signals that Neutron creates test orders only; you do not need to say "test patient" or use special wording in your request.
+In ChatGPT, open **Plugins**, select **+ → Add custom MCP server**, and use the Neutron address and OAuth settings above. Create the plugin, install it, then select it with `@` in your chat. See [ChatGPT's custom MCP setup](https://developers.openai.com/api/docs/guides/custom-mcp-server) for account and workspace requirements.
 
-Any compatible client can connect: it must support Streamable HTTP and CIMD for OAuth sign-in, or accept an existing Photon bearer token.
+In Claude, add a custom connector from **Customize → Connectors** using the same Neutron details. See [Claude's custom connector guide](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp) for individual and workspace setup.
 
 Try:
 
 > Send a prescription for amlodipine to Paige Turner.
 
-The agent uses `patient` to sync (find, create or update), `prescription` to draft/sign, `order` to draft/send, and `orders` to fetch the result. Drafting and review are built into the send flow, so you don't need to ask for a draft separately. A standalone `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
+Neutron uses the same prescribing workflow as production, with test prescriptions only. The assistant gathers missing details and prepares the order for your review before sending.
 
-## Production clients
+## Server addresses
 
-Production MCP is in **private preview** at `https://ai.photon.health`. Only ChatGPT and Claude are currently supported as approved OAuth clients. Contact [support@photon.health](mailto:support@photon.health) for preview access.
+<div className="mcp-server-table">
 
-The production plugin listings below are not live yet. If you already have preview access, use the server URL in your approved client's remote MCP connection settings.
+| Environment | Server URL | Client access |
+| --- | --- | --- |
+| Neutron — sandbox | `ai.neutron.health` | Any compatible client. Test prescriptions only. |
+| Photon — production | `ai.photon.health` | ChatGPT and Claude only. Email support for other clients. |
 
-{/* TODO(launch): add the published ChatGPT and Claude production plugin URLs, enable these cards, and remove the coming-soon markers. */}
-<div style={{ opacity: 0.5 }} aria-disabled="true">
-  <CardGroup cols={2}>
-    <Card title="Photon for ChatGPT" icon="comments">
-      ⚠️ Coming soon. Production plugin link is not available yet.
-    </Card>
-    <Card title="Photon for Claude" icon="comment">
-      ⚠️ Coming soon. Production plugin link is not available yet.
-    </Card>
-  </CardGroup>
 </div>
+
+Use an MCP client with Streamable HTTP support. Keep the account and server in the same environment. Neutron accepts compatible OAuth clients through dynamic CIMD, or existing bearer tokens from approved integrations.
+
+## Connect a chat client in production
+
+To use a chat client with real patients, add a custom MCP connection using [ai.photon.health](https://ai.photon.health), choose OAuth sign-in and connect your Photon account. Enable the connection in your conversation, just as you would with Neutron.
+
+Only **ChatGPT and Claude** are currently whitelisted for production OAuth. Claude remains in private preview and can be connected manually. To use another chat client, email [support@photon.health](mailto:support@photon.health) with the client name, use case and CIMD metadata URL. Neutron does not require this approval.
 
 ## CIMD and client approval
 
@@ -53,7 +57,7 @@ The production plugin listings below are not live yet. If you already have previ
 
 We do not plan to support DCR. Choose CIMD when building a new OAuth integration.
 
-To whitelist a new production client, email [support@photon.health](mailto:support@photon.health) with its name, use case and CIMD metadata URL. Approval is separate from a user's access to their organization and records. A successful connection only permits the actions that their account is authorized to take.
+Client approval is separate from a user's access to their organization and records. A successful connection only permits the actions that their account is authorized to take.
 
 ## Use existing API credentials
 
@@ -63,6 +67,8 @@ Your own agent can also use a regular Photon Application or Backend client to ob
 Authorization: Bearer <token>
 ```
 
+The public `/auth.md` on each server describes its OAuth connection flow; it does not support agent registration through the Auth.md protocol.
+
 Use the account, token and server URL from the same environment. Keep Backend client secrets on your own server. See [Authentication](/authentication) for obtaining user and machine tokens.
 
 A machine token can prepare drafts but cannot sign prescriptions. Hand drafts to a signed-in prescriber in [Prescribe](/integrations/agent-drafted-orders). Creating an OAuth connection for a new third-party client still follows the production approval process above.
@@ -70,7 +76,8 @@ A machine token can prepare drafts but cannot sign prescriptions. Hand drafts to
 ## Connection problems
 
 - **Client not approved:** use a supported production client or ask support to whitelist yours. For development, use Neutron.
-- **No organization access:** check that you're signing into the correct environment and organization. Contact your administrator or Photon support if access is blocked.
+- **`ORGANIZATION_REQUIRED`:** follow the [organization setup steps](/network/mcp/admin#organizations). Check the environment and contact your administrator or Photon support if access is blocked.
+- **`VERIFICATION_REQUIRED`:** open the returned `details.verifyUrl` to complete clinician verification in Prescribe, then return and retry the same signing or submission call. Preserve the full URL, including its query string. Verification does not replace review and approval of the prescription.
 - **Expired sign-in:** reconnect the client. If an earlier write had an unknown outcome, inspect the existing record before repeating it.
 
 When contacting support, include the environment, client name and error message. Don't send access tokens or client secrets.
