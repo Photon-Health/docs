@@ -4,7 +4,32 @@ description: "Connect ChatGPT, Claude or your own agent to send prescriptions wi
 icon: "plug"
 ---
 
-For ChatGPT or Claude, start with the [production clients](/network/mcp). To test an integration or connect your own agent, use the setup below.
+Use the [Photon plugin](/network/mcp) in ChatGPT, connect Claude manually, or set up your own MCP client.
+
+## Server addresses
+
+<div className="mcp-server-table">
+
+| Environment | Server URL | Client access |
+| --- | --- | --- |
+| Neutron — sandbox | `ai.neutron.health` | Any compatible client. Test prescriptions only. |
+| Photon — production | `ai.photon.health` | ChatGPT; Claude in private preview. Other OAuth clients require approval. |
+
+</div>
+
+Use an MCP client with Streamable HTTP support. Keep the account and server in the same environment.
+
+## Connect Claude manually
+
+Claude is in **private preview**, but you can connect it yourself with your Photon account. You do not need to contact Photon to get started.
+
+1. In Claude, open **Customize → Connectors**, then choose **Add → Add custom connector**.
+2. Name the connector **Photon** and enter the server address `ai.photon.health`. For sandbox testing, use `ai.neutron.health` and a Neutron account instead.
+3. Continue through the detected authentication settings. Use OAuth sign-in and **Claude's published identity** for the OAuth client.
+4. Finish adding the connector, then connect and sign in to your Photon account. Choose your organization if prompted.
+5. Enable Photon for your conversation and ask it to send a prescription.
+
+On a Claude team or enterprise account, your workspace administrator may need to add the connector first. See [Claude's custom connector guide](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp) for the setup options available to your account.
 
 ## Start in Neutron
 
@@ -22,34 +47,6 @@ Try:
 > Send a prescription for amlodipine to Paige Turner.
 
 The agent uses `patient` to sync (find, create or update), `prescription` to draft/sign, `order` to draft/send, and `orders` to fetch the result. Drafting and review are built into the send flow, so you don't need to ask for a draft separately. A standalone `prescription` signing call is optional; Photon enforces signing requirements when the order is sent.
-
-## organizations
-
-**List your organizations and invites, or sign in to another organization.** This read-only tool is available to provider accounts. Call it with no arguments to see the current organization and the choices available to you:
-
-```json
-{}
-```
-
-The result includes `current`, `organizations`, `invites` and `nextStep`. If `current` is `null`, the other tools cannot run until you sign in to an organization.
-
-| `nextStep` | What to do |
-| --- | --- |
-| `SIGNED_IN` | Continue in `current`, or choose another listed organization. |
-| `SIGN_IN` | There is one organization and no pending invite. Use `signInTo.organizationId` without asking the user to choose. |
-| `CHOOSE_ORGANIZATION` | Ask which listed organization to use or which invite to accept. |
-| `ACCEPT_INVITE` | Open an invite's `acceptUrl` to accept it in Prescribe, then call `organizations` again. Invites cannot be accepted in chat. |
-| `ONBOARD` | Open `onboardingUrl` to set up an organization, then call `organizations` again. |
-
-To sign in to a listed organization, pass its returned ID:
-
-```json
-{ "organizationId": "org_selected" }
-```
-
-When the selected organization differs from `current`, the tool returns `SIGN_IN_REQUIRED`. Complete the Photon sign-in opened by your client and choose that organization when prompted. Keep the plugin installed; changing organizations does not require removing it. Call `organizations` again and confirm `current` before continuing. Record IDs from the previous organization may not be accessible in the new one.
-
-Show pending invites alongside existing memberships. Preserve each returned `acceptUrl` and `onboardingUrl` exactly, including its query string, so Prescribe can return the user to their chat app. If `INVITES_UNAVAILABLE` is returned, the invite list is incomplete; do not describe it as empty.
 
 ## CIMD and client approval
 
@@ -82,7 +79,7 @@ A machine token can prepare drafts but cannot sign prescriptions. Hand drafts to
 ## Connection problems
 
 - **Client not approved:** use a supported production client or ask support to whitelist yours. For development, use Neutron.
-- **`ORGANIZATION_REQUIRED`:** call `organizations` and follow its `nextStep`. Check the environment and contact your administrator or Photon support if access is blocked.
+- **`ORGANIZATION_REQUIRED`:** follow the [organization setup steps](/network/mcp/admin#organizations). Check the environment and contact your administrator or Photon support if access is blocked.
 - **`VERIFICATION_REQUIRED`:** open the returned `details.verifyUrl` to complete clinician verification in Prescribe, then return and retry the same signing or submission call. Preserve the full URL, including its query string. Verification does not replace review and approval of the prescription.
 - **Expired sign-in:** reconnect the client. If an earlier write had an unknown outcome, inspect the existing record before repeating it.
 

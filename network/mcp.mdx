@@ -11,8 +11,8 @@ Start with the patient and medication details you have. Photon helps you find th
   <Card title="Photon for ChatGPT" icon="openai" iconType="brands" href="https://chatgpt.com/plugins/plugin_asdk_app_6ae536598d7481919dc43c9f44a112ad">
     Add the Photon plugin, connect your account and start prescribing.
   </Card>
-  <Card title="Photon for Claude" icon="claude" iconType="brands" href="mailto:support@photon.health">
-    Available in **private preview**. Contact us to connect Photon in Claude.
+  <Card title="Photon for Claude" icon="claude" iconType="brands" href="/network/mcp/connect#connect-claude-manually">
+    Available in **private preview**. Connect manually with your Photon account.
   </Card>
 </CardGroup>
 
@@ -39,7 +39,7 @@ The assistant uses these tools behind the conversation. You can also call them f
 | [`prescription`](/network/mcp/prescribing#prescription) | Find a medication, prepare or edit a prescription, and sign it when needed. |
 | [`order`](/network/mcp/prescribing#order) | Put prescriptions into an order, send it after approval, or change its pharmacy. |
 | [`orders`](/network/mcp/fulfillment#orders) | Check order status and compare available pharmacies and prices. |
-| [`organizations`](/network/mcp/connect#organizations) | See your organizations and invitations, or switch where you're working. |
+| [`organizations`](/network/mcp/admin#organizations) | See your organizations and invitations, or switch where you're working. |
 
 See [Prescribing](/network/mcp/prescribing) for patient, prescription and order examples, or [Fulfillment](/network/mcp/fulfillment) for status and pharmacy options.
 
@@ -47,13 +47,4 @@ See [Prescribing](/network/mcp/prescribing) for patient, prescription and order 
 
 Use an MCP client with Streamable HTTP support. Test with a Neutron account before working with real patients in Photon.
 
-<div className="mcp-server-table">
-
-| Environment | Server URL | Client access |
-| --- | --- | --- |
-| Neutron — sandbox | `ai.neutron.health` | Any compatible client. Test prescriptions only. |
-| Photon — production | `ai.photon.health` | ChatGPT; Claude in private preview. Other OAuth clients require approval. |
-
-</div>
-
-[Connect a client](/network/mcp/connect) covers sign-in, organization selection and approval for your own OAuth client. A backend agent can use [API credentials](/authentication#machine-tokens) to prepare drafts, then [hand them to a prescriber](/integrations/agent-drafted-orders) to review and send. Machine tokens cannot sign prescriptions.
+[Connect a client](/network/mcp/connect) covers server addresses, sign-in and approval for your own OAuth client. See [Admin](/network/mcp/admin) to manage organizations. A backend agent can use [API credentials](/authentication#machine-tokens) to prepare drafts, then [hand them to a prescriber](/integrations/agent-drafted-orders) to review and send. Machine tokens cannot sign prescriptions.
