@@ -31,18 +31,14 @@ npm install @photonhealth/client@rc
 
 `@photonhealth/react` includes the matching `@photonhealth/client`, so you don't install that separately. Include `@rc` until 2.0.0 is released.
 
-The latest release candidate is `2.0.0-rc.1`, for both packages.
-
-<Warning>
-  This release uses an older Network schema, including contact details under `demographic`. The current API uses `contact` and has changed order and treatment fields. Use the [GraphQL API](/network/graphql) or [Prescribe links](/prescribe/app/deep-links) for current integrations until a compatible public SDK release is available.
-</Warning>
-
-{/* TODO(launch): when a compatible release candidate is published, recheck its schema and features, then update the version and compatibility notes. */}
-
-`2.0.0-rc.1` does not include:
+The latest release candidate is `2.0.0-rc.2`, for both packages. It uses the current Network schema, and adds:
 
 - **Machine credentials** for the JavaScript client, so your backend can call it with its own client id and secret. See [On your backend](/prescribe/embed/javascript#on-your-backend).
 - **Sig options** in the client and `PhotonPrescription`. See [Sig options](/network/prescription#sig-options).
+
+<Warning>
+  `2.0.0-rc.1` uses an older Network schema. Coming from it, move a patient's `phone`, `email` and `address` from `demographic` to `contact`.
+</Warning>
 
 ## Start in the sandbox
 
@@ -72,8 +68,8 @@ The READMEs cover the rest: sign-in, live objects, errors, each card's props and
 
 ## What a release candidate means
 
-- Each `2.0.0-rc.N` can change before 2.0.0. Pin an exact version, such as `2.0.0-rc.1`, to choose when you take changes.
-- Both `latest` and `rc` currently resolve to `2.0.0-rc.1`; `latest` does not mean a stable 2.0.0 release is available.
+- Each `2.0.0-rc.N` can change before 2.0.0. Pin an exact version, such as `2.0.0-rc.2`, to choose when you take changes.
+- `rc` resolves to `2.0.0-rc.2`. `latest` still resolves to `2.0.0-rc.1`, so an install without `@rc` gets the older release. `latest` does not mean a stable 2.0.0 release is available.
 - `@photonhealth/client/testing`, the helpers for your own tests, may change before 2.0.0.
 
 <Note>

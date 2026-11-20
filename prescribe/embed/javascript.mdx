@@ -19,8 +19,6 @@ It has no dependencies and runs in browsers and Node.
 npm install @photonhealth/client@rc
 ```
 
-The public `2.0.0-rc.1` release uses an older Network schema. Check [SDK compatibility](/prescribe/embed/release-candidates) before using these examples with the current API.
-
 ## Create a client
 
 ```ts
@@ -60,10 +58,6 @@ const { patient } = await ph.patient.sync({ demographic: { … } });
 
 The client gets a machine token, keeps it until shortly before it expires, and gets a new one if Photon refuses it. A token for any organization other than `organizationId` is refused with `unauthorized`. It works only on a server: `photon()` throws if it's given a client secret in a browser. A machine token can't sign or send, so `rx.sign()` and `order.submit()` are for a prescriber's sign-in.
 
-{/* TODO(launch): remove once client credentials are in a published @photonhealth/client release candidate (after 2.0.0-rc.1). */}
-
-⚠️ Machine credentials aren't in a published release candidate yet. They arrive after `2.0.0-rc.1`.
-
 <Note>
   With `clientId`, the access token stays in memory and the refresh token is kept in the page's `localStorage`, so a reload signs back in. Any script on the page can read it, so treat script injection there as a token leak, and set a Content-Security-Policy. Auth0 rotates the refresh token on every use and revokes it as soon as an old one is reused. [How Prescribe is built](/prescribe/architecture#sign-in) has the details.
 </Note>
@@ -79,7 +73,7 @@ const { patient, candidates, changes } = await ph.patient.sync({
   demographic: { name: { first: "Paige", last: "Turner" }, dateOfBirth: "1990-01-01", sex: "FEMALE" },
 }); // find, match or add
 
-await ph.patient.update(patient.id, { demographic: { phone: "+13175550142" } }); // just these fields
+await ph.patient.update(patient.id, { contact: { phone: "+13175550142" } }); // just these fields
 ```
 
 `sync` and `update` return the live object, any `candidates` when Photon isn't sure which record you meant, and the `changes` it reported. The client never picks a candidate for you. Pick one with `patient.pick(id)`, `rx.continueDraft(id)` for a draft the patient already has in progress, or `order.pick(id)` for one of the patient's draft orders.
@@ -116,7 +110,7 @@ The rules live in the objects, so every UI built on them behaves the same:
 
 ### Sig options
 
-The public `2.0.0-rc.1` client does not include sig suggestions. For the current API, read [treatment templates](/network/prescription#sig-options). See [Release candidates](/prescribe/embed/release-candidates) for SDK compatibility.
+A drug lookup's options carry `treatment.templates`: your catalog's templates first, then recommended sigs and units. For a draft, call `rx.loadTemplates()`, then read `rx.templates`. It's `null` until they load. See [Sig options](/network/prescription#sig-options).
 
 ### Pharmacies
 

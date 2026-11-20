@@ -13,7 +13,7 @@ npm install @photonhealth/react@rc
 
 It includes `@photonhealth/client`, the [JavaScript client](/prescribe/embed/javascript), so you don't install that separately.
 
-The public `2.0.0-rc.1` release uses an older Network schema. Check [SDK compatibility](/prescribe/embed/release-candidates) before using these examples with the current API. It needs React 18.2 or 19.
+It needs React 18.2 or 19.
 
 ```tsx
 import { PhotonOrder, PhotonProvider } from "@photonhealth/react";
@@ -42,7 +42,7 @@ Wrap the cards in one provider. It signs the prescriber in and gives every card 
 | --- | --- | --- |
 | `clientId` | `string` | Your Application `client_id`. Public, not a secret. |
 | `environment` | `"neutron" \| "photon"` | Defaults to `"photon"` (production). Set `"neutron"` while you build. |
-| `organization` | `string` | Sign in straight to this organization (`org_ORGANIZATION_ID`), skipping the organization picker. Links from `usePhoton()` carry it too. |
+| `organization` | `string` | Sign in straight to this organization (`org_ORGANIZATION_ID`), skipping the organization picker. Links from `usePhoton()` carry it too, unless you pass your own `client`. |
 | `client` | `Photon` | Your own [JavaScript client](/prescribe/embed/javascript) instead of `clientId`, for example when you sign in yourself. |
 | `components` | `Partial<PhotonComponents>` | Your design system's building blocks. See [Styling](/prescribe/embed/styling). |
 | `onAuth` | `({ ok, error }) => void` | Whether Photon accepted the prescriber's token. |
@@ -51,7 +51,7 @@ Providers can nest. A nested provider inherits what it doesn't set, and provider
 
 ### Signing in
 
-On load, the provider signs in by itself when it can: it finishes a sign-in returning from Photon, or renews a stored session. It never redirects on its own. Otherwise, the first card on the page shows **Sign in to Photon**, and the prescriber clicks it. Inside an iframe, sign-in opens a popup. The cards don't offer sign-out. Your app can sign out with `usePhoton().session.signOut()`.
+On load, the provider signs in by itself when it can: it finishes a sign-in returning from Photon, or renews a stored session. It never redirects on its own. Otherwise, the first card on the page shows **Sign in to Photon** (**Sign in to Neutron** in the sandbox), and the prescriber clicks it. Photon sends them back to your site's root, such as `https://your-app.example/`, so render a `PhotonProvider` there too. It finishes the sign-in and puts back the URL they started on. Inside an iframe, sign-in opens a popup. The cards don't offer sign-out. Your app can sign out with `usePhoton().session.signOut()`.
 
 `useSession()` gives your own chrome the prescriber's name, email and organization.
 
@@ -70,7 +70,7 @@ The patient, a card for each prescription, then the send button: **Send prescrip
 | `fixed` | `boolean` | Hides **Change patient**. Use it beside your own view of the patient. |
 | `onPatient` | `(patient \| null) => void` | The patient once Photon has a record, and again when it changes. `null` on **Change patient**. |
 | `onOrder` | `(order) => void` | The order once it, its patient or a prescription has a record, and again when any of them changes. |
-| `onSent` | `(order) => void` | Called once, when the order is sent. For example, close your dialog here. |
+| `onSent` | `(order) => void` | Called once, when the order is sent from this card. An order that was already sent never calls it. For example, close your dialog here. |
 
 Without prescriptions, the order starts with one empty line. **Add another prescription** starts from the same template as the first line.
 
@@ -87,7 +87,7 @@ Find or add a patient, then edit them. Each field the prescriber fills in is syn
 
 ## PhotonPrescription
 
-One prescription: the drug, sig and dispense, screening, and **Sign**. A signed prescription is final. [Try it](https://rx.neutron.health/integrate/prescription).
+One prescription: the drug, sig and dispense, screening, and **Add**, which signs it. A signed prescription is final. [Try it](https://rx.neutron.health/integrate/prescription).
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -97,7 +97,7 @@ One prescription: the drug, sig and dispense, screening, and **Sign**. A signed 
 | `onPrescription` | `(rx) => void` | The prescription once Photon has a record, and again when it's saved or signed. |
 | `onSigned` | `(rx) => void` | Called once, when it's signed on this card. |
 
-The public `2.0.0-rc.1` cards do not include sig suggestions. See [Release candidates](/prescribe/embed/release-candidates) for compatibility with the current API.
+Once a drug is chosen, the card offers its [sig options](/network/prescription#sig-options): your catalog's templates, then recommended ones.
 
 ## Events
 
