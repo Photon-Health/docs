@@ -47,8 +47,8 @@ Most migrations change one component. Patients you synced before keep their `pat
 | `id` | `clientId`. It's the same Application credential. |
 | `org` | `organization` |
 | `dev-mode="true"` | `environment="neutron"`. Prescribe defaults to production. |
-| `redirect-uri`, `redirect-path` | Not needed. Sign-in returns to the page it started on. |
-| `auto-login` | Not needed. Prescribe signs in on its own when it can, and otherwise shows **Sign in to Photon**. |
+| `redirect-uri`, `redirect-path` | Not needed. Sign-in returns to your site's root, where a `PhotonProvider` finishes it and puts back the URL it started on. |
+| `auto-login` | Not needed. Prescribe signs in on its own when it can, and otherwise shows **Sign in to Photon** (**Sign in to Neutron** in the sandbox). |
 
 The iframe takes the same `client_id` in its URL. Build the URL with `frame()` from `photon({ environment: "neutron", auth: { clientId: "YOUR_CLIENT_ID" }, organization: "org_ORGANIZATION_ID" })`, and add `https://rx.neutron.health` to the credential's allowed URLs, beside every domain that shows the iframe.
 

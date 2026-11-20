@@ -33,8 +33,8 @@ In a few minutes you'll render Photon's order card in your app, prescribe for a 
                 name: { first: "Paige", last: "Turner" },
                 dateOfBirth: "1990-01-01",
                 sex: "FEMALE",
-                phone: "+13175550142",
               },
+              contact: { phone: "+13175550142" },
             }}
             onSent={(order) => console.log("Sent", order.id)}
           />
@@ -44,9 +44,9 @@ In a few minutes you'll render Photon's order card in your app, prescribe for a 
     ```
   </Step>
   <Step title="Prescribe">
-    1. Click **Sign in to Photon** and sign in with your Neutron account.
+    1. Click **Sign in to Neutron** and sign in with your Neutron account.
     2. Search for a drug, such as `amlodipine`, and fill in the sig and quantity. Screening runs as you go.
-    3. Click **Sign**, then **Send prescription to patient**.
+    3. Click **Add** to sign the prescription, then **Send prescription to patient**.
 
     Photon now texts the patient a link to choose a pharmacy, in Neutron too. To get the text yourself, use your own mobile number as the patient's `phone`. In Neutron, the order stops there: it's never sent to a pharmacy.
   </Step>
@@ -61,7 +61,7 @@ In a few minutes you'll render Photon's order card in your app, prescribe for a 
 | --- | --- |
 | Passed a patient | Found or added the patient record (`pat_PATIENT_ID`) |
 | Searched for a drug and filled in the sig | Created a draft prescription (`rx_PRESCRIPTION_ID`) on a draft order (`ord_ORDER_ID`), and screened it |
-| Clicked **Sign** | Recorded the prescriber's approval. The prescription can't change now. |
+| Clicked **Add** | Signed the prescription, recording the prescriber's approval. The prescription can't change now. |
 | Clicked **Send** | Submitted the order and texted the patient. **This is the send.** In production, Photon transmits it to a pharmacy once one is chosen. |
 
 See [From draft to pharmacy](/architecture#from-draft-to-pharmacy) for every step after the send.

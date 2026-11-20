@@ -34,6 +34,8 @@ export function Prescribe({ patient, onDone }) {
             name: { first: patient.firstName, last: patient.lastName },
             dateOfBirth: patient.dateOfBirth, // "1990-01-01"
             sex: patient.sex, // "FEMALE" | "MALE" | "UNKNOWN"
+          },
+          contact: {
             phone: patient.mobile, // needed to send: Photon texts the patient
             email: patient.email,
           },
@@ -49,10 +51,10 @@ export function Prescribe({ patient, onDone }) {
 
 What happens:
 
-1. The first time, the card shows **Sign in to Photon**. The prescriber signs in and stays signed in.
+1. The first time, the card shows **Sign in to Neutron**. The prescriber signs in and stays signed in.
 2. Photon matches the patient. If it isn't sure, the prescriber picks from the candidates. If there's no match, Photon adds the patient.
 3. The prescriber searches for a drug and fills in the sig and quantity. Screening runs as they type.
-4. They sign each prescription, then click **Send prescription to patient**. Photon texts the patient a link to choose a pharmacy.
+4. They click **Add** to sign each prescription, then click **Send prescription to patient**. Photon texts the patient a link to choose a pharmacy.
 
 `fixed` hides **Change patient**, because your page is already about this patient.
 
@@ -71,7 +73,7 @@ What happens:
 If your details changed, pass the id together with them, and Photon updates only those fields:
 
 ```tsx
-<PhotonOrder patient={{ id: photonPatientId, demographic: { phone: patient.mobile } }} fixed />
+<PhotonOrder patient={{ id: photonPatientId, contact: { phone: patient.mobile } }} fixed />
 ```
 
 ## Not using React?
