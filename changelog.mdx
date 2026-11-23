@@ -14,8 +14,8 @@ Every page shows when it was last updated. This page says what's stable, and lis
 | [Prescribe app](/prescribe/app) | Stable in Neutron | `rx.neutron.health` in the sandbox. Production, `rx.new`, is in private preview: ask your Photon contact for access. |
 | [Deep links](/prescribe/app/deep-links) | Stable | No credentials needed. |
 | [iframe](/prescribe/embed/iframe) | Stable | Needs your Application `client_id`, in a URL built by `frame()`. |
-| [React components](/prescribe/embed/react) | Release candidate | `@photonhealth/react@rc`, currently `2.0.0-rc.1`. See [Release candidates](/prescribe/embed/release-candidates). |
-| [JavaScript client](/prescribe/embed/javascript) | Release candidate | `@photonhealth/client@rc`, currently `2.0.0-rc.1`. See [Release candidates](/prescribe/embed/release-candidates). |
+| [React components](/prescribe/embed/react) | Release candidate | `@photonhealth/react@rc`, currently `2.0.0-rc.2`. See [Release candidates](/prescribe/embed/release-candidates). |
+| [JavaScript client](/prescribe/embed/javascript) | Release candidate | `@photonhealth/client@rc`, currently `2.0.0-rc.2`. See [Release candidates](/prescribe/embed/release-candidates). |
 | [GraphQL](/network/graphql) | Available | `network.neutron.health/graphql` in the sandbox; `network.photon.health/graphql` in production. Both require a [bearer token](/authentication). |
 | [Webhooks](/network/webhooks) | Stable | Signed with HMAC-SHA256. |
 | [MCP](/network/mcp) | Available | Test at `ai.neutron.health` or use the [ChatGPT plugin](/network/mcp) with `ai.photon.health`. Claude is in private preview. |
@@ -24,6 +24,15 @@ Every page shows when it was last updated. This page says what's stable, and lis
 Durable concepts, such as [records and the send](/architecture), [permissions](/authentication#permissions) and [plans](/use-cases), change rarely. Anything marked ⚠️ or **Preview** is still moving.
 
 ## Changes
+
+<Update label="November 20, 2026" tags={["Prescribe"]}>
+  **Packages:** `2.0.0-rc.2` of `@photonhealth/react` and `@photonhealth/client` is on npm under the `rc` tag. See [Release candidates](/prescribe/embed/release-candidates).
+
+  - It uses the current Network schema. A patient's `phone`, `email` and `address` are under `contact`, not `demographic`.
+  - The JavaScript client takes [machine credentials](/prescribe/embed/javascript#on-your-backend).
+  - The client and `PhotonPrescription` include [sig options](/prescribe/embed/javascript#sig-options).
+  - The prescription card's button is **Add**. It signs the prescription.
+</Update>
 
 <Update label="November 13, 2026" tags={["Network", "MCP", "Prescribe"]}>
   - Production Network is available. Removed the obsolete endpoint launch warning.
